@@ -1,0 +1,37 @@
+body {
+	position: relative;
+	background-color: #ccc;
+}
+
+button {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+#tool-bar {
+	width: 680px;
+	height: 35px;
+	background-color: #e3e3e3;
+}
+
+#canvas {
+	position: absolute;
+	width: 640px;
+	height: 640px;
+	left: 40px;
+}
+
+.canvasCell {
+	pointer-events: auto;
+	width: 20px;
+	height: 20px;
+	outline: 1px dashed #aaa;
+	float: left;
+}
+
+.paletteCell {
+	position: relative;
+	width: 40px;
+	height: 40px;
+}
