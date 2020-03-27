@@ -2,37 +2,32 @@
 <html>
 <head>
 	<title>pixel art</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="stylesheet" type="text/css" href="main.css">
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
 </head>
 
 <body>
 	<!-- TOOLBAR -->
-	<div id="tool-bar">
+	<div class="noselect" id="toolbar">
 		<button id="reset-button">Reset</button>
-		<button id="toggle-grid">Toggle Grid</button>
-		<button>Save As</button>
-		<label>Eraser Mode: E</label>
-		<label>Fill Mode: F</label>
+		<button id="toggle-grid-button">Grid</button>
+		<button id="save-button">Save</button>
+		<div id="active-color-div"></div>
 	</div>
 
-	<!-- CANVAS -->
-	<div id="canvas"></div>
+	<div style="position: relative;">
+		<!-- PALETTE -->
+		<div id="palette-div"></div>
 
-	<!-- PALETTE -->
-	<div id="color-palette">
-		<div class="paletteCell" style="background-color: red"></div>
-		<div class="paletteCell" style="background-color: blue"></div>
-		<div class="paletteCell" style="background-color: green"></div>
-		<div class="paletteCell" style="background-color: yellow"></div>
-		<div class="paletteCell" style="background-color: salmon"></div>
-		<div class="paletteCell" style="background-color: pink"></div>
-		<div class="paletteCell" style="background-color: purple"></div>
-		<div class="paletteCell" style="background-color: teal"></div>
-		<div class="paletteCell" style="background-color: turquoise"></div>
-		<div class="paletteCell" style="background-color: black"></div>
+		<!-- CANVAS -->
+		<div id="canvas-div"></div>
 	</div>
+
+	<!-- FRAME EDITOR -->
+	<!-- <div id="frame-timeline"></div> -->
+
 </body>
 
-<script type="text/javascript" src="script.js"></script>
+<script type="text/javascript" src="./script.js"></script>
 
 </html>

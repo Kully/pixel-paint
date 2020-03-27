@@ -1,0 +1,124 @@
+body {
+	position: relative;
+	background-color: #ccc;
+	font-family: 'Open Sans', sans-serif;
+	pointer-events: fill;
+}
+
+button {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	width: 90px;
+	font-family: 'Open Sans', sans-serif;
+	font-size: 16px;
+	border-radius: 3px;
+	outline: 0;
+	box-shadow: 0;
+}
+
+#toolbar {
+	position: relative;
+	left: 60px;
+	width: 640px;
+	height: 35px;
+	margin-bottom: 10px;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Chrome, Opera and Firefox */
+}
+
+#active-color-div {
+	height: 20px;
+	width: 20px;
+	margin: 0;
+	float: right;
+	padding: 0;
+	font-size: 16px;
+	border-radius: 3px;
+	outline: 0;
+	box-shadow: 0;
+}
+
+#canvas-div {
+	/*position: relative;*/
+	/*left: 20px;*/
+	width: 640px;
+	height: 640px;
+	float: left;
+}
+
+#palette-div {
+	/*position: relative;*/
+	width: 40px;
+	height: 640px;
+	float: left;
+}
+
+.paletteCell {
+	position: relative;
+	height: 40px;
+	cursor: pointer;
+}
+
+#frame-timeline {
+	/*float: none;
+	position: relative;
+	width: 700px;
+	height: 60px;
+	background-color: pink;*/
+	position: relative;
+	width: 700px;
+	height: 60px;
+	outline: solid 2px red;
+}
+
+.frame {
+	position: relative;
+	width: 40px;
+	height: 99%;
+	margin-right: 8px;
+	border-radius: 4px;
+	background-color: white;
+	border: 1px solid black;
+	box-shadow: 2px 2px 4px #999;
+	font-size: 10px;
+	color: #333;
+	float: left;
+}
+
+.canvasCell {
+	pointer-events: auto;
+	width: 20px;
+	height: 20px;
+	float: left;
+}
+
+#output-div {
+	position: relative;
+	left: 40px;
+	width: 200px;
+	height: 640px;
+	float: left;
+	opacity: 1;
+	overflow-y: scroll;
+	background-color: #eee;
+}
+
+
+/*.paletteCell:hover {
+	animation-name: example;
+	animation-duration: 2s;
+	animation-fill-mode: forwards;
+}
+
+@keyframes revealColorCode {
+	from {box-shadow: 0 0 0px #eee;}
+	to {box-shadow: 0 0 12px #eee;}
+}*/
