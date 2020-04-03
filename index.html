@@ -1,33 +1,32 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title>pixel art</title>
-	<link rel="stylesheet" type="text/css" href="main.css">
-	<link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
-</head>
+	<head>
+		<title>pixel-paint</title>
+		<link rel="stylesheet" type="text/css" href="main.css">
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
+	</head>
 
-<body>
-	<!-- TOOLBAR -->
-	<div class="noselect" id="toolbar">
-		<button id="reset-button">Reset</button>
-		<button id="toggle-grid-button">Grid</button>
-		<button id="save-button">Save</button>
-		<div id="active-color-div"></div>
-	</div>
+	<body>	
+		<!-- TOOLBAR -->
+		<div class="no-select" id="toolbar">
+			<button class="img-cursor-crosshair"></button>
+			<button class="img-cursor-fill"></button>
+			<button class="img-cursor-eraser"></button>
+			<button class="img-cursor-colorpicker"></button>
 
-	<div style="position: relative;">
+			<button class="toolbar-button" id="reset-button"></button>      
+			<button class="toolbar-button" id="toggle-grid-button"></button>
+			<button class="toolbar-button" id="save-button"></button>
+
+			<div id="active-color-preview"></div>
+		</div>
+
 		<!-- PALETTE -->
 		<div id="palette-div"></div>
 
 		<!-- CANVAS -->
 		<div id="canvas-div"></div>
-	</div>
 
-	<!-- FRAME EDITOR -->
-	<!-- <div id="frame-timeline"></div> -->
-
-</body>
-
-<script type="text/javascript" src="./script.js"></script>
-
+	</body>
+	<script type="text/javascript" src="./js/master.js"></script>
 </html>

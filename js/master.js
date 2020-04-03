@@ -1,14 +1,33 @@
+// *******
+// IMPORTS 
+// *******
+
+// js/modules/randomImport.js
+console.log("randomImport.js");
+
+// js/modules/anotherScript.js
+console.log("anotherScript.js");
+
+
 console.log("Welcome to Pixel Paint");
 console.log("https://github.com/Kully/pixel-paint/issues/1");
+
+// CSS
+const TOOLBAR_HEIGHT = 32;
+const TOOLBAR_WIDTH = 700;
+const PALETTE_WIDTH = 700;
+const PALETTE_RMARGIN = 20;
+const CANVAS_CELL_WIDTH = (TOOLBAR_WIDTH - PALETTE_WIDTH - PALETTE_RMARGIN)/32;
 
 // VARIABLES
 const GRID_WIDTH = 32;
 const GRID_COLOR = "1px dashed #aaa";
-const BUTTON_COLOR_OFF = "#50d890";
+const BUTTON_COLOR_OFF = "#dedede"; //"#50d890";
 const BUTTON_COLOR_ON = "#c9f2dc";
 const INIT_COLOR = "white";
 const MAX_UNDOS = 25;
 
+// COUNTERS
 var KeyE_Counter = 0;
 var KeyG_Counter = 0;
 var KeyF_Counter = 0;
@@ -18,8 +37,8 @@ var last_active_color = "";
 var active_color = "black";
 var brush_down = false;
 var palette_color_array = [
-    "white",
-    "black",
+    "#fff",
+    "#000",
     "gray",
     "red",
     "orange",
@@ -32,10 +51,8 @@ var palette_color_array = [
     "salmon",
     "pink",
     "purple",
-    "teal",
-    "turquoise",
-];
-
+    "teal"
+];  
 
 function Canvas_State_Object(maxSize) {
     let init_array = new Array(GRID_WIDTH * GRID_WIDTH).fill(INIT_COLOR);
@@ -56,18 +73,18 @@ Canvas_State_Object.prototype.decPtr = function()
 Canvas_State_Object.prototype.incPtr = function()
 {
     if(this.ptr >= this.state_array.length-1)
-    { 
+    {
         this.print();
         return;
     }
-    this.ptr++;
+    this.ptr += 1;
     this.print();
 };
 Canvas_State_Object.prototype.pushToPtr = function(item)
 {
     if(canPush(item, this.state_array, this.ptr))
     {
-        this.ptr++;
+        this.ptr += 1;
         this.state_array.splice(this.ptr, 0, item);
     }
 
@@ -101,20 +118,20 @@ function Color_Buttons()
     var buttons = document.querySelectorAll("button");
     buttons.forEach(function(b)
     {
-        b.style.backgroundColor = BUTTON_COLOR_OFF;
+        b.style.backgroundColor = BUTTON_COLOR_OFF
     })
 }
 
 function Color_Active_Color_Div()
 {
-    var activeColorDiv = document.getElementById("active-color-div");
+    var activeColorDiv = document.getElementById("active-color-preview");
     activeColorDiv.style.backgroundColor = active_color;
 }
 
 function Populate_Canvas_With_Cells()
 {
     const canvasDiv = document.getElementById("canvas-div");
-    for(let i=0; i<GRID_WIDTH*GRID_WIDTH; i++)
+    for(let i=0; i<GRID_WIDTH*GRID_WIDTH; i += 1)
     {
         let div = document.createElement("div");
         div.className = "canvasCell";
@@ -128,7 +145,7 @@ function Populate_Palette_With_Cells()
 {
     const paletteDiv = document.getElementById("palette-div");
 
-    for(let i=0; i<palette_color_array.length; i++)
+    for(let i=0; i<palette_color_array.length; i += 1)
     {
         let cell = document.createElement("div");
         cell.className = "paletteCell";
@@ -153,7 +170,7 @@ function Add_Ids_To_Palette_Cells()
     let j = 0;
     allPaletteCells.forEach(function(item){
         item.id = "palette-cell-"+toString(j);
-        j++;
+        j += 1;
     })
 }
 
@@ -169,7 +186,7 @@ function Add_EventHandlers_To_Palette_Cells()
     const allPaletteCells = document.querySelectorAll(".paletteCell");
     allPaletteCells.forEach(function(item){
         item.addEventListener("mousedown",
-            EventHandler_Update_Active_Color);    
+            EventHandler_Update_Active_Color);
     })
 }
 
@@ -177,7 +194,7 @@ function Add_EventHandlers_To_Palette_Cells()
 function Reset_Color_Of_Canvas_Cells()
 {
     let canvasCells = document.querySelectorAll(".canvasCell");
-    for(let i=0; i<GRID_WIDTH*GRID_WIDTH; i++)
+    for(let i=0; i<GRID_WIDTH*GRID_WIDTH; i += 1)
     {
         canvasCells[i].style.backgroundColor = INIT_COLOR;
     }
@@ -189,7 +206,7 @@ function Add_EventHandlers_To_Reset_Button()
     resetButton.addEventListener("mousedown", Reset_Color_Of_Canvas_Cells)
     resetButton.addEventListener("mousedown", function(){
         let init_array = new Array(GRID_WIDTH * GRID_WIDTH).fill(INIT_COLOR);
-        
+
         state_array.state_array = [init_array];
         state_array.ptr = 0;
         console.log("after reset button: ", state_array);
@@ -205,7 +222,7 @@ function Add_EventHandlers_To_Canvas_Cells()
     }
 
     const canvasCells = document.querySelectorAll(".canvasCell");
-    for(let i=0; i<GRID_WIDTH*GRID_WIDTH; i++)
+    for(let i=0; i<GRID_WIDTH*GRID_WIDTH; i += 1)
     {
         canvasCells[i].addEventListener("mousemove",
             Color_Canvas_Cell_If_Drawing_Mode
@@ -251,11 +268,12 @@ function Add_EventHandlers_To_Save_Button()
     let saveButton = document.getElementById("save-button");
     let outputDiv = document.getElementById("output-div");
     saveButton.addEventListener("click", function(e){
-        let text = ""; 
+        let text = "array = [";
         Get_Canvas_State().forEach(function(color){
-            text += color + "<br> ";
+            text += color + ", ";
         })
-        outputDiv.innerHTML = text;
+        text += "]";
+        console.log(text);
     });
 }
 
@@ -264,7 +282,7 @@ function _Arrays_Are_Equal(a, b)
     if(a === b.length) return true;
     if(a.length !== b.length) return false;
 
-    for(let i=0; i<a.length;i++)
+    for(let i=0; i<a.length;i += 1)
     {
         if(a[i] !== b[i]) return false;
     }
@@ -273,8 +291,7 @@ function _Arrays_Are_Equal(a, b)
 function canPush(thisState, state_array, ptr)
 {
     if(ptr === 0) return true;
-    if(!_Arrays_Are_Equal(thisState, state_array[ptr-1])) return true;
-    
+    if(!_Arrays_Are_Equal(thisState, state_array[ptr-1])) return true;    
     return false;
 }
 
@@ -295,7 +312,7 @@ function Transfer_Canvas_State_To_Screen(ptr)
     var saved_canvas = state_array.state_array[ptr];
     var canvasCells = document.querySelectorAll(".canvasCell");
 
-    for(let i=0; i<GRID_WIDTH*GRID_WIDTH; i++)
+    for(let i=0; i<GRID_WIDTH*GRID_WIDTH; i += 1)
         canvasCells[i].style.backgroundColor = saved_canvas[i];
 }
 
@@ -354,7 +371,6 @@ function Add_EventHandlers_To_Document()
         if(e.code === "KeyC")
         {
             KeyC_Counter += 1;
-            
             if(KeyC_Counter > 0) { document.body.style.cursor = "crosshair";}
         }
     })
@@ -400,4 +416,4 @@ Add_EventHandlers_To_Reset_Button();
 Add_EventHandlers_To_Grid_Button();
 Add_EventHandlers_To_Save_Button();
 
-var state_array = new Canvas_State_Object(10);
+var state_array = new Canvas_State_Object(MAX_UNDOS);

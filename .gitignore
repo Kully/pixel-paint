@@ -1,0 +1,4 @@
+*.xcf
+dont_upload/
+js/linkedFile.js
+js/linked.js
