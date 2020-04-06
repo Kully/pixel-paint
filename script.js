@@ -27,19 +27,19 @@ let fillObj = {
     "id": "fill-button",
     "hotkey": "KeyW",
     "isKeyDown": false,
-    "cursor": 'url("img/fill.png") 28 16, auto',
+    "cursor": 'url("img/fill2.png") 28 16, auto',
 }
 let eraserObj = {
     "id": "eraser-button",
     "hotkey": "KeyE",
     "isKeyDown": false,
-    "cursor": 'url("img/eraser.png") 16 16, auto',
+    "cursor": 'url("img/eraser2.png") 16 16, auto',
 }
 let colorpickerObj = {
     "id": "colorpicker-button",
     "hotkey": "KeyR",
     "isKeyDown": false,
-    "cursor": 'url("img/colorpicker.png") -32 32, auto',
+    "cursor": 'url("img/colorpicker2.png") -32 32, auto',
 }
 
 let palette_color_array = [
@@ -191,12 +191,7 @@ function Get_Y_From_CellInt(idx)
 
 function Get_CellInt_From_XY(x, y)
 {
-    return x + CELLS_PER_ROW * y;
-}
-
-function Color_From_ID(node_id)
-{
-    return document.getElementById(node_id).style.backgroundColor;
+    return x + (y * CELLS_PER_ROW);
 }
 
 function Cell_ID_To_Int(id)
@@ -218,108 +213,73 @@ function Does_CellID_Exist(id)
 
 function Cell_Coordinates_Out_Of_Bounds(x, y)
 {
-    if((0 <= x <= CELLS_PER_ROW-1) && (0 <= y <= CELLS_PER_ROW-1))
+    if((0 <= x) && (x <= CELLS_PER_ROW-1) && (0 <= y) && (y <= CELLS_PER_ROW-1))
         return false;
     return true;
 }
 
 function Cell_Coordinates_In_Bounds(x, y)
 {
-    if((0 <= x <= CELLS_PER_ROW-1) && (0 <= y <= CELLS_PER_ROW-1))
+    if((0 <= x) && (x <= CELLS_PER_ROW-1) && (0 <= y) && (y <= CELLS_PER_ROW-1))
         return true;
     return false;
 }
 
-function Flood_Fill_Algorithm(node_id, target_color, replacement_color)
+function Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
 {
     // grab X,Y from ID of Cell
-    cell_int = Cell_ID_To_Int(node_id);
-    cell_x = Get_X_From_CellInt(cell_int);
-    cell_y = Get_Y_From_CellInt(cell_int);
-    
-    console.log(cell_x);
-    console.log(cell_y);
-    console.log("");
-    return;
+    let cell_int = Cell_ID_To_Int(cell_id);
+    let cell_x = Get_X_From_CellInt(cell_int);
+    let cell_y = Get_Y_From_CellInt(cell_int);
 
-    if(Cell_Coordinates_Out_Of_Bounds(cell_x, cell_y))
-        return;
+    Cell_Coordinates_In_Bounds(cell_x, cell_y+1)
 
-
-    let cell_element = document.getElementById(node_id);
+    let cell_element = document.getElementById(cell_id);
     if(target_color === replacement_color)
         return;
-    else if(Color_From_ID(node_id) !== target_color)
+    else if(cell_element.style.backgroundColor !== target_color)
         return;
     else
     {
-        cell_element.style.backgroundColor = replacement_color;  // set color
+        cell_element.style.backgroundColor = replacement_color;
 
-        if(Cell_Coordinates_In_Bounds(x+1, y))
+        if(Cell_Coordinates_In_Bounds(cell_x, cell_y+1))
         {
-            let cell_int = Get_CellInt_From_XY(cell_x, cell_y+1);
-            let next_node_id = Cell_Int_To_ID(idx_new);
+            let next_cell_int = Get_CellInt_From_XY(cell_x, cell_y+1);
+            let next_cell_id = Cell_Int_To_ID(next_cell_int);
 
-            Flood_Fill_Algorithm(next_node_id,
+            Flood_Fill_Algorithm(next_cell_id,
                                  target_color,
                                  replacement_color);
         }
-        if(Cell_Coordinates_In_Bounds(x-1, y))
+        if(Cell_Coordinates_In_Bounds(cell_x, cell_y-1))
         {
+            let next_cell_int = Get_CellInt_From_XY(cell_x, cell_y-1);
+            let next_cell_id = Cell_Int_To_ID(next_cell_int);
 
-        }
-        if(Cell_Coordinates_In_Bounds(x, y+1))
-        {
-
-        }
-        if(Cell_Coordinates_In_Bounds(x, y-1))
-        {
-
-        }
-
-        // north
-        if((0 <= cell_x <= CELLS_PER_ROW-1) && (0 <= cell_y-1 <= CELLS_PER_ROW-1))
-        {
-            console.log("  > north");
-            let idx_new = Get_CellInt_From_XY(cell_x, cell_y-1);
-            let next_node = Cell_Int_To_ID(idx_new);
-            Flood_Fill_Algorithm(next_node,
+            Flood_Fill_Algorithm(next_cell_id,
                                  target_color,
                                  replacement_color);
         }
-
-        // west
-        if((0 <= cell_x-1 <= CELLS_PER_ROW-1) && (0 <= cell_y <= CELLS_PER_ROW-1))
+        if(Cell_Coordinates_In_Bounds(cell_x-1, cell_y))
         {
-            console.log("  > west");
-            let idx_new = Get_CellInt_From_XY(cell_x-1, cell_y);
-            let next_node = Cell_Int_To_ID(idx_new);
-            Flood_Fill_Algorithm(next_node,
+            let next_cell_int = Get_CellInt_From_XY(cell_x-1, cell_y);
+            let next_cell_id = Cell_Int_To_ID(next_cell_int);
+
+            Flood_Fill_Algorithm(next_cell_id,
                                  target_color,
                                  replacement_color);
         }
-
-        // east
-        if((0 <= cell_x+1 <= CELLS_PER_ROW-1) && (0 <= cell_y <= CELLS_PER_ROW-1))
+        if(Cell_Coordinates_In_Bounds(cell_x+1, cell_y))
         {
-            console.log("  > east");
-            let idx_new = Get_CellInt_From_XY(cell_x+1, cell_y);
-            let next_node = Cell_Int_To_ID(idx_new);
-            Flood_Fill_Algorithm(next_node,
+            let next_cell_int = Get_CellInt_From_XY(cell_x+1, cell_y);
+            let next_cell_id = Cell_Int_To_ID(next_cell_int);
+
+            Flood_Fill_Algorithm(next_cell_id,
                                  target_color,
                                  replacement_color);
         }
     }
-
-// Flood-fill (node, target-color, replacement-color):
-//  1. If target-color is equal to replacement-color, return.
-//  2. ElseIf the color of node is not equal to target-color, return.
-//  3. Else Set the color of node to replacement-color.
-//  4. Perform Flood-fill (one step to the south of node, target-color, replacement-color).
-//     Perform Flood-fill (one step to the north of node, target-color, replacement-color).
-//     Perform Flood-fill (one step to the west of node, target-color, replacement-color).
-//     Perform Flood-fill (one step to the east of node, target-color, replacement-color).
-//  5. Return. 
 }
 
 function Add_EventHandlers_To_Canvas_Cells()
@@ -338,7 +298,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         }
         else if(cursor === fillObj["cursor"])
         {
-            // do nothing
+            // fill only does something on mouseup
         }
         else if(cursor === crosshairObj["cursor"])
         {
@@ -364,11 +324,11 @@ function Add_EventHandlers_To_Canvas_Cells()
             const cursor = document.body.style.cursor;
             if(cursor === fillObj["cursor"])
             {
-                let node = e.target.id;
+                let cell_id = e.target.id;
                 let target_color = e.target.style.backgroundColor;
                 let replacement_color = active_color;
 
-                Flood_Fill_Algorithm(e.target.id,
+                Flood_Fill_Algorithm(cell_id,
                                      target_color,
                                      replacement_color)
             }

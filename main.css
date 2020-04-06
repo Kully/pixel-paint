@@ -27,13 +27,13 @@ button {
 	background-image: url(img/crosshair.png);
 }
 .fillImg {
-	background-image: url(img/fill.png);
+	background-image: url(img/fill2.png);
 }
 .eraserImg {
-	background-image: url(img/eraser.png);
+	background-image: url(img/eraser2.png);
 }
 .colorpickerImg {
-	background-image: url(img/colorpicker.png);
+	background-image: url(img/colorpicker2.png);
 }
 
 /* other toolbar buttons */
@@ -41,7 +41,7 @@ button {
 	background-image: url(img/grid.png);
 }
 .saveImg {
-	background-image: url(img/save.png);
+	background-image: url(img/save2.png);
 }
 
 /* for cursor */
@@ -49,13 +49,13 @@ button {
 	cursor: crosshair;
 }
 .cursor-fill {
-	cursor: url(img/fill.png) 16 16, auto;
+	cursor: url(img/fill2.png) 16 16, auto;
 }
 .cursor-eraser {
-	cursor: url(img/eraser.png) 16 16, auto;
+	cursor: url(img/eraser2.png) 16 16, auto;
 }
 .cursor-colorpicker {
-	cursor: url(img/colorpicker.png) 16 16, auto;
+	cursor: url(img/colorpicker2.png) 16 16, auto;
 }
 .cursor-default {
 	cursor: default;
@@ -110,6 +110,12 @@ button {
 .canvasCell {
 	pointer-events: auto;
 	float: left;
+	user-drag: none; 
+	user-select: none;
+	-moz-user-select: none;
+	-webkit-user-drag: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
 }
 
 #output-div {
@@ -122,14 +128,3 @@ button {
 	overflow-y: scroll;
 	background-color: #eee;
 }
-
-/*.paletteCell:hover {
-	animation-name: example;
-	animation-duration: 2s;
-	animation-fill-mode: forwards;
-}
-
-@keyframes revealColorCode {
-	from {box-shadow: 0 0 0px #eee;}
-	to {box-shadow: 0 0 12px #eee;}
-}*/
