@@ -1,4 +1,5 @@
 *.xcf
 dont_upload/
-js/linkedFile.js
-js/linked.js
+js/linked.jsa
+_compiled_script.js
+_allmodules.js

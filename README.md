@@ -1,5 +1,3 @@
 # pixel paint
 
-let's make 32x32px pixel art
-
-
+let's make 32 x 32px pixel art

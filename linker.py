@@ -1,9 +1,12 @@
-'''statically link javascript files into one''' 
+'''statically link javascript files''' 
 
-input_file_array = ['js/modules/randomImport.js', 'js/modules/anotherScript.js']
-linkedFile = 'js/linked_modules.js'
-scriptFile = 'js/script.js'
-outputFile = 'js/master.js'
+linkedModulesFile = 'js/_allmodules.js'
+scriptFile = 'script.js'
+compiledFile = 'js/_compiled_script.js'
+
+input_file_array = [
+    'js/modules/canvasStateObject.js'
+]
 
 
 def combine_text_files_into_string(input_file_array):
@@ -31,5 +34,9 @@ def merge_file1_and_file2_then_write_to_file3(file1, file2, file3):
 
 
 linkedText = combine_text_files_into_string(input_file_array)
-overwrite_text_to_file(linkedText, linkedFile)
-merge_file1_and_file2_then_write_to_file3(linkedFile, scriptFile, outputFile)
+overwrite_text_to_file(linkedText, linkedModulesFile)
+merge_file1_and_file2_then_write_to_file3(
+    linkedModulesFile, scriptFile, compiledFile
+)
+
+print("  > finished linking files")

@@ -1,5 +1,3 @@
 make:
-	echo "linking files..."
-	python linker.py
-	echo "launch app in browser"
-	open index.html
+	python linker.py  # link
+	open index.html   # launch

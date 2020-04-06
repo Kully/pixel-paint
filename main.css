@@ -3,6 +3,7 @@ body {
 	background-color: #ccc;
 	font-family: 'Open Sans', sans-serif;
 	pointer-events: fill;
+	/*cursor: move;*/
 }
 
 button {
@@ -22,20 +23,28 @@ button {
 }
 
 /* for toolbar icons */
-.img-cursor-crosshair {
+.crosshairImg {
 	background-image: url(img/crosshair.png);
 }
-.img-cursor-fill {
+.fillImg {
 	background-image: url(img/fill.png);
 }
-.img-cursor-eraser {
+.eraserImg {
 	background-image: url(img/eraser.png);
 }
-.img-cursor-colorpicker {
+.colorpickerImg {
 	background-image: url(img/colorpicker.png);
 }
 
-/* for cursor*/
+/* other toolbar buttons */
+.gridImg {
+	background-image: url(img/grid.png);
+}
+.saveImg {
+	background-image: url(img/save.png);
+}
+
+/* for cursor */
 .cursor-crosshair {
 	cursor: crosshair;
 }
@@ -47,6 +56,9 @@ button {
 }
 .cursor-colorpicker {
 	cursor: url(img/colorpicker.png) 16 16, auto;
+}
+.cursor-default {
+	cursor: default;
 }
 
 
@@ -78,7 +90,6 @@ button {
 	width: 608px;
 	height: 608px;
 	float: left;
-	outline: 1px dashed red;
 }
 
 #palette-div {
@@ -98,8 +109,6 @@ button {
 
 .canvasCell {
 	pointer-events: auto;
-	width: 19px;
-	height: 19px;
 	float: left;
 }
 
