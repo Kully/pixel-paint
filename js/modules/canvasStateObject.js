@@ -7,26 +7,20 @@ function Canvas_State_Object(maxSize) {
 Canvas_State_Object.prototype.decPtr = function()
 {
     if(this.ptr <= 0)
-    {
-        // this.print();
         return;
-    }
+
     this.ptr--;
-    // this.print();
 };
 Canvas_State_Object.prototype.incPtr = function()
 {
     if(this.ptr >= this.state_array.length-1)
-    {
-        // this.print();
         return;
-    }
+
     this.ptr += 1;
-    // this.print();
 };
 Canvas_State_Object.prototype.pushToPtr = function(item)
 {
-    if(Can_Push(item, this.state_array, this.ptr))
+    if(_Can_Push(item, this.state_array, this.ptr))
     {
         this.ptr += 1;
         this.state_array.splice(this.ptr, 0, item);
@@ -36,7 +30,6 @@ Canvas_State_Object.prototype.pushToPtr = function(item)
     this.state_array = this.state_array.slice(0, this.ptr+1);
 
     this._manageSize();
-    // this.print();
 }
 Canvas_State_Object.prototype._manageSize = function(item)
 {
@@ -45,7 +38,6 @@ Canvas_State_Object.prototype._manageSize = function(item)
         this.state_array.shift();
         this.ptr--;
     }
-    // this.print();
 }
 Canvas_State_Object.prototype.ptrToEndOfStateArray = function(item)
 {
@@ -56,11 +48,31 @@ Canvas_State_Object.prototype.print = function()
     console.log(this);
 }
 
-function Can_Push(thisState, state_array, ptr)
+function _Can_Push(thisState, state_array, ptr)
 {
-    if(ptr === 0) return true;
-    if(!_Arrays_Are_Equal(thisState, state_array[ptr-1])) return true;    
+    if(ptr === 0)
+    {
+        return true;
+    }
+    if(_Arrays_Are_Equal(thisState, state_array[ptr]) === false)
+    {
+        return true;
+    }
+    
     return false;
 }
 
+function _Arrays_Are_Equal(a, b)
+{
+    if(a === b)
+        return true;
+    if(a.length !== b.length)
+        return false;
 
+    for(let i=0; i<a.length; i += 1)
+    {
+        if(a[i] !== b[i])
+            return false;
+    }
+    return true;
+}

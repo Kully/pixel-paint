@@ -1,31 +1,55 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>pixel-paint</title>
+		<title>PAINT APP</title>
 		<link rel="stylesheet" type="text/css" href="main.css">
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
 	</head>
 
-	<body>	
+	<body>
 		<!-- TOOLBAR -->
 		<div class="no-select" id="toolbar">
-			<button class="crosshairImg" id="crosshair-button"></button>
-			<button class="fillImg" id="fill-button"></button>
-			<button class="eraserImg" id="eraser-button"></button>
-			<button class="colorpickerImg" id="colorpicker-button"></button>
+			<!-- float left -->
+			<button disabled="true" class="pencilImg toolbarBtn" id="pencil-button">
+				<span class="tooltipText">Pencil <b>(N)</b></span>
+			</button>
+			
+			<button disabled="true" class="fillImg toolbarBtn" id="fill-button">
+				<span class="tooltipText">Flood Fill <b>(F)</b></span>
+			</button>
+			
+			<button disabled="true" class="eraserImg toolbarBtn" id="eraser-button">
+				<span class="tooltipText">Eraser <b>(E)</b></span>
+			</button>
 
-			<button class="toolbar-button" id="reset-button"></button>
-			<button class="gridImg" id="toggle-grid-button"></button>
-			<button class="saveImg" id="save-button"></button>
+			<button disabled="true" class="selectionImg toolbarBtn" id="selection-button">
+				<span class="tooltipText">Selection <b>(S)</b></span>
+			</button>
 
+			<button disabled="true" class="colorpickerImg toolbarBtn" id="colorpicker-button">
+				<span class="tooltipText">Colorpicker <b>(I)</b></span>
+			</button>
+
+			<button disabled="true" class="gridImg toolbarBtn" id="toggle-grid-button">
+				<span class="tooltipText toolbarBtn">Grid <b>(G)</b></span>
+			</button>
+			
+			<button class="saveImg toolbarBtn" id="copy-button">
+				<span class="tooltipText">Copy to Clipboard</span>
+			</button>
+
+			<!-- float right -->
 			<div id="active-color-preview"></div>
+			<label id="active-color-label"></label>
+			<div class="fadeOutAnimation" id="popup-message"></div>
+			
 		</div>
-
-		<!-- PALETTE -->
-		<div id="palette-div"></div>
 
 		<!-- CANVAS -->
 		<div id="canvas-div"></div>
+
+		<!-- PALETTE -->
+		<div id="palette-div"></div>
 
 	</body>
 	<script type="text/javascript" src="./js/_compiled_script.js"></script>

@@ -1,30 +1,107 @@
+:root {
+  --body-margin: 8px;
+
+  --toolbar-width: 608px;
+  --toolbar-height: 32px;
+  --palette-width: 80px;
+  
+  --palette-cell-width: 20px;
+  --palette-cell-height: 20px;
+
+  --palette-margin-right: 10px;
+  --canvas-width: 608px;  /* 19*32 = 608 */
+  --canvas-cell-width: 19px;
+}
+
 body {
 	position: relative;
 	background-color: #ccc;
 	font-family: 'Open Sans', sans-serif;
 	pointer-events: fill;
-	/*cursor: move;*/
+	margin: var(--body-margin);
 }
 
 button {
-	height: 32px;
-	width: 32px;
+	height: 33px;
+	width: 33px;
 	padding: 0;
 	margin: 0;
 	font-family: 'Open Sans', sans-serif;
 	outline: 0;
 }
 
+#popup-message {
+	position: relative;
+	float: right;
+	margin-right: 20px;
+	height: var(--toolbar-height);
+	border-radius: 4px;
+	font-size: 1.5em;
+	color: #ffffc9;
+}
+
+.fadeOutAnimation {
+	animation: fadeOut 4s;
+	animation-fill-mode: forwards;
+	animation-play-state: running;
+}
+
+@keyframes fadeOut 
+{
+	0%   {opacity: 0;}
+	1.5% {opacity: 1;}
+	50%  {opacity: 1;}
+	100% {opacity: 0;}
+}
+
+#hidden-text-div {
+	position: absolute;
+	width: 0;
+	height: 0;
+	top: 0;
+	left: 0;
+	background-color: red;
+}
+
+.tooltipText {
+	visibility: hidden;
+	position: absolute;
+	z-index: 50;
+	margin: auto;
+	color: black;
+	background-color: #ffffc9;
+	border-radius: 4px;
+	padding: 2px;
+	top: 36px;
+	box-shadow: 4px 4px 10px #ccc;
+}
+
+.toolbarBtn:hover .tooltipText {
+	visibility: visible;
+}
+
 #toolbar {
 	position: relative;
-	width: 608px;
-	height: 32px;
+	width: var(--toolbar-width);
+	height: var(--toolbar-height);
 	margin-bottom: 4px;
+	cursor: default;
+}
+
+/* undo and redo */
+.undoImg {
+	background-image: url(img/undo.png);
+}
+.redoImg {
+	background-image: url(img/redo.png);
 }
 
 /* for toolbar icons */
-.crosshairImg {
-	background-image: url(img/crosshair.png);
+.pencilImg {
+	background-image: url(img/pencil2.png);
+}
+.selectionImg {
+	background-image: url(img/crosshair2.png);
 }
 .fillImg {
 	background-image: url(img/fill2.png);
@@ -43,37 +120,44 @@ button {
 .saveImg {
 	background-image: url(img/save2.png);
 }
-
-/* for cursor */
-.cursor-crosshair {
-	cursor: crosshair;
-}
-.cursor-fill {
-	cursor: url(img/fill2.png) 16 16, auto;
-}
-.cursor-eraser {
-	cursor: url(img/eraser2.png) 16 16, auto;
-}
-.cursor-colorpicker {
-	cursor: url(img/colorpicker2.png) 16 16, auto;
-}
-.cursor-default {
-	cursor: default;
+.resetImg {
+	background-image: url(img/reset2.png);
 }
 
-
-.cursor-wait {
-	cursor: wait;
+#add-color-button {
+	position: relative;
+	outline: 1px solid black;
+	cursor: pointer;
+	margin-bottom: 4px;
+	background-color: #d1d1d2;
+	height: var(--palette-cell-height);
+	width: var(--palette-cell-height);
 }
-.cursor-move {
-	cursor: move;
+
+#add-color-button:hover
+{
+	box-shadow: 0px 0px 10px aqua;
+}
+
+#add-color-button:active
+{
+	box-shadow: none;
 }
 
 #active-color-preview {
-	height: 32px;
-	width: 32px;
+	height: var(--toolbar-height);
+	width: var(--toolbar-height);
 	border-radius: 4px;
 	float: right;
+}
+
+#active-color-label {
+	position: relative;
+	float: right;
+	font-size: 1.5em;  /* make smaller */
+	padding-top: auto;
+	margin-right: var(--palette-margin-right);
+	height: var(--toolbar-height);
 }
 
 .no-select {
@@ -87,27 +171,47 @@ button {
 
 #canvas-div {
 	position: relative;
-	width: 608px;
-	height: 608px;
+	width: var(--canvas-width);
+	height: var(--canvas-width);
+	margin-right: var(--palette-margin-right);
 	float: left;
 }
 
 #palette-div {
 	position: relative;
-	width: 40px;
+	width: var(--palette-width);
 	height: 640px;
 	float: left;
-	margin-right: 20px;
+	cursor: default;
+}
+
+#secret-info {
+	position: fixed;
+	bottom: 0;
+	display: none;
+
 }
 
 .paletteCell {
 	position: relative;
-	height: 40px;
+	float: left;
+	height: var(--palette-cell-height);
+	width: var(--palette-cell-width);
 	cursor: pointer;
-	border-radius: 2px;
+}
+
+.textInPaletteCell {
+	position: relative;
+	left: var(--palette-width);
+	height: inherit;
+	z-index: 1;
+	outline: 1px dotted grey;
+	visibility: hidden;
 }
 
 .canvasCell {
+	width: var(--canvas-cell-width);
+	height: var(--canvas-cell-width);
 	pointer-events: auto;
 	float: left;
 	user-drag: none; 
@@ -116,6 +220,14 @@ button {
 	-webkit-user-drag: none;
 	-webkit-user-select: none;
 	-ms-user-select: none;
+}
+
+#selection {
+	position: absolute;
+	z-index: 42;
+	background-color: #ff000011;
+	outline: 1px dashed #ff000055;  /*crimson*/
+	pointer-events: none;
 }
 
 #output-div {

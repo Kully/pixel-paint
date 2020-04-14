@@ -5,7 +5,8 @@ scriptFile = 'script.js'
 compiledFile = 'js/_compiled_script.js'
 
 input_file_array = [
-    'js/modules/canvasStateObject.js'
+    'js/modules/canvasStateObject.js',
+    'js/modules/floodFill.js',
 ]
 
 
@@ -39,4 +40,4 @@ merge_file1_and_file2_then_write_to_file3(
     linkedModulesFile, scriptFile, compiledFile
 )
 
-print("  > finished linking files")
+print("done linking")
