@@ -2,8 +2,8 @@ console.log("https://github.com/Kully/pixel-paint/issues/1");
 
 const CELLS_PER_ROW = 32;
 const CELL_WIDTH_PX = 19;
-const MAX_UNDOS = 25;
-const GRID_CSS_OUTLINE = "1px dashed #aaa";
+const MAX_UNDOS = 35;
+const GRID_OUTLINE_CSS = "1px dashed #aaa";
 const SELECTION_LOCKED_OUTLINE = "1px dashed #ff0000c0";
 const BUTTON_UP_COLOR = "#dedede";
 const BUTTON_UP_RGB = "rgb(222, 222, 222)";
@@ -11,34 +11,33 @@ const BUTTON_DOWN_COLOR = "#777";
 const INIT_COLOR = "#fcfcfc";
 const MAX_COLORS_IN_PALETTE = 14;
 
-let pencilCursor = 'url("img/pencil2.png") -16 28, auto';
 let selectionObj = {
-    "id": "selection-button",
+    "button-id": "selection-button",
     "hotkey": "KeyS",
-    "isKeyDown": false,
-    "enabled": false,
     "cursor": "crosshair",
 }
 let fillObj = {
-    "id": "fill-button",
+    "button-id": "fill-button",
     "hotkey": "KeyF",
-    "isKeyDown": false,
-    "enabled": false,
     "cursor": 'url("img/fill2.png") 28 16, auto',
 }
 let eraserObj = {
-    "id": "eraser-button",
+    "button-id": "eraser-button",
     "hotkey": "KeyE",
-    "isKeyDown": false,
-    "enabled": false,
     "cursor": 'url("img/eraser1919.png") 10 7, auto',
 }
 let colorpickerObj = {
-    "id": "colorpicker-button",
+    "button-id": "colorpicker-button",
     "hotkey": "KeyI",
-    "isKeyDown": false,
-    "enabled": false,
     "cursor": 'url("img/colorpicker2.png") -32 32, auto',
+}
+let pencilObj = {
+    "button-id": "pencil-button",
+    "hotkey": "KeyN",
+    "cursor": 'url("img/pencil2.png") -16 28, auto',
+}
+let gridObj = {
+
 }
 
 let palette_color_array = [
@@ -113,18 +112,22 @@ let palette_color_array = [
     "#000000",
 ];
 
+// grid
+let KeyG_Counter = 0;
+let gridKeyCode = "KeyG";
+
+// layout measurement
+let bodyMargin = 8;
+let toolbarHeight = 32;
+let canvasDivY = bodyMargin + toolbarHeight + 2;  // 2 for correction?
+
+// misc
 let last_active_color = "";
 let active_color = "#000000";
 let brush_down = false;
 let active_tool = "";
-let KeyG_Counter = 0;
-let gridKeyCode = "KeyG";
 let selectionLocked = false;
 let altKeyDown = false;
-
-let bodyMargin = 8;
-let toolbarHeight = 32;
-let canvasDivY = bodyMargin + toolbarHeight + 2;  // 2 for correction?
 
 
 // *******************
@@ -278,7 +281,7 @@ function Cell_Int_To_ID(int)
 
 function Add_Pencil_Cursor_To_Document()
 {
-    document.body.style.cursor = pencilCursor;
+    document.body.style.cursor = pencilObj["cursor"];
 }
 
 function Color_All_Buttons()
@@ -371,17 +374,10 @@ function Reset_Color_Of_Canvas_Cells()
     }
 }
 
-function Does_CellID_Exist(id)
-{
-    if(!document.getElementById(id))
-        return false;
-    return true;
-}
-
 function Remove_Selection()
 {
     let selection = document.getElementById("selection");
-    if(selection)
+    if(document.getElementById("selection"))
         selection.remove();
 }
 
@@ -679,7 +675,7 @@ function Unlock_Selection_Div()
     selectionLocked = false;
 }
 
-function Color_Toolbar_Button_When_Down(elem)
+function Color_Toolbar_Button_As_Down(elem)
 {
     elem.style.backgroundColor = BUTTON_DOWN_COLOR;
 }
@@ -696,20 +692,16 @@ function Toggle_Grid(e)
 
     // color toggle grid button
     if(canvasCells[0].style.outline === "")
-        Color_Toolbar_Button_When_Down(gridButton);
+        Color_Toolbar_Button_As_Down(gridButton);
     else
         Color_Toolbar_Button_When_Up(gridButton);
 
     canvasCells.forEach(function(cell)
     {
         if(cell.style.outline === "")
-        {
-            cell.style.outline = GRID_CSS_OUTLINE;
-        }
+            cell.style.outline = GRID_OUTLINE_CSS;
         else
-        {
             cell.style.outline = "";
-        }
     })
 
 }
@@ -804,41 +796,32 @@ function Redo()
     Transfer_Canvas_State_To_Screen(state_array.ptr);
 }
 
-function Toggle_ToolbarButton_Color(object)
+function Activate_Tool(object)
 {
-    object["isKeyDown"] = true;
-
-    let button = document.getElementById(object["id"]);
+    let button = document.getElementById(object["button-id"]);
     let bkgdColor = button.style.backgroundColor;
-    let canvasDiv = document.getElementById("canvas-div");
 
-    if(bkgdColor === BUTTON_UP_RGB)
+    if(bkgdColor === BUTTON_UP_RGB)  // check if tool is active already
     {
         // set cursor
         document.getElementById("canvas-div").style.cursor = object["cursor"];
+        Color_Toolbar_Button_As_Down(button);
 
-        Color_Toolbar_Button_When_Down(button);
-
-        // release all other buttons
-        let toolbarObjectsArray = [
+        // deactivate all other toolbar buttons
+        const toolbarObjectArray = [
             selectionObj,
             fillObj,
             eraserObj,
             colorpickerObj,
+            pencilObj,
         ];
-        toolbarObjectsArray.forEach(function(item){
-            if(item["id"] !== object["id"])
+        toolbarObjectArray.forEach(function(item){
+            if(item["button-id"] !== object["button-id"])
             {
-                let btn = document.getElementById(item["id"]);
+                let btn = document.getElementById(item["button-id"]);
                 Color_Toolbar_Button_When_Up(btn);
             }
         })
-    }
-    else
-    { 
-        document.getElementById("canvas-div").style.cursor = pencilCursor;
-        
-        Color_Toolbar_Button_When_Up(button);
     }
 }
 
@@ -874,36 +857,33 @@ function Add_EventHandlers_To_Document()
         {
             Redo();
         }
+
+        // toolbar
         if(e.code === selectionObj["hotkey"])
         {
-            if(selectionObj["isKeyDown"] === false)
-            {
-                // toggle enabled key
-                selectionObj["enabled"] = !selectionObj["enabled"];
-                Toggle_ToolbarButton_Color(selectionObj);
-            }
+            Activate_Tool(selectionObj);
         }
+        else
         if(e.code === fillObj["hotkey"])
         {
-            if(fillObj["isKeyDown"] === false)
-            {
-                Toggle_ToolbarButton_Color(fillObj);
-            }
+             Activate_Tool(fillObj);
         }
+        else
         if(e.code === eraserObj["hotkey"])
         {
-            if(eraserObj["isKeyDown"] === false)
-            {
-                Toggle_ToolbarButton_Color(eraserObj);
-            }
+             Activate_Tool(eraserObj);
         }
+        else
         if(e.code === colorpickerObj["hotkey"])
         {
-            if(colorpickerObj["isKeyDown"] === false)
-            {
-                Toggle_ToolbarButton_Color(colorpickerObj);
-            }
+             Activate_Tool(colorpickerObj);
         }
+        else
+        if(e.code === pencilObj["hotkey"])
+        {
+             Activate_Tool(pencilObj);
+        }
+
         if(e.code === gridKeyCode)  // grid
         {
             KeyG_Counter += 1;
@@ -915,23 +895,6 @@ function Add_EventHandlers_To_Document()
         {
             altKeyDown = false;
         }
-        // toolbar
-        if(e.code == selectionObj["hotkey"])
-        {
-            selectionObj["isKeyDown"] = false;
-        }
-        if(e.code == fillObj["hotkey"])
-        {
-            fillObj["isKeyDown"] = false;
-        }
-        if(e.code == eraserObj["hotkey"])
-        {
-            eraserObj["isKeyDown"] = false;
-        }
-        if(e.code == colorpickerObj["hotkey"])
-        {
-            colorpickerObj["isKeyDown"] = false;
-        }
         if(e.code == gridKeyCode)  // grid
         {
             KeyG_Counter = 0;
@@ -941,25 +904,17 @@ function Add_EventHandlers_To_Document()
 }
 
 
-// **************
-// CALL FUNCTIONS
-// **************
-
-// init
 Color_All_Buttons();
 Update_Active_Color_Preview();
 Populate_Canvas_With_Cells();
 Populate_Palette_With_Cells();
 Add_Ids_To_Palette_Cells();
-Add_Pencil_Cursor_To_Document();
+Activate_Tool(pencilObj);
 
-// event handlers
 Add_EventHandlers_To_Canvas_Cells();
 Add_EventHandlers_To_Canvas_Div();
 Add_EventHandlers_To_Document();
 Add_EventHandlers_To_Palette_Cells();
-
-// toolbar buttons
 Add_EventHandlers_To_Grid_Button();
 Add_EventHandlers_To_Copy_Button();
 

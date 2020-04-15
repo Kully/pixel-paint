@@ -60,13 +60,14 @@ body {
 	visibility: hidden;
 	position: absolute;
 	z-index: 50;
+	font-size: 14px;
 	margin: auto;
 	color: black;
 	background-color: #ffffc9;
 	border-radius: 4px;
 	padding: 2px;
-	top: 36px;
-	box-shadow: 4px 4px 10px #ccc;
+	top: 48px;
+	box-shadow: 4px 4px 10px #dee;
 }
 
 .toolbarBtn:hover .tooltipText {
