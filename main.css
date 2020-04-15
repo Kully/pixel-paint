@@ -11,6 +11,8 @@
   --palette-margin-right: 10px;
   --canvas-width: 608px;  /* 19*32 = 608 */
   --canvas-cell-width: 19px;
+
+  --line-height-toolbar-text: 30px;
 }
 
 body {
@@ -21,22 +23,13 @@ body {
 	margin: var(--body-margin);
 }
 
-button {
-	height: 33px;
-	width: 33px;
-	padding: 0;
-	margin: 0;
-	font-family: 'Open Sans', sans-serif;
-	outline: 0;
-}
-
 #popup-message {
 	position: relative;
 	float: right;
-	margin-right: 20px;
+	line-height: var(--line-height-toolbar-text);
+	margin-right: 10px;
 	height: var(--toolbar-height);
 	border-radius: 4px;
-	font-size: 1.5em;
 	color: #ffffc9;
 }
 
@@ -78,6 +71,20 @@ button {
 
 .toolbarBtn:hover .tooltipText {
 	visibility: visible;
+}
+
+.toolbarBtn {
+	height: 33px;
+	width: 33px;
+	padding: 0;
+	margin: 0;
+	font-family: 'Open Sans', sans-serif;
+	outline: 0;
+	cursor: not-allowed;
+}
+
+#copy-button {
+	cursor: pointer;
 }
 
 #toolbar {
@@ -154,7 +161,7 @@ button {
 #active-color-label {
 	position: relative;
 	float: right;
-	font-size: 1.5em;  /* make smaller */
+	line-height: var(--line-height-toolbar-text);
 	padding-top: auto;
 	margin-right: var(--palette-margin-right);
 	height: var(--toolbar-height);
@@ -224,9 +231,8 @@ button {
 
 #selection {
 	position: absolute;
-	z-index: 42;
-	background-color: #ff000011;
-	outline: 1px dashed #ff000055;  /*crimson*/
+	z-index: 2;
+	outline: 1px dashed #ff000066;
 	pointer-events: none;
 }
 
