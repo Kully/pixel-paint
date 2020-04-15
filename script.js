@@ -2,42 +2,42 @@ console.log("https://github.com/Kully/pixel-paint/issues/1");
 
 const CELLS_PER_ROW = 32;
 const CELL_WIDTH_PX = 19;
-const MAX_UNDOS = 25;
-const GRID_CSS_OUTLINE = "1px dashed #aaa";
+const MAX_UNDOS = 35;
+const GRID_OUTLINE_CSS = "1px dashed #aaa";
+const SELECTION_LOCKED_OUTLINE = "1px dashed #ff0000c0";
 const BUTTON_UP_COLOR = "#dedede";
 const BUTTON_UP_RGB = "rgb(222, 222, 222)";
 const BUTTON_DOWN_COLOR = "#777";
-const INIT_COLOR = "#fcfcfc";  // palette_color_array
+const INIT_COLOR = "#fcfcfc";
 const MAX_COLORS_IN_PALETTE = 14;
 
-let pencilCursor = 'url("img/pencil2.png") -16 28, auto';
 let selectionObj = {
-    "id": "selection-button",
+    "button-id": "selection-button",
     "hotkey": "KeyS",
-    "isKeyDown": false,
-    "enabled": false,
     "cursor": "crosshair",
 }
 let fillObj = {
-    "id": "fill-button",
+    "button-id": "fill-button",
     "hotkey": "KeyF",
-    "isKeyDown": false,
-    "enabled": false,
     "cursor": 'url("img/fill2.png") 28 16, auto',
 }
 let eraserObj = {
-    "id": "eraser-button",
+    "button-id": "eraser-button",
     "hotkey": "KeyE",
-    "isKeyDown": false,
-    "enabled": false,
     "cursor": 'url("img/eraser1919.png") 10 7, auto',
 }
 let colorpickerObj = {
-    "id": "colorpicker-button",
+    "button-id": "colorpicker-button",
     "hotkey": "KeyI",
-    "isKeyDown": false,
-    "enabled": false,
     "cursor": 'url("img/colorpicker2.png") -32 32, auto',
+}
+let pencilObj = {
+    "button-id": "pencil-button",
+    "hotkey": "KeyN",
+    "cursor": 'url("img/pencil2.png") -16 28, auto',
+}
+let gridObj = {
+
 }
 
 let palette_color_array = [
@@ -112,19 +112,106 @@ let palette_color_array = [
     "#000000",
 ];
 
-// VARIABLES
+// grid
+let KeyG_Counter = 0;
+let gridKeyCode = "KeyG";
+
+// layout measurement
+let bodyMargin = 8;
+let toolbarHeight = 32;
+let canvasDivY = bodyMargin + toolbarHeight + 2;  // 2 for correction?
+
+// misc
 let last_active_color = "";
 let active_color = "#000000";
 let brush_down = false;
 let active_tool = "";
-let KeyG_Counter = 0;
-let gridKeyCode = "KeyG";
 let selectionLocked = false;
-let selectionCopyOn = false;
+let altKeyDown = false;
 
-let bodyMargin = 8;
-let toolbarHeight = 32;
-let canvasDivY = bodyMargin + toolbarHeight + 2;  // 2 for correction?
+
+// *******************
+// CANVAS STATE OBJECT
+// *******************
+
+function Canvas_State_Object(maxSize) {
+    let init_array = new Array(CELLS_PER_ROW * CELLS_PER_ROW).fill(INIT_COLOR);
+    this.state_array = [init_array];    // empty array
+    this.ptr = 0;                       // pointer
+    this.maxSize = maxSize;             // maximum size
+}
+Canvas_State_Object.prototype.decPtr = function()
+{
+    if(this.ptr <= 0)
+        return;
+
+    this.ptr--;
+};
+Canvas_State_Object.prototype.incPtr = function()
+{
+    if(this.ptr >= this.state_array.length-1)
+        return;
+
+    this.ptr += 1;
+};
+Canvas_State_Object.prototype.pushToPtr = function(item)
+{
+    if(_Can_Push(item, this.state_array, this.ptr))
+    {
+        this.ptr += 1;
+        this.state_array.splice(this.ptr, 0, item);
+    }
+
+    // slice off array after ptr
+    this.state_array = this.state_array.slice(0, this.ptr+1);
+
+    this._manageSize();
+}
+Canvas_State_Object.prototype._manageSize = function(item)
+{
+    if(this.state_array.length > this.maxSize)
+    {
+        this.state_array.shift();
+        this.ptr--;
+    }
+}
+Canvas_State_Object.prototype.ptrToEndOfStateArray = function(item)
+{
+    this.ptr = this.state_array.length - 1;
+}
+Canvas_State_Object.prototype.print = function()
+{
+    console.log(this);
+}
+
+function _Can_Push(thisState, state_array, ptr)
+{
+    if(ptr === 0)
+    {
+        return true;
+    }
+    if(_Arrays_Are_Equal(thisState, state_array[ptr]) === false)
+    {
+        return true;
+    }
+    
+    return false;
+}
+
+function _Arrays_Are_Equal(a, b)
+{
+    if(a === b)
+        return true;
+    if(a.length !== b.length)
+        return false;
+
+    for(let i=0; i<a.length; i += 1)
+    {
+        if(a[i] !== b[i])
+            return false;
+    }
+    return true;
+}
 
 
 // *****
@@ -133,6 +220,10 @@ let canvasDivY = bodyMargin + toolbarHeight + 2;  // 2 for correction?
 
 function rgbToHex(rgb)
 {
+    // check if already in hex format
+    if(rgb.includes("#"))
+        return rgb;
+
     rgb = rgb.replace(" ", "");
     rgb = rgb.slice(4,rgb.length-1);
 
@@ -190,10 +281,10 @@ function Cell_Int_To_ID(int)
 
 function Add_Pencil_Cursor_To_Document()
 {
-    document.body.style.cursor = pencilCursor;
+    document.body.style.cursor = pencilObj["cursor"];
 }
 
-function Color_Buttons()
+function Color_All_Buttons()
 {
     let buttons = document.querySelectorAll("button");
     buttons.forEach(function(b) {
@@ -256,8 +347,7 @@ function Update_Active_Color_Label()
 {
     activeColorLabel = document.getElementById("active-color-label");
 
-    if(active_color.includes("rgb"))
-        active_color = rgbToHex(active_color);
+    active_color = rgbToHex(active_color);
 
     activeColorLabel.innerHTML = active_color;    // label
     activeColorLabel.style.color = active_color;  // text color
@@ -284,87 +374,189 @@ function Reset_Color_Of_Canvas_Cells()
     }
 }
 
-function Does_CellID_Exist(id)
-{
-    if(!document.getElementById(id))
-        return false;
-    return true;
-}
-
-function Cell_Coordinates_Out_Of_Bounds(x, y)
-{
-    if((0 <= x) && (x <= CELLS_PER_ROW-1) && (0 <= y) && (y <= CELLS_PER_ROW-1))
-        return false;
-    return true;
-}
-
-function Cell_Coordinates_In_Bounds(x, y)
-{
-    if((0 <= x) && (x <= CELLS_PER_ROW-1) && (0 <= y) && (y <= CELLS_PER_ROW-1))
-        return true;
-    return false;
-}
-
 function Remove_Selection()
 {
     let selection = document.getElementById("selection");
-    if(selection)
+    if(document.getElementById("selection"))
         selection.remove();
 }
 
+function Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
+{
+
+    function Cell_Coordinates_Out_Of_Bounds(x, y)
+    {
+        if((0<=x) && (x<=CELLS_PER_ROW-1) && (0<=y) && (y<=CELLS_PER_ROW-1))
+            return false;
+        return true;
+    }
+
+    function Cell_Coordinates_In_Bounds(x, y)
+    {
+        if((0<=x) && (x<=CELLS_PER_ROW-1) && (0<=y) && (y<=CELLS_PER_ROW-1))
+            return true;
+        return false;
+    }
+
+    // grab X,Y from ID of Cell
+    let cell_int = Cell_ID_To_Int(cell_id);
+    let cell_x = Get_X_From_CellInt(cell_int);
+    let cell_y = Get_Y_From_CellInt(cell_int);
+
+    Cell_Coordinates_In_Bounds(cell_x, cell_y+1)
+
+    let cell_element = document.getElementById(cell_id);
+
+    if(rgbToHex(target_color) === replacement_color)
+        return;
+    else if(cell_element.style.backgroundColor !== target_color)
+        return;
+    else
+    {
+        cell_element.style.backgroundColor = replacement_color;
+
+        if(Cell_Coordinates_In_Bounds(cell_x, cell_y+1))
+        {
+            let next_cell_int = Get_CellInt_From_XY(cell_x, cell_y+1);
+            let next_cell_id = Cell_Int_To_ID(next_cell_int);
+
+            Flood_Fill_Algorithm(next_cell_id,
+                                 target_color,
+                                 replacement_color);
+        }
+        if(Cell_Coordinates_In_Bounds(cell_x, cell_y-1))
+        {
+            let next_cell_int = Get_CellInt_From_XY(cell_x, cell_y-1);
+            let next_cell_id = Cell_Int_To_ID(next_cell_int);
+
+            Flood_Fill_Algorithm(next_cell_id,
+                                 target_color,
+                                 replacement_color);
+        }
+        if(Cell_Coordinates_In_Bounds(cell_x-1, cell_y))
+        {
+            let next_cell_int = Get_CellInt_From_XY(cell_x-1, cell_y);
+            let next_cell_id = Cell_Int_To_ID(next_cell_int);
+
+            Flood_Fill_Algorithm(next_cell_id,
+                                 target_color,
+                                 replacement_color);
+        }
+        if(Cell_Coordinates_In_Bounds(cell_x+1, cell_y))
+        {
+            let next_cell_int = Get_CellInt_From_XY(cell_x+1, cell_y);
+            let next_cell_id = Cell_Int_To_ID(next_cell_int);
+
+            Flood_Fill_Algorithm(next_cell_id,
+                                 target_color,
+                                 replacement_color);
+        }
+    }
+}
+
+
+
+
+
+function Array_Of_Colors_In_Selection()
+{
+    const selection = document.getElementById("selection");
+
+    // calculate
+    let left = Px_To_Int(selection.style.left);
+    let top = Px_To_Int(selection.style.top);
+    let cell0 = Get_CellInt_From_XY(left / CELL_WIDTH_PX, top / CELL_WIDTH_PX);
+
+    let width = Px_To_Int(selection.style.width) / CELL_WIDTH_PX;
+    let height = Px_To_Int(selection.style.height) / CELL_WIDTH_PX;
+
+    let color_array = [];
+    for(let y=0; y<height; y+=1)
+    for(let x=0; x<width; x+=1)
+    {
+        let id = Cell_Int_To_ID(y * CELLS_PER_ROW + cell0 + x);
+        let cell = document.getElementById(id);
+        let color = rgbToHex(cell.style.backgroundColor);
+        color_array.push(color);
+    }
+    return color_array;
+}
+
+
+
+
+
 function Add_EventHandlers_To_Canvas_Cells()
 {
+    function Get_XY_Of_Cursor_Rounded_To_Neareset_Cell_Corner(e)
+    {
+        let parentCell = e.target.closest("div.canvasCell");
+        let selectionLeft = 0;
+        if( e.offsetX <= Math.floor( CELL_WIDTH_PX / 2 ) )
+            selectionLeft = parentCell.offsetLeft;
+        else
+        {
+            let cellId = parseInt(parentCell.id);
+
+            let rightCell = document.getElementById(Cell_Int_To_ID(cellId+1));
+            selectionLeft = rightCell.offsetLeft;
+        }
+
+        let selectionTop = 0;
+        if( e.offsetY <= Math.floor( CELL_WIDTH_PX / 2 ) )
+            selectionTop = parentCell.offsetTop;
+        else
+        {
+            let cellId = parseInt(parentCell.id);
+            let cellIdBelow = Cell_Int_To_ID(cellId+CELLS_PER_ROW);
+
+            // TODO: what if cell is at bottom row?
+            let belowCell = document.getElementById(cellIdBelow);
+            selectionTop = belowCell.offsetTop;
+        }
+        return [selectionLeft, selectionTop];
+    }
+
+    function Create_Selection_Div(e)
+    {
+        const canvasDiv = document.getElementById("canvas-div");
+
+        let selection = document.createElement("div");
+        selection.id = "selection";
+
+        const coords = Get_XY_Of_Cursor_Rounded_To_Neareset_Cell_Corner(e);
+        let selectionLeft = coords[0];
+        let selectionTop = coords[1];
+
+        selection.style.left = selectionLeft + "px";
+        selection.style.top = selectionTop + "px";
+
+        selection.addEventListener("move", function() {
+            console.log("moving over selection");
+        })
+
+        canvasDiv.appendChild(selection);
+
+        document.getElementById("canvas-div").style.cursor
+    }
+
     function Crosshair_Mousedown(e)
     {
         let cursor = document.getElementById("canvas-div").style.cursor;
         if(cursor === selectionObj["cursor"])
         {
-            Remove_Selection();
-            Unlock_Selection_Div();
-
-            const canvasDiv = document.getElementById("canvas-div");
-            
-            // create a selection div
-            let selection = document.createElement("div");
-            selection.id = "selection";
-
-            // set top and left position of new selection div
-            let closestCanvasCell = e.target.closest("div.canvasCell");
-
-            let selectionLeft = 0;
-            if( e.offsetX <= Math.floor( CELL_WIDTH_PX / 2 ) )
-                selectionLeft = closestCanvasCell.offsetLeft;
+            if(altKeyDown === true)
+            {
+                console.log("grab the selection");
+                let color_array = Array_Of_Colors_In_Selection();
+                console.log(color_array);
+            }
             else
             {
-                let cellId = parseInt(closestCanvasCell.id);
-
-                // if cell is at right side of screen: dont draw it
-                let rightCanvasCell = document.getElementById(
-                    Cell_Int_To_ID(cellId+1)
-                );
-                selectionLeft = rightCanvasCell.offsetLeft;
+                Remove_Selection();
+                Unlock_Selection_Div();
+                Create_Selection_Div(e);
             }
-
-
-            let selectionTop = 0;
-            if( e.offsetY <= Math.floor( CELL_WIDTH_PX / 2 ) )
-                selectionTop = closestCanvasCell.offsetTop;
-            else
-            {
-                let cellId = parseInt(closestCanvasCell.id);
-
-                // what if cell is at bottom row?
-                let belowCanvasCell = document.getElementById(
-                    Cell_Int_To_ID(cellId+CELLS_PER_ROW)
-                );
-                selectionTop = belowCanvasCell.offsetTop;
-            }
-
-            selection.style.left = selectionLeft + "px";
-            selection.style.top = selectionTop + "px";
-
-            // append div to DOM
-            canvasDiv.appendChild(selection);
         }
     }
 
@@ -379,25 +571,22 @@ function Add_EventHandlers_To_Canvas_Cells()
             if(!selection)
                 return;
 
-            let closestCanvasCell = e.target.closest("div.canvasCell");
-            const cell_id_as_int = parseInt(closestCanvasCell.id);
+            // update width and height
+            const coords = Get_XY_Of_Cursor_Rounded_To_Neareset_Cell_Corner(e);
+            let newWidth = coords[0] - Px_To_Int(selection.style.left);
+            let newHeight = coords[1] - Px_To_Int(selection.style.top);
 
-            let cursorX = e.pageX - bodyMargin - e.offsetX - 4 + 2;
-            let cursorY = e.pageY - canvasDivY - e.offsetY - 2 + 2;
-
-            let newWidth = (cursorX - Px_To_Int(selection.style.left));
-            let newHeight = (cursorY - Px_To_Int(selection.style.top));
-
-            // sanatize width
+            // sanatize width and height
             newWidth = Math.ceil(newWidth);
-            newWidth = newWidth - (newWidth % CELL_WIDTH_PX) + CELL_WIDTH_PX-3;
-            selection.style.width = newWidth + "px";
-            
-            // sanatize height
+            newWidth = newWidth - (newWidth % CELL_WIDTH_PX) - 1;
             newHeight = Math.floor(newHeight);
-            newHeight = newHeight - (newHeight % CELL_WIDTH_PX) + CELL_WIDTH_PX-3;
+            newHeight = newHeight - (newHeight % CELL_WIDTH_PX) - 1;
+
+            // assign to the div
+            selection.style.width = newWidth + "px";
             selection.style.height = newHeight + "px";
 
+            return;
         }
     }
 
@@ -443,12 +632,12 @@ function Add_EventHandlers_To_Canvas_Cells()
         canvasCells[i].addEventListener("mousedown", Crosshair_Mousedown);
         canvasCells[i].addEventListener("mousemove", Crosshair_Mousemove);
         canvasCells[i].addEventListener("mouseup", Crosshair_Mouseup);
+        canvasCells[i].addEventListener("mousedown", Tool_Action_On_Canvas_Cell);
+        
         canvasCells[i].addEventListener("mousemove", function(e) {
             if(brush_down)
                 Tool_Action_On_Canvas_Cell(e)
         });
-        
-        canvasCells[i].addEventListener("mousedown", Tool_Action_On_Canvas_Cell);
         
         canvasCells[i].addEventListener("mouseup", function(e) {
             let cursor = document.getElementById("canvas-div").style.cursor;
@@ -467,6 +656,7 @@ function Add_EventHandlers_To_Canvas_Cells()
                 // nothing
             }
         });
+    
     }
 }
 
@@ -477,7 +667,7 @@ function Lock_Selection_Div()
     // make selection grabbable
     let selection = document.getElementById("selection");
 
-    selection.style.backgroundColor = "#ff000033";
+    selection.style.outline = SELECTION_LOCKED_OUTLINE;
 }
 
 function Unlock_Selection_Div()
@@ -485,7 +675,7 @@ function Unlock_Selection_Div()
     selectionLocked = false;
 }
 
-function Color_Toolbar_Button_When_Down(elem)
+function Color_Toolbar_Button_As_Down(elem)
 {
     elem.style.backgroundColor = BUTTON_DOWN_COLOR;
 }
@@ -502,36 +692,24 @@ function Toggle_Grid(e)
 
     // color toggle grid button
     if(canvasCells[0].style.outline === "")
-        Color_Toolbar_Button_When_Down(gridButton);
+        Color_Toolbar_Button_As_Down(gridButton);
     else
         Color_Toolbar_Button_When_Up(gridButton);
 
     canvasCells.forEach(function(cell)
     {
         if(cell.style.outline === "")
-        {
-            cell.style.outline = GRID_CSS_OUTLINE;
-        }
+            cell.style.outline = GRID_OUTLINE_CSS;
         else
-        {
             cell.style.outline = "";
-        }
     })
 
 }
 
 function Add_EventHandlers_To_Copy_Button()
 {
-    function Delete_Popup(popupDiv)
-    {
-
-    }
-
     function Copy_To_Clipboard()
     {
-        console.log("copy array to clipboard");
-
-        // format array of canvas of colors
         let canvasState = Get_Canvas_State();
         let copiedText = "";
         canvasState.forEach(function(item) {
@@ -555,7 +733,7 @@ function Add_EventHandlers_To_Copy_Button()
         let popupMessage = document.getElementById("popup-message");
         popupMessage.classList.remove("fadeOutAnimation");
         void popupMessage.offsetWidth;
-        popupMessage.innerHTML = "Copied to Clipboard!";
+        popupMessage.innerHTML = "Hexvalues Copied to Clipboard!";
         popupMessage.classList.add("fadeOutAnimation");
     }
 
@@ -576,7 +754,7 @@ function Add_EventHandlers_To_Selection_Div()
 {
     let selection = document.getElementById("selection");
     selection.addEventListener("mouseover", function(e) {
-        if(selectionCopyOn)
+        if(altKeyDown)
         {
             // selection.style.cursor = "move";
         }
@@ -604,59 +782,46 @@ function Transfer_Canvas_State_To_Screen(ptr)
 
 function Undo()
 {
-    console.log("undo");
     let canvas_state = Get_Canvas_State();
     state_array.decPtr();
 
     Transfer_Canvas_State_To_Screen(state_array.ptr);
-    state_array.print();
 }
 
 function Redo()
 {
-    console.log("redo");
     let canvas_state = Get_Canvas_State();
     state_array.incPtr();
 
     Transfer_Canvas_State_To_Screen(state_array.ptr);
-    state_array.print();
 }
 
-function Toggle_ToolbarButton_Color(object)
+function Activate_Tool(object)
 {
-    object["isKeyDown"] = true;
-
-    let button = document.getElementById(object["id"]);
+    let button = document.getElementById(object["button-id"]);
     let bkgdColor = button.style.backgroundColor;
-    let canvasDiv = document.getElementById("canvas-div");
 
-    if(bkgdColor === BUTTON_UP_RGB)
+    if(bkgdColor === BUTTON_UP_RGB)  // check if tool is active already
     {
         // set cursor
         document.getElementById("canvas-div").style.cursor = object["cursor"];
+        Color_Toolbar_Button_As_Down(button);
 
-        Color_Toolbar_Button_When_Down(button);
-
-        // release all other buttons
-        let toolbarObjectsArray = [
+        // deactivate all other toolbar buttons
+        const toolbarObjectArray = [
             selectionObj,
             fillObj,
             eraserObj,
             colorpickerObj,
+            pencilObj,
         ];
-        toolbarObjectsArray.forEach(function(item){
-            if(item["id"] !== object["id"])
+        toolbarObjectArray.forEach(function(item){
+            if(item["button-id"] !== object["button-id"])
             {
-                let btn = document.getElementById(item["id"]);
+                let btn = document.getElementById(item["button-id"]);
                 Color_Toolbar_Button_When_Up(btn);
             }
         })
-    }
-    else
-    { 
-        document.getElementById("canvas-div").style.cursor = pencilCursor;
-        
-        Color_Toolbar_Button_When_Up(button);
     }
 }
 
@@ -678,8 +843,7 @@ function Add_EventHandlers_To_Document()
     document.addEventListener("keydown", function(e) {
         if(e.code === "AltLeft" || e.code === "AltRight")
         {
-            // move to ifHoldingDown
-            selectionCopyOn = !selectionCopyOn;
+            altKeyDown = true;
         }
         if(e.code === "Escape")
         {
@@ -693,36 +857,33 @@ function Add_EventHandlers_To_Document()
         {
             Redo();
         }
+
+        // toolbar
         if(e.code === selectionObj["hotkey"])
         {
-            if(selectionObj["isKeyDown"] === false)
-            {
-                // toggle enabled key
-                selectionObj["enabled"] = !selectionObj["enabled"];
-                Toggle_ToolbarButton_Color(selectionObj);
-            }
+            Activate_Tool(selectionObj);
         }
+        else
         if(e.code === fillObj["hotkey"])
         {
-            if(fillObj["isKeyDown"] === false)
-            {
-                Toggle_ToolbarButton_Color(fillObj);
-            }
+             Activate_Tool(fillObj);
         }
+        else
         if(e.code === eraserObj["hotkey"])
         {
-            if(eraserObj["isKeyDown"] === false)
-            {
-                Toggle_ToolbarButton_Color(eraserObj);
-            }
+             Activate_Tool(eraserObj);
         }
+        else
         if(e.code === colorpickerObj["hotkey"])
         {
-            if(colorpickerObj["isKeyDown"] === false)
-            {
-                Toggle_ToolbarButton_Color(colorpickerObj);
-            }
+             Activate_Tool(colorpickerObj);
         }
+        else
+        if(e.code === pencilObj["hotkey"])
+        {
+             Activate_Tool(pencilObj);
+        }
+
         if(e.code === gridKeyCode)  // grid
         {
             KeyG_Counter += 1;
@@ -730,22 +891,9 @@ function Add_EventHandlers_To_Document()
     })
 
     document.addEventListener("keyup", function(e){
-        // toolbar
-        if(e.code == selectionObj["hotkey"])
+        if(e.code === "AltLeft" || e.code === "AltRight")
         {
-            selectionObj["isKeyDown"] = false;
-        }
-        if(e.code == fillObj["hotkey"])
-        {
-            fillObj["isKeyDown"] = false;
-        }
-        if(e.code == eraserObj["hotkey"])
-        {
-            eraserObj["isKeyDown"] = false;
-        }
-        if(e.code == colorpickerObj["hotkey"])
-        {
-            colorpickerObj["isKeyDown"] = false;
+            altKeyDown = false;
         }
         if(e.code == gridKeyCode)  // grid
         {
@@ -756,25 +904,17 @@ function Add_EventHandlers_To_Document()
 }
 
 
-// **************
-// CALL FUNCTIONS
-// **************
-
-// init
-Color_Buttons();
+Color_All_Buttons();
 Update_Active_Color_Preview();
 Populate_Canvas_With_Cells();
 Populate_Palette_With_Cells();
 Add_Ids_To_Palette_Cells();
-Add_Pencil_Cursor_To_Document();
+Activate_Tool(pencilObj);
 
-// event handlers
 Add_EventHandlers_To_Canvas_Cells();
 Add_EventHandlers_To_Canvas_Div();
 Add_EventHandlers_To_Document();
 Add_EventHandlers_To_Palette_Cells();
-
-// toolbar buttons
 Add_EventHandlers_To_Grid_Button();
 Add_EventHandlers_To_Copy_Button();
 

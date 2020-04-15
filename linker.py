@@ -6,9 +6,7 @@ compiledFile = 'js/_compiled_script.js'
 
 input_file_array = [
     'js/modules/canvasStateObject.js',
-    'js/modules/floodFill.js',
 ]
-
 
 def combine_text_files_into_string(input_file_array):
     linkedText = '// *******\n// IMPORTS \n// *******\n\n'
