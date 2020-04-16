@@ -13,6 +13,17 @@
   --canvas-cell-width: 19px;
 
   --line-height-toolbar-text: 30px;
+
+  --border-radius: 4px;
+}
+
+.no-select {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Chrome, Opera and Firefox */
 }
 
 body {
@@ -29,7 +40,7 @@ body {
 	line-height: var(--line-height-toolbar-text);
 	margin-right: 10px;
 	height: var(--toolbar-height);
-	border-radius: 4px;
+	border-radius: var(--border-radius);
 	color: #ffffc9;
 }
 
@@ -64,17 +75,17 @@ body {
 	margin: auto;
 	color: black;
 	background-color: #ffffc9;
-	border-radius: 4px;
+	border-radius: var(--border-radius);
 	padding: 2px;
 	top: 48px;
 	box-shadow: 4px 4px 10px #dee;
 }
 
-.toolbarBtn:hover .tooltipText {
+.toolbarButton:hover .tooltipText {
 	visibility: visible;
 }
 
-.toolbarBtn {
+.toolbarButton {
 	height: 33px;
 	width: 33px;
 	padding: 0;
@@ -86,6 +97,18 @@ body {
 
 #copy-button {
 	cursor: pointer;
+	background-color: #1a73f8;
+	border-radius: var(--border-radius);
+	box-shadow: 4px 4px 10px #dee;
+}
+
+#copy-button:hover {
+	animation: boxShadowDarkens 0.05s forwards;
+}
+
+@keyframes boxShadowDarkens {
+	from {box-shadow: 4px 4px 10px #dee;}
+	to {box-shadow: 4px 4px 10px #aaa;}
 }
 
 #toolbar {
@@ -155,7 +178,7 @@ body {
 #active-color-preview {
 	height: var(--toolbar-height);
 	width: var(--toolbar-height);
-	border-radius: 4px;
+	border-radius: var(--border-radius);
 	float: right;
 }
 
@@ -168,13 +191,15 @@ body {
 	height: var(--toolbar-height);
 }
 
-.no-select {
-  -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Old versions of Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Chrome, Opera and Firefox */
+#palette-preview {
+	position: absolute;
+	width: var(--palette-width);
+	height: var(--toolbar-height);
+	top: 0px;
+	border: 1px solid black;
+	left: var(--toolbar-width);
+	border-radius: var(--border-radius);
+	margin-left: var(--palette-margin-right);
 }
 
 #canvas-div {
@@ -197,7 +222,6 @@ body {
 	position: fixed;
 	bottom: 0;
 	display: none;
-
 }
 
 .paletteCell {
@@ -222,12 +246,6 @@ body {
 	height: var(--canvas-cell-width);
 	pointer-events: auto;
 	float: left;
-	user-drag: none; 
-	user-select: none;
-	-moz-user-select: none;
-	-webkit-user-drag: none;
-	-webkit-user-select: none;
-	-ms-user-select: none;
 }
 
 #selection {

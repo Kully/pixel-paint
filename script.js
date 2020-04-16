@@ -37,9 +37,9 @@ let pencilObj = {
     "cursor": 'url("img/pencil2.png") -16 28, auto',
 }
 let gridObj = {
-
+    "KeyG_Counter": 0,
+    "hotkey": "KeyG",
 }
-
 let palette_color_array = [
     "#fcfcfc",
     "#f8f8f8",
@@ -112,10 +112,6 @@ let palette_color_array = [
     "#000000",
 ];
 
-// grid
-let KeyG_Counter = 0;
-let gridKeyCode = "KeyG";
-
 // layout measurement
 let bodyMargin = 8;
 let toolbarHeight = 32;
@@ -129,10 +125,6 @@ let active_tool = "";
 let selectionLocked = false;
 let altKeyDown = false;
 
-
-// *******************
-// CANVAS STATE OBJECT
-// *******************
 
 function Canvas_State_Object(maxSize) {
     let init_array = new Array(CELLS_PER_ROW * CELLS_PER_ROW).fill(INIT_COLOR);
@@ -284,9 +276,9 @@ function Add_Pencil_Cursor_To_Document()
     document.body.style.cursor = pencilObj["cursor"];
 }
 
-function Color_All_Buttons()
+function Color_All_Toolbar_Buttons()
 {
-    let buttons = document.querySelectorAll("button");
+    let buttons = document.querySelectorAll("button:not(#copy-button)");
     buttons.forEach(function(b) {
         b.style.backgroundColor = BUTTON_UP_COLOR;
     })
@@ -299,8 +291,10 @@ function Populate_Canvas_With_Cells()
     {
         let div = document.createElement("div");
         div.className = "canvasCell";
+        div.classList.add("no-select");
         div.id = Cell_Int_To_ID(i);
         div.style.backgroundColor = INIT_COLOR;
+
         canvasDiv.appendChild(div);
     }
 }
@@ -356,11 +350,18 @@ function Update_Active_Color_Label()
 function Add_EventHandlers_To_Palette_Cells()
 {
     const allPaletteCells = document.querySelectorAll(".paletteCell");
+    const colorPreview = document.getElementById("palette-preview");
+
     allPaletteCells.forEach(function(cell){
+        // click palette to change color
         cell.addEventListener("click", function(e){
             active_color = e.target.style.backgroundColor;
             Update_Active_Color_Preview();
             Update_Active_Color_Label();
+        })
+        // on hover, update the color preview above
+        cell.addEventListener("mouseenter", function(e){
+             colorPreview.style.backgroundColor = e.target.style.backgroundColor;
         })
     })
 }
@@ -858,7 +859,7 @@ function Add_EventHandlers_To_Document()
             Redo();
         }
 
-        // toolbar
+        // switch tool from toolbar
         if(e.code === selectionObj["hotkey"])
         {
             Activate_Tool(selectionObj);
@@ -884,9 +885,9 @@ function Add_EventHandlers_To_Document()
              Activate_Tool(pencilObj);
         }
 
-        if(e.code === gridKeyCode)  // grid
+        if(e.code === gridObj["hotkey"])
         {
-            KeyG_Counter += 1;
+            gridObj["KeyG_Counter"] += 1;
         }
     })
 
@@ -895,19 +896,26 @@ function Add_EventHandlers_To_Document()
         {
             altKeyDown = false;
         }
-        if(e.code == gridKeyCode)  // grid
+        if(e.code == gridObj["hotkey"])
         {
-            KeyG_Counter = 0;
+            gridObj["KeyG_Counter"] = 0;
             Toggle_Grid();
         }
     })
 }
 
+function Set_Palette_Preview_Color()
+{
+    palettePreview = document.getElementById("palette-preview");
+    palettePreview.style.backgroundColor = active_color;
+}
 
-Color_All_Buttons();
+
+Color_All_Toolbar_Buttons();
 Update_Active_Color_Preview();
 Populate_Canvas_With_Cells();
 Populate_Palette_With_Cells();
+Set_Palette_Preview_Color();
 Add_Ids_To_Palette_Cells();
 Activate_Tool(pencilObj);
 
