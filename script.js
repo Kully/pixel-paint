@@ -526,11 +526,11 @@ function Add_EventHandlers_To_Canvas_Cells()
         selection.id = "selection";
 
         const coords = Get_XY_Of_Cursor_Rounded_To_Neareset_Cell_Corner(e);
-        let selectionLeft = coords[0];
-        let selectionTop = coords[1];
+        let cursorX = coords[0];
+        let cursorY = coords[1];
 
-        selection.style.left = selectionLeft + "px";
-        selection.style.top = selectionTop + "px";
+        selection.style.left = cursorX + "px";
+        selection.style.top = cursorY + "px";
 
         selection.addEventListener("move", function() {
             console.log("moving over selection");
@@ -548,7 +548,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         {
             if(altKeyDown === true)
             {
-                console.log("grab the selection");
+                console.log("grab selection");
                 let color_array = Array_Of_Colors_In_Selection();
                 console.log(color_array);
             }

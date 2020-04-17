@@ -97,7 +97,7 @@ body {
 
 #copy-button {
 	cursor: pointer;
-	background-color: #1a73f8;
+	/*background-color: #1a73f8;*/
 	border-radius: var(--border-radius);
 	box-shadow: 4px 4px 10px #dee;
 }
