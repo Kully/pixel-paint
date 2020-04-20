@@ -1,7 +1,7 @@
 console.log("https://github.com/Kully/pixel-paint/issues/1");
 
 const CELLS_PER_ROW = 32;
-const CELL_WIDTH_PX = 19;
+const CELL_WIDTH_PX = 16;
 const MAX_UNDOS = 35;
 const GRID_OUTLINE_CSS = "1px dashed #aaa";
 const SELECTION_LOCKED_OUTLINE = "1px dashed #ff0000c0";
@@ -11,106 +11,6 @@ const BUTTON_DOWN_COLOR = "#777";
 const INIT_COLOR = "#fcfcfc";
 const MAX_COLORS_IN_PALETTE = 14;
 
-let selectionObj = {
-    "button-id": "selection-button",
-    "hotkey": "KeyS",
-    "cursor": "crosshair",
-}
-let fillObj = {
-    "button-id": "fill-button",
-    "hotkey": "KeyF",
-    "cursor": 'url("img/fill2.png") 28 16, auto',
-}
-let eraserObj = {
-    "button-id": "eraser-button",
-    "hotkey": "KeyE",
-    "cursor": 'url("img/eraser1919.png") 10 7, auto',
-}
-let colorpickerObj = {
-    "button-id": "colorpicker-button",
-    "hotkey": "KeyI",
-    "cursor": 'url("img/colorpicker2.png") -32 32, auto',
-}
-let pencilObj = {
-    "button-id": "pencil-button",
-    "hotkey": "KeyN",
-    "cursor": 'url("img/pencil2.png") -16 28, auto',
-}
-let gridObj = {
-    "KeyG_Counter": 0,
-    "hotkey": "KeyG",
-}
-let palette_color_array = [
-    "#fcfcfc",
-    "#f8f8f8",
-    "#bcbcbc",
-    "#7c7c7c",
-    
-    "#a4e4fc",
-    "#3cbcfc",
-    "#0078f8",
-    "#0007fc",
-    
-    "#b8b8f8",
-    "#6888fc",
-    "#0059f8",
-    "#0004bc",
-    
-    "#d8b8f8",
-    "#9878f8",
-    "#6846fc",
-    "#432abc",
-
-    "#f8b8f8",
-    "#f878f8",
-    "#d801cc",
-    "#940084",
-
-    "#f8a4c0",
-    "#f878f8",
-    "#d801cc",
-    "#a80020",
-    
-    "#f0cfb0",
-    "#f87758",
-    "#f83701",
-    "#a80e00",
-    
-    "#fce0a8",
-    "#fc9f44",
-    "#e45b11",
-    "#881400",
-
-    "#f8d878",
-    "#f8b801",
-    "#ac7b01",
-    "#503000",
-
-    "#d8f878",
-    "#b9f819",
-    "#02b801",
-    "#017800",
-
-    "#b8f8b8",
-    "#58d854",
-    "#01a801",
-    "#016800",
-
-    "#b8f8d8",
-    "#58f898",
-    "#01a844",
-    "#015800",
-
-    "#00fcfc",
-    "#00e8d8",
-    "#008888",
-    "#004058",
-
-    "#c4c4c4",
-    "#787878",
-    "#000001",
-    "#000000",
-];
 
 // layout measurement
 let bodyMargin = 8;
@@ -124,86 +24,6 @@ let brush_down = false;
 let active_tool = "";
 let selectionLocked = false;
 let altKeyDown = false;
-
-
-function Canvas_State_Object(maxSize) {
-    let init_array = new Array(CELLS_PER_ROW * CELLS_PER_ROW).fill(INIT_COLOR);
-    this.state_array = [init_array];    // empty array
-    this.ptr = 0;                       // pointer
-    this.maxSize = maxSize;             // maximum size
-}
-Canvas_State_Object.prototype.decPtr = function()
-{
-    if(this.ptr <= 0)
-        return;
-
-    this.ptr--;
-};
-Canvas_State_Object.prototype.incPtr = function()
-{
-    if(this.ptr >= this.state_array.length-1)
-        return;
-
-    this.ptr += 1;
-};
-Canvas_State_Object.prototype.pushToPtr = function(item)
-{
-    if(_Can_Push(item, this.state_array, this.ptr))
-    {
-        this.ptr += 1;
-        this.state_array.splice(this.ptr, 0, item);
-    }
-
-    // slice off array after ptr
-    this.state_array = this.state_array.slice(0, this.ptr+1);
-
-    this._manageSize();
-}
-Canvas_State_Object.prototype._manageSize = function(item)
-{
-    if(this.state_array.length > this.maxSize)
-    {
-        this.state_array.shift();
-        this.ptr--;
-    }
-}
-Canvas_State_Object.prototype.ptrToEndOfStateArray = function(item)
-{
-    this.ptr = this.state_array.length - 1;
-}
-Canvas_State_Object.prototype.print = function()
-{
-    console.log(this);
-}
-
-function _Can_Push(thisState, state_array, ptr)
-{
-    if(ptr === 0)
-    {
-        return true;
-    }
-    if(_Arrays_Are_Equal(thisState, state_array[ptr]) === false)
-    {
-        return true;
-    }
-    
-    return false;
-}
-
-function _Arrays_Are_Equal(a, b)
-{
-    if(a === b)
-        return true;
-    if(a.length !== b.length)
-        return false;
-
-    for(let i=0; i<a.length; i += 1)
-    {
-        if(a[i] !== b[i])
-            return false;
-    }
-    return true;
-}
 
 
 // *****
@@ -266,9 +86,9 @@ function Int_To_Px(int)
     return int + "px";
 }
 
-function Cell_Int_To_ID(int)
+function Pad_Start_Int(int, pad=4)
 {
-    return int.toString().padStart(4, 0);
+    return int.toString().padStart(pad, 0);
 }
 
 function Add_Pencil_Cursor_To_Document()
@@ -292,7 +112,7 @@ function Populate_Canvas_With_Cells()
         let div = document.createElement("div");
         div.className = "canvasCell";
         div.classList.add("no-select");
-        div.id = Cell_Int_To_ID(i);
+        div.id = Pad_Start_Int(i);
         div.style.backgroundColor = INIT_COLOR;
 
         canvasDiv.appendChild(div);
@@ -312,12 +132,85 @@ function Populate_Palette_With_Cells()
     }
 }
 
+function Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e)
+{
+    let parentCell = e.target.closest("div.canvasCell");
+
+    let x = 0;
+    if( e.offsetX <= Math.floor( CELL_WIDTH_PX / 2 ) )
+        x = parentCell.offsetLeft;
+    else
+    {
+        let cellId = parseInt(parentCell.id);
+
+        let rightCell = document.getElementById(Pad_Start_Int(cellId+1));
+        x = rightCell.offsetLeft;
+    }
+
+    let y = 0;
+    if( e.offsetY <= Math.floor( CELL_WIDTH_PX / 2 ) )
+        y = parentCell.offsetTop;
+    else
+    {
+        let cellId = parseInt(parentCell.id);
+        let cellIdBelow = Pad_Start_Int(cellId+CELLS_PER_ROW);
+
+        // TODO: what if cell is at bottom row?
+        let belowCell = document.getElementById(cellIdBelow);
+        y = belowCell.offsetTop;
+    }
+    return [x, y];
+}
+
+// function Round_XY_Of_Cursor_To_Neareset_Cell_Corner()
+// {
+//     if( e.offsetX <= Math.floor( CELL_WIDTH_PX / 2 ) )
+//         x = parentCell.offsetLeft;
+//     else
+//     {
+//         let cellId = parseInt(parentCell.id);
+
+//         let rightCell = document.getElementById(Pad_Start_Int(cellId+1));
+//         x = rightCell.offsetLeft;
+//     }
+
+//     let y = 0;
+//     if( e.offsetY <= Math.floor( CELL_WIDTH_PX / 2 ) )
+//         y = parentCell.offsetTop;
+//     else
+//     {
+//         let cellId = parseInt(parentCell.id);
+//         let cellIdBelow = Pad_Start_Int(cellId+CELLS_PER_ROW);
+
+//         // TODO: what if cell is at bottom row?
+//         let belowCell = document.getElementById(cellIdBelow);
+//         y = belowCell.offsetTop;
+//     }
+//     return [x, y];
+// }
+
 function Add_EventHandlers_To_Canvas_Div()
 {
+
+    function Update_Cursor_Coordinates_On_Screen(e)
+    {
+        const coords = Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e);
+        let cursorX = coords[0];
+        let cursorY = coords[1];
+
+        let cellX = Pad_Start_Int(cursorX / CELL_WIDTH_PX, 2);
+        let cellY = Pad_Start_Int(cursorY / CELL_WIDTH_PX, 2);
+
+        const coordsDisplay = document.getElementById("cursor-coords-display");
+        coordsDisplay.innerHTML = "(" + cellX + ", " + cellY + ")";
+    }
+
     const canvasDiv = document.getElementById("canvas-div");
     canvasDiv.addEventListener("mousedown", function() {
         brush_down = true;
     });
+
+    canvasDiv.addEventListener("mousemove", Update_Cursor_Coordinates_On_Screen)
 }
 
 function Add_Ids_To_Palette_Cells()
@@ -419,7 +312,7 @@ function Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
         if(Cell_Coordinates_In_Bounds(cell_x, cell_y+1))
         {
             let next_cell_int = Get_CellInt_From_XY(cell_x, cell_y+1);
-            let next_cell_id = Cell_Int_To_ID(next_cell_int);
+            let next_cell_id = Pad_Start_Int(next_cell_int);
 
             Flood_Fill_Algorithm(next_cell_id,
                                  target_color,
@@ -428,7 +321,7 @@ function Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
         if(Cell_Coordinates_In_Bounds(cell_x, cell_y-1))
         {
             let next_cell_int = Get_CellInt_From_XY(cell_x, cell_y-1);
-            let next_cell_id = Cell_Int_To_ID(next_cell_int);
+            let next_cell_id = Pad_Start_Int(next_cell_int);
 
             Flood_Fill_Algorithm(next_cell_id,
                                  target_color,
@@ -437,7 +330,7 @@ function Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
         if(Cell_Coordinates_In_Bounds(cell_x-1, cell_y))
         {
             let next_cell_int = Get_CellInt_From_XY(cell_x-1, cell_y);
-            let next_cell_id = Cell_Int_To_ID(next_cell_int);
+            let next_cell_id = Pad_Start_Int(next_cell_int);
 
             Flood_Fill_Algorithm(next_cell_id,
                                  target_color,
@@ -446,7 +339,7 @@ function Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
         if(Cell_Coordinates_In_Bounds(cell_x+1, cell_y))
         {
             let next_cell_int = Get_CellInt_From_XY(cell_x+1, cell_y);
-            let next_cell_id = Cell_Int_To_ID(next_cell_int);
+            let next_cell_id = Pad_Start_Int(next_cell_int);
 
             Flood_Fill_Algorithm(next_cell_id,
                                  target_color,
@@ -454,10 +347,6 @@ function Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
         }
     }
 }
-
-
-
-
 
 function Array_Of_Colors_In_Selection()
 {
@@ -475,7 +364,7 @@ function Array_Of_Colors_In_Selection()
     for(let y=0; y<height; y+=1)
     for(let x=0; x<width; x+=1)
     {
-        let id = Cell_Int_To_ID(y * CELLS_PER_ROW + cell0 + x);
+        let id = Pad_Start_Int(y * CELLS_PER_ROW + cell0 + x);
         let cell = document.getElementById(id);
         let color = rgbToHex(cell.style.backgroundColor);
         color_array.push(color);
@@ -483,41 +372,8 @@ function Array_Of_Colors_In_Selection()
     return color_array;
 }
 
-
-
-
-
 function Add_EventHandlers_To_Canvas_Cells()
 {
-    function Get_XY_Of_Cursor_Rounded_To_Neareset_Cell_Corner(e)
-    {
-        let parentCell = e.target.closest("div.canvasCell");
-        let selectionLeft = 0;
-        if( e.offsetX <= Math.floor( CELL_WIDTH_PX / 2 ) )
-            selectionLeft = parentCell.offsetLeft;
-        else
-        {
-            let cellId = parseInt(parentCell.id);
-
-            let rightCell = document.getElementById(Cell_Int_To_ID(cellId+1));
-            selectionLeft = rightCell.offsetLeft;
-        }
-
-        let selectionTop = 0;
-        if( e.offsetY <= Math.floor( CELL_WIDTH_PX / 2 ) )
-            selectionTop = parentCell.offsetTop;
-        else
-        {
-            let cellId = parseInt(parentCell.id);
-            let cellIdBelow = Cell_Int_To_ID(cellId+CELLS_PER_ROW);
-
-            // TODO: what if cell is at bottom row?
-            let belowCell = document.getElementById(cellIdBelow);
-            selectionTop = belowCell.offsetTop;
-        }
-        return [selectionLeft, selectionTop];
-    }
-
     function Create_Selection_Div(e)
     {
         const canvasDiv = document.getElementById("canvas-div");
@@ -525,7 +381,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         let selection = document.createElement("div");
         selection.id = "selection";
 
-        const coords = Get_XY_Of_Cursor_Rounded_To_Neareset_Cell_Corner(e);
+        const coords = Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e);
         let cursorX = coords[0];
         let cursorY = coords[1];
 
@@ -573,7 +429,7 @@ function Add_EventHandlers_To_Canvas_Cells()
                 return;
 
             // update width and height
-            const coords = Get_XY_Of_Cursor_Rounded_To_Neareset_Cell_Corner(e);
+            const coords = Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e);
             let newWidth = coords[0] - Px_To_Int(selection.style.left);
             let newHeight = coords[1] - Px_To_Int(selection.style.top);
 
@@ -734,7 +590,7 @@ function Add_EventHandlers_To_Copy_Button()
         let popupMessage = document.getElementById("popup-message");
         popupMessage.classList.remove("fadeOutAnimation");
         void popupMessage.offsetWidth;
-        popupMessage.innerHTML = "Hexvalues Copied to Clipboard!";
+        popupMessage.innerHTML = "Copied to Clipboard!";
         popupMessage.classList.add("fadeOutAnimation");
     }
 

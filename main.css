@@ -1,7 +1,7 @@
 :root {
   --body-margin: 8px;
 
-  --toolbar-width: 608px;
+  --toolbar-width: 512px;
   --toolbar-height: 32px;
   --palette-width: 80px;
   
@@ -9,8 +9,8 @@
   --palette-cell-height: 20px;
 
   --palette-margin-right: 10px;
-  --canvas-width: 608px;  /* 19*32 = 608 */
-  --canvas-cell-width: 19px;
+  --canvas-width: 512px;  /* 19*32 = 608 */
+  --canvas-cell-width: 16px;
 
   --line-height-toolbar-text: 30px;
 
@@ -56,6 +56,13 @@ body {
 	1.5% {opacity: 1;}
 	50%  {opacity: 1;}
 	100% {opacity: 0;}
+}
+
+#cursor-coords-display {
+	position: fixed;
+	z-index: 100;
+	top: 553px;
+	/*--toolbar-height + --canvas-width + --body-margin= 512px+32px+8px*/
 }
 
 #hidden-text-div {
