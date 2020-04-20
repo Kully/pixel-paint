@@ -30,7 +30,7 @@ let altKeyDown = false;
 // UTILS
 // *****
 
-function rgbToHex(rgb)
+function Rgb_To_Hex(rgb)
 {
     // check if already in hex format
     if(rgb.includes("#"))
@@ -234,7 +234,7 @@ function Update_Active_Color_Label()
 {
     activeColorLabel = document.getElementById("active-color-label");
 
-    active_color = rgbToHex(active_color);
+    active_color = Rgb_To_Hex(active_color);
 
     activeColorLabel.innerHTML = active_color;    // label
     activeColorLabel.style.color = active_color;  // text color
@@ -301,7 +301,7 @@ function Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
 
     let cell_element = document.getElementById(cell_id);
 
-    if(rgbToHex(target_color) === replacement_color)
+    if(Rgb_To_Hex(target_color) === replacement_color)
         return;
     else if(cell_element.style.backgroundColor !== target_color)
         return;
@@ -366,7 +366,7 @@ function Array_Of_Colors_In_Selection()
     {
         let id = Pad_Start_Int(y * CELLS_PER_ROW + cell0 + x);
         let cell = document.getElementById(id);
-        let color = rgbToHex(cell.style.backgroundColor);
+        let color = Rgb_To_Hex(cell.style.backgroundColor);
         color_array.push(color);
     }
     return color_array;
@@ -570,7 +570,7 @@ function Add_EventHandlers_To_Copy_Button()
         let canvasState = Get_Canvas_State();
         let copiedText = "";
         canvasState.forEach(function(item) {
-            copiedText += rgbToHex(item);
+            copiedText += Rgb_To_Hex(item);
             copiedText += ",";
         })
 
