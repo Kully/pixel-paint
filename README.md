@@ -7,7 +7,7 @@ NES Pixel Art for Developers
 compatible format for any popular programming language
 
 ```Javascript
-let colors = [0xff00ff, 0xbababa, ...]          # javascript
+let colors = [0xff00ff, 0xbababa, ...]          // javascript
 ```
 
 ```C++
