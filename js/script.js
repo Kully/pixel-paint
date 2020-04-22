@@ -2,7 +2,7 @@ const CELLS_PER_ROW = 32;
 const CELL_WIDTH_PX = 16;
 const MAX_UNDOS = 35;
 const GRID_OUTLINE_CSS = "1px dashed #aaa";
-const SELECTION_LOCKED_OUTLINE = "1px dashed #ff0000c0";
+const SELECTION_LOCKED_OUTLINE = "1px dashed #ff0000";
 
 const BUTTON_UP_COLOR = "#639a67";
 const BUTTON_DOWN_COLOR = "#dee3e2";
@@ -34,29 +34,39 @@ function Canvas_Cursor_XY(e)
 function Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e)
 {
     let parentCell = e.target.closest("div.canvasCell");
+    let parentCellId = parseInt(parentCell.id);
+    const maxId = Math.pow(CELLS_PER_ROW, 2) - 1;
 
     let x = 0;
     if( e.offsetX <= Math.floor( CELL_WIDTH_PX / 2 ) )
+    {
         x = parentCell.offsetLeft;
+    }
+    else if( Get_X_From_CellInt(Number(parentCellId)) === CELLS_PER_ROW - 1 )
+    {
+        x = parentCell.offsetLeft + CELL_WIDTH_PX;  // right side of canvas
+    }
     else
     {
-        let cellId = parseInt(parentCell.id);
-
-        let rightCell = document.getElementById(Pad_Start_Int(cellId+1));
+        let rightCell = document.getElementById(Pad_Start_Int(parentCellId+1));
         x = rightCell.offsetLeft;
     }
 
     let y = 0;
-    if( e.offsetY <= Math.floor( CELL_WIDTH_PX / 2 ) )
+    if( e.offsetY <= Math.floor( CELL_WIDTH_PX / 2 ))
+    {
         y = parentCell.offsetTop;
+    }
+    else
+    if( parseInt(parentCell.id)+CELLS_PER_ROW > maxId )  // bottom of canvas
+    {
+        y = parentCell.offsetTop + CELL_WIDTH_PX;
+    }
     else
     {
-        let cellId = parseInt(parentCell.id);
-        let cellIdBelow = Pad_Start_Int(cellId+CELLS_PER_ROW);
-
-        // TODO: what if cell is at bottom row?
+        let cellIdBelow = Pad_Start_Int(parentCellId + CELLS_PER_ROW);
         let belowCell = document.getElementById(cellIdBelow);
-        y = belowCell.offsetTop;
+        y = document.getElementById(cellIdBelow).offsetTop;
     }
     return [x, y];
 }
@@ -167,7 +177,7 @@ function Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
     }
 
     // grab X,Y from ID of Cell
-    let cell_int = Cell_ID_To_Int(cell_id);
+    let cell_int = Number(cell_id);
     let cell_x = Get_X_From_CellInt(cell_int);
     let cell_y = Get_Y_From_CellInt(cell_int);
 
@@ -267,11 +277,10 @@ function Add_EventHandlers_To_Canvas_Cells()
         })
 
         canvasDiv.appendChild(selection);
-
         document.getElementById("canvas-div").style.cursor
     }
 
-    function Crosshair_Mousedown(e)
+    function Selection_Mousedown(e)
     {
         let cursor = document.getElementById("canvas-div").style.cursor;
         if(cursor === selectionObj["cursor"])
@@ -291,7 +300,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         }
     }
 
-    function Crosshair_Mousemove(e)
+    function Selection_Mousemove(e)
     {
         let cursor = document.getElementById("canvas-div").style.cursor;
         if((cursor === selectionObj["cursor"]) && (selectionLocked === false))
@@ -321,7 +330,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         }
     }
 
-    function Crosshair_Mouseup(e)
+    function Selection_Mouseup(e)
     {
         let cursor = document.getElementById("canvas-div").style.cursor;
         if(cursor === selectionObj["cursor"])
@@ -360,9 +369,9 @@ function Add_EventHandlers_To_Canvas_Cells()
     const canvasCells = document.querySelectorAll(".canvasCell");
     for(let i=0; i<CELLS_PER_ROW*CELLS_PER_ROW; i += 1)
     {
-        canvasCells[i].addEventListener("mousedown", Crosshair_Mousedown);
-        canvasCells[i].addEventListener("mousemove", Crosshair_Mousemove);
-        canvasCells[i].addEventListener("mouseup", Crosshair_Mouseup);
+        canvasCells[i].addEventListener("mousedown", Selection_Mousedown);
+        canvasCells[i].addEventListener("mousemove", Selection_Mousemove);
+        canvasCells[i].addEventListener("mouseup", Selection_Mouseup);
         canvasCells[i].addEventListener("mousedown", Tool_Action_On_Canvas_Cell);
         
         canvasCells[i].addEventListener("mousemove", function(e) {

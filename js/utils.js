@@ -38,11 +38,6 @@ function Get_CellInt_From_XY(x, y)
     return x + (y * CELLS_PER_ROW);
 }
 
-function Cell_ID_To_Int(id)
-{
-    return Number(id);
-}
-
 function Px_To_Int(str)
 {
     return str.slice(0, str.length-2);
