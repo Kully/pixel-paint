@@ -77,3 +77,5 @@ function _Arrays_Are_Equal(a, b)
     }
     return true;
 }
+
+console.log("canvasStateObject");

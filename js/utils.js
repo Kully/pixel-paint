@@ -60,12 +60,13 @@ function Pad_Start_Int(int, pad=4)
 
 function Add_Pencil_Cursor_To_Document()
 {
+    console.log(' > add pencil cursor to document');
     document.body.style.cursor = pencilObj["cursor"];
 }
 
 function Color_All_Toolbar_Buttons()
 {
-    let buttons = document.querySelectorAll("button:not(#copy-button)");
+    let buttons = document.querySelectorAll(".toolbarButton:not(#copy-button)");
     buttons.forEach(function(b) {
         b.style.backgroundColor = BUTTON_UP_COLOR;
     })
@@ -98,3 +99,5 @@ function Populate_Palette_With_Cells()
         paletteDiv.appendChild(cell);
     }
 }
+
+console.log("utils");

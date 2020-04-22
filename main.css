@@ -1,20 +1,24 @@
 :root {
+  --body-height: 556px;
   --body-margin: 8px;
+  --border-radius: 4px;
+  --button-border-radius: 1px;
 
   --toolbar-width: 512px;
   --toolbar-height: 32px;
-  --palette-width: 80px;
-  
-  --palette-cell-width: 20px;
-  --palette-cell-height: 20px;
-
-  --palette-margin-right: 10px;
-  --canvas-width: 512px;  /* 19*32 = 608 */
-  --canvas-cell-width: 16px;
-
   --line-height-toolbar-text: 30px;
 
-  --border-radius: 4px;
+  --popup-message-background-color: purple; /*#aacfcf*/
+
+  --palette-width: 80px;
+  --palette-cell-width: 20px;
+  --palette-cell-height: 20px;
+  --palette-margin-right: 10px;
+  
+  --tooltiptext-background-color: #ffffc9;
+
+  --canvas-width: 512px;  /* 19*32 = 608 */
+  --canvas-cell-width: 16px;
 }
 
 .no-select {
@@ -28,10 +32,12 @@
 
 body {
 	position: relative;
-	background-color: #ccc;
+	background-color: #d9bf77;
 	font-family: 'Open Sans', sans-serif;
+	color: #000035;
 	pointer-events: fill;
 	margin: var(--body-margin);
+	height: var(--body-height);
 }
 
 #popup-message {
@@ -40,8 +46,11 @@ body {
 	line-height: var(--line-height-toolbar-text);
 	margin-right: 10px;
 	height: var(--toolbar-height);
+	border: 1px solid black;
 	border-radius: var(--border-radius);
-	color: #ffffc9;
+	background-color: var(--tooltiptext-background-color);
+	padding-left: 4px;
+	padding-right: 4px;
 }
 
 .fadeOutAnimation {
@@ -61,16 +70,15 @@ body {
 #cursor-coords-display {
 	position: fixed;
 	z-index: 100;
-	top: 553px;
-	/*--toolbar-height + --canvas-width + --body-margin= 512px+32px+8px*/
+	top: 553px;  /* toolbar-height + canvas-width + body-margin */
 }
 
 #hidden-text-div {
 	position: absolute;
+	left: 0;
+	top: 0;
 	width: 0;
 	height: 0;
-	top: 0;
-	left: 0;
 	background-color: red;
 }
 
@@ -81,41 +89,35 @@ body {
 	font-size: 14px;
 	margin: auto;
 	color: black;
-	background-color: #ffffc9;
-	border-radius: var(--border-radius);
+	background-color: var(--tooltiptext-background-color);
+	border-radius: var(--button-border-radius);
 	padding: 2px;
 	top: 48px;
 	box-shadow: 4px 4px 10px #dee;
 }
 
+.toolbarButton {
+	height: 32px;
+	width: 32px;
+	padding: 0;
+	margin: 0;
+	outline: 0;
+	margin-right: 2px;
+	border-radius: 2px;
+	font-family: 'Open Sans', sans-serif;
+	float: left;
+	cursor: not-allowed;
+}
 .toolbarButton:hover .tooltipText {
 	visibility: visible;
 }
 
-.toolbarButton {
-	height: 33px;
-	width: 33px;
-	padding: 0;
-	margin: 0;
-	font-family: 'Open Sans', sans-serif;
-	outline: 0;
-	cursor: not-allowed;
-}
-
 #copy-button {
 	cursor: pointer;
-	/*background-color: #1a73f8;*/
-	border-radius: var(--border-radius);
-	box-shadow: 4px 4px 10px #dee;
+	background-color: #639a67;
 }
-
 #copy-button:hover {
-	animation: boxShadowDarkens 0.05s forwards;
-}
-
-@keyframes boxShadowDarkens {
-	from {box-shadow: 4px 4px 10px #dee;}
-	to {box-shadow: 4px 4px 10px #aaa;}
+	background-color: #dee3e2;
 }
 
 #toolbar {
@@ -126,40 +128,43 @@ body {
 	cursor: default;
 }
 
-/* undo and redo */
-.undoImg {
-	background-image: url(img/undo.png);
-}
-.redoImg {
-	background-image: url(img/redo.png);
-}
-
 /* for toolbar icons */
 .pencilImg {
-	background-image: url(img/pencil2.png);
+	background-image: url(img/pencil.png);
+	background-position: center;
+	background-repeat: no-repeat;
 }
 .selectionImg {
-	background-image: url(img/crosshair2.png);
+	background-image: url(img/crosshair.png);
+	background-position: center;
+	background-repeat: no-repeat;
 }
 .fillImg {
-	background-image: url(img/fill2.png);
+	background-image: url(img/fill.png);
+	background-position: center;
+	background-repeat: no-repeat;
 }
 .eraserImg {
-	background-image: url(img/eraser2.png);
+	background-image: url(img/eraser.png);
+	background-position: center;
+	background-repeat: no-repeat;
 }
 .colorpickerImg {
-	background-image: url(img/colorpicker2.png);
+	background-image: url(img/colorpicker.png);
+	background-position: center;
+	background-repeat: no-repeat;
 }
 
 /* other toolbar buttons */
 .gridImg {
 	background-image: url(img/grid.png);
+	background-position: center;
+	background-repeat: no-repeat;
 }
-.saveImg {
-	background-image: url(img/save2.png);
-}
-.resetImg {
-	background-image: url(img/reset2.png);
+.copyImg {
+	background-image: url(img/clipboard.png);
+	background-position: center;
+	background-repeat: no-repeat;
 }
 
 #add-color-button {
@@ -195,7 +200,6 @@ body {
 	line-height: var(--line-height-toolbar-text);
 	padding-top: auto;
 	margin-right: var(--palette-margin-right);
-	height: var(--toolbar-height);
 }
 
 #palette-preview {
@@ -220,7 +224,6 @@ body {
 #palette-div {
 	position: relative;
 	width: var(--palette-width);
-	height: 640px;
 	float: left;
 	cursor: default;
 }

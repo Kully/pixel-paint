@@ -1,13 +1,11 @@
-console.log("https://github.com/Kully/pixel-paint/issues/1");
-
 const CELLS_PER_ROW = 32;
 const CELL_WIDTH_PX = 16;
 const MAX_UNDOS = 35;
 const GRID_OUTLINE_CSS = "1px dashed #aaa";
 const SELECTION_LOCKED_OUTLINE = "1px dashed #ff0000c0";
-const BUTTON_UP_COLOR = "#dedede";
-const BUTTON_UP_RGB = "rgb(222, 222, 222)";
-const BUTTON_DOWN_COLOR = "#777";
+
+const BUTTON_UP_COLOR = "#639a67";
+const BUTTON_DOWN_COLOR = "#dee3e2";
 const INIT_COLOR = "#fcfcfc";
 
 
@@ -24,6 +22,14 @@ let active_tool = "";
 let selectionLocked = false;
 let altKeyDown = false;
 
+
+function Canvas_Cursor_XY(e)
+{
+    let parentCell = e.target.closest("div.canvasCell");
+    let x = parentCell.offsetLeft;
+    let y = parentCell.offsetTop;
+    return [x, y];
+}
 
 function Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e)
 {
@@ -55,44 +61,19 @@ function Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e)
     return [x, y];
 }
 
-// function Round_XY_Of_Cursor_To_Neareset_Cell_Corner()
-// {
-//     if( e.offsetX <= Math.floor( CELL_WIDTH_PX / 2 ) )
-//         x = parentCell.offsetLeft;
-//     else
-//     {
-//         let cellId = parseInt(parentCell.id);
-
-//         let rightCell = document.getElementById(Pad_Start_Int(cellId+1));
-//         x = rightCell.offsetLeft;
-//     }
-
-//     let y = 0;
-//     if( e.offsetY <= Math.floor( CELL_WIDTH_PX / 2 ) )
-//         y = parentCell.offsetTop;
-//     else
-//     {
-//         let cellId = parseInt(parentCell.id);
-//         let cellIdBelow = Pad_Start_Int(cellId+CELLS_PER_ROW);
-
-//         // TODO: what if cell is at bottom row?
-//         let belowCell = document.getElementById(cellIdBelow);
-//         y = belowCell.offsetTop;
-//     }
-//     return [x, y];
-// }
-
 function Add_EventHandlers_To_Canvas_Div()
 {
-
     function Update_Cursor_Coordinates_On_Screen(e)
     {
-        const coords = Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e);
+        const coords = Canvas_Cursor_XY(e);
         let cursorX = coords[0];
         let cursorY = coords[1];
 
-        let cellX = Pad_Start_Int(cursorX / CELL_WIDTH_PX, 2);
-        let cellY = Pad_Start_Int(cursorY / CELL_WIDTH_PX, 2);
+        let cellX = cursorX / CELL_WIDTH_PX;
+        let cellY = cursorY / CELL_WIDTH_PX;
+
+        cellX = Pad_Start_Int(cellX, 2);
+        cellY = Pad_Start_Int(cellY, 2);
 
         const coordsDisplay = document.getElementById("cursor-coords-display");
         coordsDisplay.innerHTML = "(" + cellX + ", " + cellY + ")";
@@ -551,7 +532,8 @@ function Activate_Tool(object)
     let button = document.getElementById(object["button-id"]);
     let bkgdColor = button.style.backgroundColor;
 
-    if(bkgdColor === BUTTON_UP_RGB)  // check if tool is active already
+    // check if tool is active already
+    if(Rgb_To_Hex(bkgdColor) === BUTTON_UP_COLOR)
     {
         // set cursor
         document.getElementById("canvas-div").style.cursor = object["cursor"];
@@ -668,6 +650,7 @@ Set_Palette_Preview_Color();
 Add_Ids_To_Palette_Cells();
 Activate_Tool(pencilObj);
 
+
 Add_EventHandlers_To_Canvas_Cells();
 Add_EventHandlers_To_Canvas_Div();
 Add_EventHandlers_To_Document();
@@ -676,3 +659,6 @@ Add_EventHandlers_To_Grid_Button();
 Add_EventHandlers_To_Copy_Button();
 
 let state_array = new Canvas_State_Object(MAX_UNDOS);
+
+console.log("script");
+console.log("https://github.com/Kully/pixel-paint/issues/1");

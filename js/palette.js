@@ -69,3 +69,5 @@ let palette_color_array = [
     "#000001",
     "#000000",
 ];
+
+console.log("palette");

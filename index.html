@@ -7,36 +7,37 @@
 	</head>
 
 	<body>
+
 		<!-- TOOLBAR -->
 		<div class="no-select" id="toolbar">
 			<!-- float left -->
-			<button disabled="true" class="pencilImg toolbarButton" id="pencil-button">
+			<div class="pencilImg toolbarButton" id="pencil-button">
 				<span class="tooltipText">Pencil <b>(N)</b></span>
-			</button>
-			
-			<button disabled="true" class="fillImg toolbarButton" id="fill-button">
+			</div>
+
+			<div class="fillImg toolbarButton" id="fill-button">
 				<span class="tooltipText">Flood Fill <b>(F)</b></span>
-			</button>
+			</div>
 			
-			<button disabled="true" class="eraserImg toolbarButton" id="eraser-button">
+			<div class="eraserImg toolbarButton" id="eraser-button">
 				<span class="tooltipText">Eraser <b>(E)</b></span>
-			</button>
+			</div>
 
-			<button disabled="true" class="selectionImg toolbarButton" id="selection-button">
+			<div class="selectionImg toolbarButton" id="selection-button">
 				<span class="tooltipText">Selection <b>(S)</b></span>
-			</button>
+			</div>
 
-			<button disabled="true" class="colorpickerImg toolbarButton" id="colorpicker-button">
+			<div class="colorpickerImg toolbarButton" id="colorpicker-button">
 				<span class="tooltipText">Colorpicker <b>(I)</b></span>
-			</button>
+			</div>
 
-			<button disabled="true" class="gridImg toolbarButton" id="toggle-grid-button">
+			<div class="gridImg toolbarButton" id="toggle-grid-button">
 				<span class="tooltipText">Grid <b>(G)</b></span>
-			</button>
-			
-			<button class="saveImg toolbarButton" id="copy-button">
+			</div>
+
+			<div class="copyImg toolbarButton" id="copy-button">
 				<span class="tooltipText">Copy to Clipboard!</span>
-			</button>
+			</div>
 
 			<div id="palette-preview"></div>
 
@@ -46,13 +47,10 @@
 			<div id="popup-message" class="fadeOutAnimation">Only hotkeys work</div>
 		</div>
 
-		<!-- CANVAS -->
 		<div id="canvas-div"></div>
 
-		<!-- PALETTE -->
 		<div id="palette-div"></div>
 
-		<!-- COORDINATES -->
 		<div id="cursor-coords-display"></div>
 
 	</body>
