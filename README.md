@@ -1,6 +1,18 @@
 # pixel paint
 
-a simple paint engine with NES colors
+NES Pixel Art for Developers
+
+#### You can get an array of colors
+
+compatible format for any popular programming language
+
+```C
+int colors[1024] = [0xff00ff, 0xbababa, ...];
+```
+
+```Pyton
+colors = [0xff00ff, 0xbababa, ...]
+```
 
 ## specs
 - [x] fixed resolution
