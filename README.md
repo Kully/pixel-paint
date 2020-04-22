@@ -7,11 +7,11 @@ NES Pixel Art for Developers
 compatible format for any popular programming language
 
 ```C
-int colors[1024] = [0xff00ff, 0xbababa, ...];
+int colors[1024] = [0xff00ff, 0xbababa, ...];  // C
 ```
 
 ```Pyton
-colors = [0xff00ff, 0xbababa, ...]
+colors = [0xff00ff, 0xbababa, ...]  # Python
 ```
 
 ## specs
