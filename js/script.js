@@ -3,18 +3,14 @@ const CELL_WIDTH_PX = 16;
 const MAX_UNDOS = 35;
 const GRID_OUTLINE_CSS = "1px dashed #aaa";
 const SELECTION_LOCKED_OUTLINE = "1px dashed #ff0000";
-
 const BUTTON_UP_COLOR = "#639a67";
 const BUTTON_DOWN_COLOR = "#dee3e2";
 const INIT_COLOR = "#fcfcfc";
 
-
-// layout
 let bodyMargin = 8;
 let toolbarHeight = 32;
 let canvasDivY = bodyMargin + toolbarHeight + 2;  // 2 for correction?
 
-// misc
 let last_active_color = "";
 let active_color = "#000000";
 let brush_down = false;
@@ -658,7 +654,6 @@ Populate_Palette_With_Cells();
 Set_Palette_Preview_Color();
 Add_Ids_To_Palette_Cells();
 Activate_Tool(pencilObj);
-
 
 Add_EventHandlers_To_Canvas_Cells();
 Add_EventHandlers_To_Canvas_Div();
