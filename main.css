@@ -7,7 +7,6 @@
   --toolbar-width: 512px;
   --toolbar-height: 32px;
   --line-height-toolbar-text: 30px;
-
   --popup-message-background-color: purple; /*#aacfcf*/
 
   --palette-width: 80px;
@@ -19,6 +18,13 @@
 
   --canvas-width: 512px;  /* 19*32 = 608 */
   --canvas-cell-width: 16px;
+
+  /* COLORS */
+  --body-background-color: #161619;
+  --blanket-background-color: #2a2a2a;
+  --toolbar-background-color: #777;  /*grey*/
+
+  --shadow: 2px 2px 8px #224;
 }
 
 .no-select {
@@ -32,25 +38,39 @@
 
 body {
 	position: relative;
-	background-color: #d9bf77;
-	font-family: 'Open Sans', sans-serif;
-	color: #000035;
-	pointer-events: fill;
-	margin: var(--body-margin);
+	transform: translate(-50%, 0);
+	left: 50%;
+	color: #efefef;
+	background-color: var(--body-background-color);
+	width: fit-content;
 	height: var(--body-height);
+	margin: var(--body-margin);
+	font-family: 'Open Sans', sans-serif;
+	font-weight: 100;
+	pointer-events: fill;
+}
+
+#blanket-around-body {
+	position: relative;
+	background-color: var(--blanket-background-color);
+	width: 620px;
+	height: 574px;
 }
 
 #popup-message {
 	position: relative;
 	float: right;
-	line-height: var(--line-height-toolbar-text);
 	margin-right: 10px;
-	height: var(--toolbar-height);
+	color: #000010;
+	top: 1px;
+	font-size: 14px;
 	border: 1px solid black;
 	border-radius: var(--border-radius);
 	background-color: var(--tooltiptext-background-color);
 	padding-left: 4px;
 	padding-right: 4px;
+	padding-top: 4px;
+	padding-bottom: 4px;
 }
 
 .fadeOutAnimation {
@@ -70,7 +90,7 @@ body {
 #cursor-coords-display {
 	position: fixed;
 	z-index: 100;
-	top: 553px;  /* toolbar-height + canvas-width + body-margin */
+	top: 548px;  /* toolbar-height + canvas-width + body-margin */
 }
 
 #hidden-text-div {
@@ -114,7 +134,6 @@ body {
 
 #copy-button {
 	cursor: pointer;
-	background-color: #639a67;
 }
 #copy-button:hover {
 	background-color: #dee3e2;
@@ -126,6 +145,9 @@ body {
 	height: var(--toolbar-height);
 	margin-bottom: 4px;
 	cursor: default;
+	border: 1px solid white;
+	border-radius: var(--border-radius);
+	background-color: var(--toolbar-background-color);
 }
 
 /* for toolbar icons */
@@ -188,29 +210,35 @@ body {
 }
 
 #active-color-preview {
-	height: var(--toolbar-height);
-	width: var(--toolbar-height);
+	width: 24px;  /* var(--toolbar-height) */
+	height: 24px;
+	transform: translate(0, 4px);  /* center along y-axis */
 	border-radius: var(--border-radius);
 	float: right;
+	margin-right: var(--border-radius);
+	box-shadow: var(--shadow);
 }
 
 #active-color-label {
 	position: relative;
 	float: right;
-	line-height: var(--line-height-toolbar-text);
 	padding-top: auto;
+	line-height: var(--line-height-toolbar-text);
 	margin-right: var(--palette-margin-right);
+	font-family: Courier;
+	text-shadow: var(--shadow);
 }
 
 #palette-preview {
 	position: absolute;
 	width: var(--palette-width);
 	height: var(--toolbar-height);
-	top: 0px;
+	top: -1px;
 	border: 1px solid black;
 	left: var(--toolbar-width);
 	border-radius: var(--border-radius);
 	margin-left: var(--palette-margin-right);
+	transform: translate(-2px, 0);
 }
 
 #canvas-div {

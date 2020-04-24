@@ -1,6 +1,6 @@
 # pixel paint
 
-NES Pixel Art for Developers
+A simple Pixel Art for Developers
 
 #### You can get an array of colors
 

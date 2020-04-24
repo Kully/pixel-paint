@@ -23,9 +23,33 @@ let pencilObj = {
     "hotkey": "KeyN",
     "cursor": 'url("img/pencil.png") -16 28, auto',
 }
-let gridObj = {
-    "KeyG_Counter": 0,
-    "hotkey": "KeyG",
+
+const Tools = {
+    "selection": {
+        "button-id": "selection-button",
+        "hotkey": "KeyS",
+        "cursor": "crosshair",
+    },
+    "fill": {
+        "button-id": "fill-button",
+        "hotkey": "KeyF",
+        "cursor": 'url("img/fill.png") 28 16, auto',
+    },
+    "eraser": {
+        "button-id": "eraser-button",
+        "hotkey": "KeyE",
+        "cursor": 'url("img/eraser.png") 10 7, auto',
+    },
+    "coloerpicker": {
+        "button-id": "colorpicker-button",
+        "hotkey": "KeyI",
+        "cursor": 'url("img/colorpicker.png") -32 32, auto',
+    },
+    "pencil": {
+        "button-id": "pencil-button",
+        "hotkey": "KeyN",
+        "cursor": 'url("img/pencil.png") -16 28, auto',
+    },
 }
 
-console.log("selectionObject");
+console.log("selection objects");

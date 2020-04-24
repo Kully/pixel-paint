@@ -3,21 +3,36 @@ const CELL_WIDTH_PX = 16;
 const MAX_UNDOS = 35;
 const GRID_OUTLINE_CSS = "1px dashed #aaa";
 const SELECTION_LOCKED_OUTLINE = "1px dashed #ff0000";
-const BUTTON_UP_COLOR = "#639a67";
-const BUTTON_DOWN_COLOR = "#dee3e2";
-const INIT_COLOR = "#fcfcfc";
+const BUTTON_UP_COLOR = "#a0a0a0";
+const BUTTON_DOWN_COLOR = "#f0f0f0";
+const CANVAS_INIT_COLOR = palette_color_array[0];
 
 let bodyMargin = 8;
 let toolbarHeight = 32;
-let canvasDivY = bodyMargin + toolbarHeight + 2;  // 2 for correction?
+let canvasDivY = bodyMargin + toolbarHeight + 2;  // justify this 2
 
 let last_active_color = "";
-let active_color = "#000000";
+let active_color = palette_color_array[2];
 let brush_down = false;
 let active_tool = "";
-let selectionLocked = false;
+let selectionLocked = false;                      // rename selectionLocked
 let altKeyDown = false;
 
+
+const State = {
+    "activeTool": "pencil-button",
+    "grid": {
+        "KeyG_Counter": 0,
+        "hotkey": "KeyG",
+    }
+    // "ptrToCursor": "pencil",
+    // "selection": {
+    //     "inDOM": false,
+    //     "cursorInsideDiv": false,
+    //     "isResizing": false,
+    //     "isMoving": false, 
+    // }
+}
 
 function Canvas_Cursor_XY(e)
 {
@@ -144,7 +159,7 @@ function Reset_Color_Of_Canvas_Cells()
     let canvasCells = document.querySelectorAll(".canvasCell");
     for(let i=0; i<CELLS_PER_ROW*CELLS_PER_ROW; i += 1)
     {
-        canvasCells[i].style.backgroundColor = INIT_COLOR;
+        canvasCells[i].style.backgroundColor = CANVAS_INIT_COLOR;
     }
 }
 
@@ -252,6 +267,7 @@ function Array_Of_Colors_In_Selection()
     return color_array;
 }
 
+
 function Add_EventHandlers_To_Canvas_Cells()
 {
     function Create_Selection_Div(e)
@@ -261,19 +277,11 @@ function Add_EventHandlers_To_Canvas_Cells()
         let selection = document.createElement("div");
         selection.id = "selection";
 
-        const coords = Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e);
-        let cursorX = coords[0];
-        let cursorY = coords[1];
-
-        selection.style.left = cursorX + "px";
-        selection.style.top = cursorY + "px";
-
-        selection.addEventListener("move", function() {
-            console.log("moving over selection");
-        })
+        const cursorXY = Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e);
+        selection.style.left = cursorXY[0] + "px";
+        selection.style.top = cursorXY[1] + "px";
 
         canvasDiv.appendChild(selection);
-        document.getElementById("canvas-div").style.cursor
     }
 
     function Selection_Mousedown(e)
@@ -292,6 +300,7 @@ function Add_EventHandlers_To_Canvas_Cells()
                 Remove_Selection();
                 Unlock_Selection_Div();
                 Create_Selection_Div(e);
+                Add_EventHandlers_To_Selection_Div();
             }
         }
     }
@@ -299,18 +308,19 @@ function Add_EventHandlers_To_Canvas_Cells()
     function Selection_Mousemove(e)
     {
         let cursor = document.getElementById("canvas-div").style.cursor;
+        const selection = document.getElementById("selection");
+
         if((cursor === selectionObj["cursor"]) && (selectionLocked === false))
         {
             const canvasDiv = document.getElementById("canvas-div");
-            const selection = document.getElementById("selection");
             
             if(!selection)
                 return;
 
             // update width and height
-            const coords = Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e);
-            let newWidth = coords[0] - Px_To_Int(selection.style.left);
-            let newHeight = coords[1] - Px_To_Int(selection.style.top);
+            const cursorXY = Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e);
+            let newWidth = cursorXY[0] - Px_To_Int(selection.style.left);
+            let newHeight = cursorXY[1] - Px_To_Int(selection.style.top);
 
             // sanatize width and height
             newWidth = Math.ceil(newWidth);
@@ -324,6 +334,36 @@ function Add_EventHandlers_To_Canvas_Cells()
 
             return;
         }
+        else
+        if((cursor === selectionObj["cursor"]) && (selectionLocked === true))
+        {
+            let cursorXY = Canvas_Cursor_XY(e);
+            function Boolean_CursorXY_In_Selection(cursorXY, selection)
+            {
+                let selectionLeft = Px_To_Int(selection.style.left);
+                let selectionTop = Px_To_Int(selection.style.top);
+                let selectionWidth = Px_To_Int(selection.style.width);
+                let selectionHeight = Px_To_Int(selection.style.height);
+
+                if( (cursorXY[0] >= selectionLeft) &&
+                    (cursorXY[0] <= selectionLeft + selectionWidth) &&
+                    (cursorXY[1] >= selectionTop) &&
+                    (cursorXY[1] <= selectionTop + selectionHeight) )
+                    return 1;
+                return 0;
+            }
+
+            if( Boolean_CursorXY_In_Selection(cursorXY, selection) )
+            {
+                // Do_Something_When_Mouse_Enters_Locked_Selection();
+                selection.style.backgroundColor = "green"; 
+            }
+            else
+            {
+                // Do_Something_When_Mouse_Leaves_Locked_Selection();
+                selection.style.backgroundColor = "blue";
+            }
+        }
     }
 
     function Selection_Mouseup(e)
@@ -331,7 +371,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         let cursor = document.getElementById("canvas-div").style.cursor;
         if(cursor === selectionObj["cursor"])
         {
-            Lock_Selection_Div();
+            Selection_Locked_To_Grid();
         }
     }
 
@@ -340,7 +380,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         let cursor = document.getElementById("canvas-div").style.cursor;
         if(cursor === eraserObj["cursor"])
         {
-            e.target.style.backgroundColor = INIT_COLOR;
+            e.target.style.backgroundColor = CANVAS_INIT_COLOR;
         }
         else if(cursor === colorpickerObj["cursor"])
         {
@@ -374,7 +414,7 @@ function Add_EventHandlers_To_Canvas_Cells()
             if(brush_down)
                 Tool_Action_On_Canvas_Cell(e)
         });
-        
+
         canvasCells[i].addEventListener("mouseup", function(e) {
             let cursor = document.getElementById("canvas-div").style.cursor;
             if(cursor === fillObj["cursor"])
@@ -396,13 +436,11 @@ function Add_EventHandlers_To_Canvas_Cells()
     }
 }
 
-function Lock_Selection_Div()
+function Selection_Locked_To_Grid()
 {
     selectionLocked = true;
 
-    // make selection grabbable
     let selection = document.getElementById("selection");
-
     selection.style.outline = SELECTION_LOCKED_OUTLINE;
 }
 
@@ -488,13 +526,26 @@ function Add_EventHandlers_To_Grid_Button()
 
 function Add_EventHandlers_To_Selection_Div()
 {
+    // console.log("add eventHandler");
+
+    // let selection = document.getElementById("selection");
+    // selection.addEventListener("move", function() {
+    //     console.log("moving over selection");
+    // })
+
+    // selection.addEventListener("mouseover", function(e) {
+    //     if(altKeyDown)
+    //     {
+    //         console.log("mouse over selection...and AltDown");
+    //         console.log(e.target);
+    //     }
+    // })
+}
+
+function Remove_EventListeners_From_Selection()
+{
     let selection = document.getElementById("selection");
-    selection.addEventListener("mouseover", function(e) {
-        if(altKeyDown)
-        {
-            // selection.style.cursor = "move";
-        }
-    })
+    // not finished -> do we need this?
 }
 
 function Get_Canvas_State()
@@ -581,10 +632,12 @@ function Add_EventHandlers_To_Document()
         if(e.code === "AltLeft" || e.code === "AltRight")
         {
             altKeyDown = true;
+            console.log("altkey is down");
         }
         if(e.code === "Escape")
         {
             Remove_Selection();
+            Unlock_Selection_Div();
         }
         if(e.code === "KeyZ")
         {
@@ -621,9 +674,9 @@ function Add_EventHandlers_To_Document()
              Activate_Tool(pencilObj);
         }
 
-        if(e.code === gridObj["hotkey"])
+        if(e.code === State["grid"]["hotkey"])
         {
-            gridObj["KeyG_Counter"] += 1;
+            State["grid"]["KeyG_Counter"] += 1;
         }
     })
 
@@ -631,10 +684,11 @@ function Add_EventHandlers_To_Document()
         if(e.code === "AltLeft" || e.code === "AltRight")
         {
             altKeyDown = false;
+            console.log("altkey is NOT down");
         }
-        if(e.code == gridObj["hotkey"])
+        if(e.code == State["grid"]["hotkey"])
         {
-            gridObj["KeyG_Counter"] = 0;
+            State["grid"]["KeyG_Counter"] = 0;
             Toggle_Grid();
         }
     })
@@ -662,7 +716,7 @@ Add_EventHandlers_To_Palette_Cells();
 Add_EventHandlers_To_Grid_Button();
 Add_EventHandlers_To_Copy_Button();
 
-let state_array = new Canvas_State_Object(MAX_UNDOS);
+let state_array = new Canvas_Arrays_In_Memory(MAX_UNDOS);
 
 console.log("script");
 console.log("https://github.com/Kully/pixel-paint/issues/1");

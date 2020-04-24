@@ -1,24 +1,24 @@
-function Canvas_State_Object(maxSize) {
-    let init_array = new Array(CELLS_PER_ROW * CELLS_PER_ROW).fill(INIT_COLOR);
+function Canvas_Arrays_In_Memory(maxSize) {
+    let init_array = new Array(CELLS_PER_ROW * CELLS_PER_ROW).fill(CANVAS_INIT_COLOR);
     this.state_array = [init_array];    // empty array
     this.ptr = 0;                       // pointer
     this.maxSize = maxSize;             // maximum size
 }
-Canvas_State_Object.prototype.decPtr = function()
+Canvas_Arrays_In_Memory.prototype.decPtr = function()
 {
     if(this.ptr <= 0)
         return;
 
     this.ptr--;
 };
-Canvas_State_Object.prototype.incPtr = function()
+Canvas_Arrays_In_Memory.prototype.incPtr = function()
 {
     if(this.ptr >= this.state_array.length-1)
         return;
 
     this.ptr += 1;
 };
-Canvas_State_Object.prototype.pushToPtr = function(item)
+Canvas_Arrays_In_Memory.prototype.pushToPtr = function(item)
 {
     if(_Can_Push(item, this.state_array, this.ptr))
     {
@@ -31,7 +31,7 @@ Canvas_State_Object.prototype.pushToPtr = function(item)
 
     this._manageSize();
 }
-Canvas_State_Object.prototype._manageSize = function(item)
+Canvas_Arrays_In_Memory.prototype._manageSize = function(item)
 {
     if(this.state_array.length > this.maxSize)
     {
@@ -39,11 +39,11 @@ Canvas_State_Object.prototype._manageSize = function(item)
         this.ptr--;
     }
 }
-Canvas_State_Object.prototype.ptrToEndOfStateArray = function(item)
+Canvas_Arrays_In_Memory.prototype.ptrToEndOfStateArray = function(item)
 {
     this.ptr = this.state_array.length - 1;
 }
-Canvas_State_Object.prototype.print = function()
+Canvas_Arrays_In_Memory.prototype.print = function()
 {
     console.log(this);
 }

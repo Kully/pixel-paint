@@ -40,7 +40,8 @@ function Get_CellInt_From_XY(x, y)
 
 function Px_To_Int(str)
 {
-    return str.slice(0, str.length-2);
+    // does parseInt do anything wrong?
+    return parseInt(str.slice(0, str.length-2));
 }
 
 function Int_To_Px(int)
@@ -61,7 +62,7 @@ function Add_Pencil_Cursor_To_Document()
 
 function Color_All_Toolbar_Buttons()
 {
-    let buttons = document.querySelectorAll(".toolbarButton:not(#copy-button)");
+    let buttons = document.querySelectorAll(".toolbarButton");  // :not(#copy-button)
     buttons.forEach(function(b) {
         b.style.backgroundColor = BUTTON_UP_COLOR;
     })
@@ -76,7 +77,7 @@ function Populate_Canvas_With_Cells()
         div.className = "canvasCell";
         div.classList.add("no-select");
         div.id = Pad_Start_Int(i);
-        div.style.backgroundColor = INIT_COLOR;
+        div.style.backgroundColor = CANVAS_INIT_COLOR;
 
         canvasDiv.appendChild(div);
     }

@@ -7,53 +7,54 @@
 	</head>
 
 	<body>
+		<div id="blanket-around-body">
+			<!-- TOOLBAR -->
+			<div id="toolbar">
+				<!-- float left -->
+				<div class="no-select pencilImg toolbarButton" id="pencil-button">
+					<span class="tooltipText">Pencil <b>(N)</b></span>
+				</div>
 
-		<!-- TOOLBAR -->
-		<div class="no-select" id="toolbar">
-			<!-- float left -->
-			<div class="pencilImg toolbarButton" id="pencil-button">
-				<span class="tooltipText">Pencil <b>(N)</b></span>
+				<div class="no-select fillImg toolbarButton" id="fill-button">
+					<span class="tooltipText">Flood Fill <b>(F)</b></span>
+				</div>
+				
+				<div class="no-select eraserImg toolbarButton" id="eraser-button">
+					<span class="tooltipText">Eraser <b>(E)</b></span>
+				</div>
+
+				<div class="no-select selectionImg toolbarButton" id="selection-button">
+					<span class="tooltipText">Selection <b>(S)</b></span>
+				</div>
+
+				<div class="no-select colorpickerImg toolbarButton" id="colorpicker-button">
+					<span class="tooltipText">Colorpicker <b>(I)</b></span>
+				</div>
+
+				<div class="no-select gridImg toolbarButton" id="toggle-grid-button">
+					<span class="tooltipText">Grid <b>(G)</b></span>
+				</div>
+
+				<div class="no-select copyImg toolbarButton" id="copy-button">
+					<span class="tooltipText">Copy to Clipboard!</span>
+				</div>
+
+				<div id="palette-preview"></div>
+
+				<!-- float right -->
+				<div id="active-color-preview"></div>
+				<label id="active-color-label"></label>
+				<div id="popup-message" class="fadeOutAnimation">Only use hotkeys</div>
 			</div>
 
-			<div class="fillImg toolbarButton" id="fill-button">
-				<span class="tooltipText">Flood Fill <b>(F)</b></span>
-			</div>
-			
-			<div class="eraserImg toolbarButton" id="eraser-button">
-				<span class="tooltipText">Eraser <b>(E)</b></span>
-			</div>
+			<div id="canvas-div"></div>
 
-			<div class="selectionImg toolbarButton" id="selection-button">
-				<span class="tooltipText">Selection <b>(S)</b></span>
-			</div>
+			<div id="palette-div"></div>
 
-			<div class="colorpickerImg toolbarButton" id="colorpicker-button">
-				<span class="tooltipText">Colorpicker <b>(I)</b></span>
-			</div>
-
-			<div class="gridImg toolbarButton" id="toggle-grid-button">
-				<span class="tooltipText">Grid <b>(G)</b></span>
-			</div>
-
-			<div class="copyImg toolbarButton" id="copy-button">
-				<span class="tooltipText">Copy to Clipboard!</span>
-			</div>
-
-			<div id="palette-preview"></div>
-
-			<!-- float right -->
-			<div id="active-color-preview"></div>
-			<label id="active-color-label"></label>
-			<div id="popup-message" class="fadeOutAnimation">Only use hotkeys</div>
+			<div id="cursor-coords-display"></div>
 		</div>
-
-		<div id="canvas-div"></div>
-
-		<div id="palette-div"></div>
-
-		<div id="cursor-coords-display"></div>
-
 	</body>
+
 	<script type="text/javascript" src="js/selectionObjects.js"></script>
 	<script type="text/javascript" src="js/palette.js"></script>
 	<script type="text/javascript" src="js/canvasStateObject.js"></script>
