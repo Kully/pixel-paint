@@ -24,10 +24,12 @@ const State = {
     "grid": {
         "KeyG_Counter": 0,
         "hotkey": "KeyG",
-    }
+    },
+    "selection": {
+        "cursorInsideDiv": false,
+    },
     // "ptrToCursor": "pencil",
     // "selection": {
-    //     "inDOM": false,
     //     "cursorInsideDiv": false,
     //     "isResizing": false,
     //     "isMoving": false, 
@@ -287,7 +289,7 @@ function Add_EventHandlers_To_Canvas_Cells()
     function Selection_Mousedown(e)
     {
         let cursor = document.getElementById("canvas-div").style.cursor;
-        if(cursor === selectionObj["cursor"])
+        if(cursor === Tools["selection"]["cursor"])
         {
             if(altKeyDown === true)
             {
@@ -310,7 +312,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         let cursor = document.getElementById("canvas-div").style.cursor;
         const selection = document.getElementById("selection");
 
-        if((cursor === selectionObj["cursor"]) && (selectionLocked === false))
+        if((cursor === Tools["selection"]["cursor"]) && (selectionLocked === false))
         {
             const canvasDiv = document.getElementById("canvas-div");
             
@@ -335,7 +337,7 @@ function Add_EventHandlers_To_Canvas_Cells()
             return;
         }
         else
-        if((cursor === selectionObj["cursor"]) && (selectionLocked === true))
+        if((cursor === Tools["selection"]["cursor"]) && (selectionLocked === true))
         {
             let cursorXY = Canvas_Cursor_XY(e);
             function Boolean_CursorXY_In_Selection(cursorXY, selection)
@@ -369,7 +371,7 @@ function Add_EventHandlers_To_Canvas_Cells()
     function Selection_Mouseup(e)
     {
         let cursor = document.getElementById("canvas-div").style.cursor;
-        if(cursor === selectionObj["cursor"])
+        if(cursor === Tools["selection"]["cursor"])
         {
             Selection_Locked_To_Grid();
         }
@@ -378,25 +380,28 @@ function Add_EventHandlers_To_Canvas_Cells()
     function Tool_Action_On_Canvas_Cell(e)
     {
         let cursor = document.getElementById("canvas-div").style.cursor;
-        if(cursor === eraserObj["cursor"])
+        if(cursor === Tools["eraser"]["cursor"])
         {
             e.target.style.backgroundColor = CANVAS_INIT_COLOR;
         }
-        else if(cursor === colorpickerObj["cursor"])
+        else
+        if(cursor === Tools["colorpicker"]["cursor"])
         {
             active_color = e.target.style.backgroundColor;
             Update_Active_Color_Preview();
             Update_Active_Color_Label();
         }
-        else if(cursor === fillObj["cursor"])
-        {
-            // nothing
-        }
-        else if(cursor === selectionObj["cursor"])
+        else
+        if(cursor === Tools["fill"]["cursor"])
         {
             // nothing
         }
         else
+        if(cursor === Tools["selection"]["cursor"])
+        {
+            // nothing
+        }
+        else if(cursor === Tools["pencil"]["cursor"])
         {
             e.target.style.backgroundColor = active_color;
         }
@@ -409,7 +414,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         canvasCells[i].addEventListener("mousemove", Selection_Mousemove);
         canvasCells[i].addEventListener("mouseup", Selection_Mouseup);
         canvasCells[i].addEventListener("mousedown", Tool_Action_On_Canvas_Cell);
-        
+
         canvasCells[i].addEventListener("mousemove", function(e) {
             if(brush_down)
                 Tool_Action_On_Canvas_Cell(e)
@@ -417,7 +422,7 @@ function Add_EventHandlers_To_Canvas_Cells()
 
         canvasCells[i].addEventListener("mouseup", function(e) {
             let cursor = document.getElementById("canvas-div").style.cursor;
-            if(cursor === fillObj["cursor"])
+            if(cursor === Tools["fill"]["cursor"])
             {
                 let cell_id = e.target.id;
                 let target_color = e.target.style.backgroundColor;
@@ -427,7 +432,7 @@ function Add_EventHandlers_To_Canvas_Cells()
                                      target_color,
                                      replacement_color)
             }
-            else if(cursor === selectionObj["cursor"])
+            else if(cursor === Tools["selection"]["cursor"])
             {
                 // nothing
             }
@@ -560,7 +565,7 @@ function Get_Canvas_State()
 
 function Transfer_Canvas_State_To_Screen(ptr)
 {
-    let saved_canvas = state_array.state_array[ptr];
+    let saved_canvas = array.array[ptr];
     let canvasCells = document.querySelectorAll(".canvasCell");
 
     for(let i=0; i<CELLS_PER_ROW*CELLS_PER_ROW; i += 1)
@@ -570,17 +575,17 @@ function Transfer_Canvas_State_To_Screen(ptr)
 function Undo()
 {
     let canvas_state = Get_Canvas_State();
-    state_array.decPtr();
+    array.decPtr();
 
-    Transfer_Canvas_State_To_Screen(state_array.ptr);
+    Transfer_Canvas_State_To_Screen(array.ptr);
 }
 
 function Redo()
 {
     let canvas_state = Get_Canvas_State();
-    state_array.incPtr();
+    array.incPtr();
 
-    Transfer_Canvas_State_To_Screen(state_array.ptr);
+    Transfer_Canvas_State_To_Screen(array.ptr);
 }
 
 function Activate_Tool(object)
@@ -595,21 +600,15 @@ function Activate_Tool(object)
         document.getElementById("canvas-div").style.cursor = object["cursor"];
         Color_Toolbar_Button_As_Down(button);
 
-        // deactivate all other toolbar buttons
-        const toolbarObjectArray = [
-            selectionObj,
-            fillObj,
-            eraserObj,
-            colorpickerObj,
-            pencilObj,
-        ];
-        toolbarObjectArray.forEach(function(item){
-            if(item["button-id"] !== object["button-id"])
+        // deactivate other toolbar buttons
+        for(label in Tools)
+        {
+            if(Tools[label]["button-id"] !== object["button-id"])
             {
-                let btn = document.getElementById(item["button-id"]);
+                let btn = document.getElementById(Tools[label]["button-id"]);
                 Color_Toolbar_Button_When_Up(btn);
             }
-        })
+        }
     }
 }
 
@@ -623,7 +622,7 @@ function Add_EventHandlers_To_Document()
     function Add_CanvasState_To_CanvasStateObject()
     {
         let canvas_state = Get_Canvas_State();
-        state_array.pushToPtr(canvas_state);
+        array.pushToPtr(canvas_state);
     }
 
     document.addEventListener("mouseup", Add_CanvasState_To_CanvasStateObject);
@@ -648,30 +647,12 @@ function Add_EventHandlers_To_Document()
             Redo();
         }
 
-        // switch tool from toolbar
-        if(e.code === selectionObj["hotkey"])
+        for(label in Tools)
         {
-            Activate_Tool(selectionObj);
-        }
-        else
-        if(e.code === fillObj["hotkey"])
-        {
-             Activate_Tool(fillObj);
-        }
-        else
-        if(e.code === eraserObj["hotkey"])
-        {
-             Activate_Tool(eraserObj);
-        }
-        else
-        if(e.code === colorpickerObj["hotkey"])
-        {
-             Activate_Tool(colorpickerObj);
-        }
-        else
-        if(e.code === pencilObj["hotkey"])
-        {
-             Activate_Tool(pencilObj);
+            if(e.code === Tools[label]["hotkey"])
+            {
+                Activate_Tool(Tools[label]);
+            }
         }
 
         if(e.code === State["grid"]["hotkey"])
@@ -707,7 +688,7 @@ Populate_Canvas_With_Cells();
 Populate_Palette_With_Cells();
 Set_Palette_Preview_Color();
 Add_Ids_To_Palette_Cells();
-Activate_Tool(pencilObj);
+Activate_Tool(Tools["pencil"]);
 
 Add_EventHandlers_To_Canvas_Cells();
 Add_EventHandlers_To_Canvas_Div();
@@ -716,7 +697,7 @@ Add_EventHandlers_To_Palette_Cells();
 Add_EventHandlers_To_Grid_Button();
 Add_EventHandlers_To_Copy_Button();
 
-let state_array = new Canvas_Arrays_In_Memory(MAX_UNDOS);
+let array = new History_States(MAX_UNDOS);
 
 console.log("script");
 console.log("https://github.com/Kully/pixel-paint/issues/1");

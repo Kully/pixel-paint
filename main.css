@@ -113,7 +113,6 @@ body {
 	border-radius: var(--button-border-radius);
 	padding: 2px;
 	top: 48px;
-	box-shadow: 4px 4px 10px #dee;
 }
 
 .toolbarButton {
