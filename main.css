@@ -125,8 +125,12 @@ body {
 	border-radius: 2px;
 	font-family: 'Open Sans', sans-serif;
 	float: left;
-	cursor: not-allowed;
+	cursor: pointer;
 }
+.toolbarButton:hover {
+	outline: 1px solid var(--tooltiptext-background-color);
+}
+
 .toolbarButton:hover .tooltipText {
 	visibility: visible;
 }

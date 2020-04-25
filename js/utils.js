@@ -90,4 +90,17 @@ function Populate_Palette_With_Cells()
     }
 }
 
-console.log("utils");
+function Update_Tooltip_Text()
+{
+    for(label in Tools)
+    {
+        let id = Tools[label]["button-id"];
+        let hotkey = Tools[label]["hotkey"];
+
+        const btn = document.getElementById(id);
+        const tooltip = btn.children[0];
+        tooltip.innerHTML = label + " (" + hotkey[3] + ")";
+    }
+}
+
+console.log("utils.js loaded");

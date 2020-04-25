@@ -7,33 +7,21 @@ const BUTTON_UP_COLOR = "#a0a0a0";
 const BUTTON_DOWN_COLOR = "#f0f0f0";
 const CANVAS_INIT_COLOR = palette_color_array[0];
 
-let bodyMargin = 8;
-let toolbarHeight = 32;
-let canvasDivY = bodyMargin + toolbarHeight + 2;  // justify this 2
-
-let last_active_color = "";
-let active_color = palette_color_array[2];
-let brush_down = false;
-let active_tool = "";
-let selectionLocked = false;                      // rename selectionLocked
-let altKeyDown = false;
-
 
 const State = {
+    "activeColor": palette_color_array[2],
     "activeTool": "pencil-button",
+    "brushDown": false,
     "grid": {
         "KeyG_Counter": 0,
         "hotkey": "KeyG",
     },
     "selection": {
-        "cursorInsideDiv": false,
+        "altKeyDown": false,
+        "selectionLocked": false,  // rename to isResizing
+        "isMoving": false,         // unused
+        "inDOM": false,            // unused
     },
-    // "ptrToCursor": "pencil",
-    // "selection": {
-    //     "cursorInsideDiv": false,
-    //     "isResizing": false,
-    //     "isMoving": false, 
-    // }
 }
 
 function Canvas_Cursor_XY(e)
@@ -104,7 +92,7 @@ function Add_EventHandlers_To_Canvas_Div()
 
     const canvasDiv = document.getElementById("canvas-div");
     canvasDiv.addEventListener("mousedown", function() {
-        brush_down = true;
+        State["brushDown"] = true;
     });
 
     canvasDiv.addEventListener("mousemove", Update_Cursor_Coordinates_On_Screen)
@@ -123,7 +111,7 @@ function Add_Ids_To_Palette_Cells()
 function Update_Active_Color_Preview()
 {
     let activeColorDiv = document.getElementById("active-color-preview");
-    activeColorDiv.style.backgroundColor = active_color;
+    activeColorDiv.style.backgroundColor = State["activeColor"];
     Update_Active_Color_Label();
 }
 
@@ -131,10 +119,10 @@ function Update_Active_Color_Label()
 {
     activeColorLabel = document.getElementById("active-color-label");
 
-    active_color = Rgb_To_Hex(active_color);
+    State["activeColor"] = Rgb_To_Hex(State["activeColor"]);
 
-    activeColorLabel.innerHTML = active_color;    // label
-    activeColorLabel.style.color = active_color;  // text color
+    activeColorLabel.innerHTML = State["activeColor"];    // label
+    activeColorLabel.style.color = State["activeColor"];  // text color
 }
 
 function Add_EventHandlers_To_Palette_Cells()
@@ -145,7 +133,7 @@ function Add_EventHandlers_To_Palette_Cells()
     allPaletteCells.forEach(function(cell){
         // click palette to change color
         cell.addEventListener("click", function(e){
-            active_color = e.target.style.backgroundColor;
+            State["activeColor"] = e.target.style.backgroundColor;
             Update_Active_Color_Preview();
             Update_Active_Color_Label();
         })
@@ -291,7 +279,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         let cursor = document.getElementById("canvas-div").style.cursor;
         if(cursor === Tools["selection"]["cursor"])
         {
-            if(altKeyDown === true)
+            if(State["selection"]["altKeyDown"] === true)
             {
                 console.log("grab selection");
                 let color_array = Array_Of_Colors_In_Selection();
@@ -312,7 +300,8 @@ function Add_EventHandlers_To_Canvas_Cells()
         let cursor = document.getElementById("canvas-div").style.cursor;
         const selection = document.getElementById("selection");
 
-        if((cursor === Tools["selection"]["cursor"]) && (selectionLocked === false))
+        if( (cursor === Tools["selection"]["cursor"]) &&
+            (State["selection"]["selectionLocked"] === false) )
         {
             const canvasDiv = document.getElementById("canvas-div");
             
@@ -337,7 +326,8 @@ function Add_EventHandlers_To_Canvas_Cells()
             return;
         }
         else
-        if((cursor === Tools["selection"]["cursor"]) && (selectionLocked === true))
+        if( (cursor === Tools["selection"]["cursor"]) &&
+            (State["selection"]["selectionLocked"]) )
         {
             let cursorXY = Canvas_Cursor_XY(e);
             function Boolean_CursorXY_In_Selection(cursorXY, selection)
@@ -357,13 +347,11 @@ function Add_EventHandlers_To_Canvas_Cells()
 
             if( Boolean_CursorXY_In_Selection(cursorXY, selection) )
             {
-                // Do_Something_When_Mouse_Enters_Locked_Selection();
-                selection.style.backgroundColor = "green"; 
+                // selection.style.backgroundColor = "green"; 
             }
             else
             {
-                // Do_Something_When_Mouse_Leaves_Locked_Selection();
-                selection.style.backgroundColor = "blue";
+                // selection.style.backgroundColor = "blue";
             }
         }
     }
@@ -387,7 +375,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         else
         if(cursor === Tools["colorpicker"]["cursor"])
         {
-            active_color = e.target.style.backgroundColor;
+            State["activeColor"] = e.target.style.backgroundColor;
             Update_Active_Color_Preview();
             Update_Active_Color_Label();
         }
@@ -403,7 +391,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         }
         else if(cursor === Tools["pencil"]["cursor"])
         {
-            e.target.style.backgroundColor = active_color;
+            e.target.style.backgroundColor = State["activeColor"];
         }
     }
 
@@ -416,7 +404,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         canvasCells[i].addEventListener("mousedown", Tool_Action_On_Canvas_Cell);
 
         canvasCells[i].addEventListener("mousemove", function(e) {
-            if(brush_down)
+            if(State["brushDown"])
                 Tool_Action_On_Canvas_Cell(e)
         });
 
@@ -426,7 +414,7 @@ function Add_EventHandlers_To_Canvas_Cells()
             {
                 let cell_id = e.target.id;
                 let target_color = e.target.style.backgroundColor;
-                let replacement_color = active_color;
+                let replacement_color = State["activeColor"];
 
                 Flood_Fill_Algorithm(cell_id,
                                      target_color,
@@ -443,7 +431,7 @@ function Add_EventHandlers_To_Canvas_Cells()
 
 function Selection_Locked_To_Grid()
 {
-    selectionLocked = true;
+    State["selection"]["selectionLocked"] = true;
 
     let selection = document.getElementById("selection");
     selection.style.outline = SELECTION_LOCKED_OUTLINE;
@@ -451,7 +439,7 @@ function Selection_Locked_To_Grid()
 
 function Unlock_Selection_Div()
 {
-    selectionLocked = false;
+    State["selection"]["selectionLocked"] = false;
 }
 
 function Color_Toolbar_Button_As_Down(elem)
@@ -531,20 +519,7 @@ function Add_EventHandlers_To_Grid_Button()
 
 function Add_EventHandlers_To_Selection_Div()
 {
-    // console.log("add eventHandler");
 
-    // let selection = document.getElementById("selection");
-    // selection.addEventListener("move", function() {
-    //     console.log("moving over selection");
-    // })
-
-    // selection.addEventListener("mouseover", function(e) {
-    //     if(altKeyDown)
-    //     {
-    //         console.log("mouse over selection...and AltDown");
-    //         console.log(e.target);
-    //     }
-    // })
 }
 
 function Remove_EventListeners_From_Selection()
@@ -616,7 +591,7 @@ function Add_EventHandlers_To_Document()
 {
     function Exit_Drawing_Mode()
     {
-        brush_down = false;
+        State["brushDown"] = false;
     }
 
     function Add_CanvasState_To_CanvasStateObject()
@@ -630,7 +605,7 @@ function Add_EventHandlers_To_Document()
     document.addEventListener("keydown", function(e) {
         if(e.code === "AltLeft" || e.code === "AltRight")
         {
-            altKeyDown = true;
+            State["selection"]["altKeyDown"] = true;
             console.log("altkey is down");
         }
         if(e.code === "Escape")
@@ -664,7 +639,7 @@ function Add_EventHandlers_To_Document()
     document.addEventListener("keyup", function(e){
         if(e.code === "AltLeft" || e.code === "AltRight")
         {
-            altKeyDown = false;
+            State["selection"]["altKeyDown"] = false;
             console.log("altkey is NOT down");
         }
         if(e.code == State["grid"]["hotkey"])
@@ -678,7 +653,56 @@ function Add_EventHandlers_To_Document()
 function Set_Palette_Preview_Color()
 {
     palettePreview = document.getElementById("palette-preview");
-    palettePreview.style.backgroundColor = active_color;
+    palettePreview.style.backgroundColor = State["activeColor"];
+}
+
+
+for(label in Tools)
+{
+    let toolButton = document.getElementById(Tools[label]["button-id"]);
+    toolButton.addEventListener("click", Activate_Tool(Tools[label]));
+}
+
+function Add_EventHandlers_To_Toolbar_Buttons()
+{
+    // let toolBtn;
+    // for(l in Tools)
+    // {
+    //     console.log(l);
+    //     console.log(Tools[l]['button-id']);
+    //     console.log("");
+
+    //     let toolBtn;
+    //     toolBtn = document.getElementById(Tools[l]['button-id']);
+    //     toolBtn.addEventListener("click", function(e) {
+    //         Activate_Tool(Tools[l]);
+    //     })
+    // }
+
+    toolBtn = document.getElementById("pencil-button");
+    toolBtn.addEventListener("click", function(e) {
+        Activate_Tool(Tools["pencil"]);
+    })
+
+    toolBtn = document.getElementById("fill-button");
+    toolBtn.addEventListener("click", function(e) {
+        Activate_Tool(Tools["fill"]);
+    })
+
+    toolBtn = document.getElementById("eraser-button");
+    toolBtn.addEventListener("click", function(e) {
+        Activate_Tool(Tools["eraser"]);
+    })
+
+    toolBtn = document.getElementById("selection-button");
+    toolBtn.addEventListener("click", function(e) {
+        Activate_Tool(Tools["selection"]);
+    })
+
+    toolBtn = document.getElementById("colorpicker-button");
+    toolBtn.addEventListener("click", function(e) {
+        Activate_Tool(Tools["colorpicker"]);
+    })
 }
 
 
@@ -688,6 +712,7 @@ Populate_Canvas_With_Cells();
 Populate_Palette_With_Cells();
 Set_Palette_Preview_Color();
 Add_Ids_To_Palette_Cells();
+Update_Tooltip_Text();
 Activate_Tool(Tools["pencil"]);
 
 Add_EventHandlers_To_Canvas_Cells();
@@ -696,6 +721,7 @@ Add_EventHandlers_To_Document();
 Add_EventHandlers_To_Palette_Cells();
 Add_EventHandlers_To_Grid_Button();
 Add_EventHandlers_To_Copy_Button();
+Add_EventHandlers_To_Toolbar_Buttons();
 
 let array = new History_States(MAX_UNDOS);
 
