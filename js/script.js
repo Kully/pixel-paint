@@ -454,7 +454,7 @@ function Color_Toolbar_Button_When_Up(elem)
 
 function Toggle_Grid(e)
 {
-    const gridButton = document.getElementById("toggle-grid-button");
+    const gridButton = document.getElementById("grid-button");
     const canvasCells = document.querySelectorAll(".canvasCell");
 
     // color toggle grid button
@@ -471,6 +471,37 @@ function Toggle_Grid(e)
             cell.style.outline = "";
     })
 
+}
+
+function Add_EventHandlers_To_Toolbar_Buttons()
+{
+    toolBtn = document.getElementById("pencil-button");
+    toolBtn.addEventListener("click", function(e) {
+        Activate_Tool("pencil");
+    })
+
+    toolBtn = document.getElementById("fill-button");
+    toolBtn.addEventListener("click", function(e) {
+        Activate_Tool("fill");
+    })
+
+    toolBtn = document.getElementById("eraser-button");
+    toolBtn.addEventListener("click", function(e) {
+        Activate_Tool("eraser");
+    })
+
+    toolBtn = document.getElementById("selection-button");
+    toolBtn.addEventListener("click", function(e) {
+        Activate_Tool("selection");
+    })
+
+    toolBtn = document.getElementById("colorpicker-button");
+    toolBtn.addEventListener("click", function(e) {
+        Activate_Tool("colorpicker");
+    })
+
+    toolBtn = document.getElementById("grid-button");
+    toolBtn.addEventListener("click", Toggle_Grid);
 }
 
 function Add_EventHandlers_To_Copy_Button()
@@ -508,15 +539,6 @@ function Add_EventHandlers_To_Copy_Button()
     CopyButton.addEventListener("click", Copy_To_Clipboard);
 }
 
-function Add_EventHandlers_To_Grid_Button()
-{
-    const gridButton = document.getElementById("toggle-grid-button");
-
-    gridButton.addEventListener("click", function(e) {
-        const canvasCells = document.querySelectorAll(".canvasCell");
-    });
-}
-
 function Add_EventHandlers_To_Selection_Div()
 {
 
@@ -525,7 +547,6 @@ function Add_EventHandlers_To_Selection_Div()
 function Remove_EventListeners_From_Selection()
 {
     let selection = document.getElementById("selection");
-    // not finished -> do we need this?
 }
 
 function Get_Canvas_State()
@@ -563,27 +584,28 @@ function Redo()
     Transfer_Canvas_State_To_Screen(array.ptr);
 }
 
-function Activate_Tool(object)
+function Activate_Tool(label)
 {
+    let object = Tools[label];
     let button = document.getElementById(object["button-id"]);
-    let bkgdColor = button.style.backgroundColor;
+    let buttonBkgdColor = button.style.backgroundColor;
 
-    // check if tool is active already
-    if(Rgb_To_Hex(bkgdColor) === BUTTON_UP_COLOR)
+    if(State["activeTool"] !== label)
     {
-        // set cursor
         document.getElementById("canvas-div").style.cursor = object["cursor"];
         Color_Toolbar_Button_As_Down(button);
 
-        // deactivate other toolbar buttons
-        for(label in Tools)
+        for(let l in Tools)
         {
-            if(Tools[label]["button-id"] !== object["button-id"])
+            if(Tools[l]["button-id"] !== object["button-id"])
             {
-                let btn = document.getElementById(Tools[label]["button-id"]);
+                let btn = document.getElementById(Tools[l]["button-id"]);
                 Color_Toolbar_Button_When_Up(btn);
             }
         }
+
+        State["activeTool"] = label;
+        console.log(State);
     }
 }
 
@@ -626,7 +648,7 @@ function Add_EventHandlers_To_Document()
         {
             if(e.code === Tools[label]["hotkey"])
             {
-                Activate_Tool(Tools[label]);
+                Activate_Tool(label);
             }
         }
 
@@ -657,55 +679,6 @@ function Set_Palette_Preview_Color()
 }
 
 
-for(label in Tools)
-{
-    let toolButton = document.getElementById(Tools[label]["button-id"]);
-    toolButton.addEventListener("click", Activate_Tool(Tools[label]));
-}
-
-function Add_EventHandlers_To_Toolbar_Buttons()
-{
-    // let toolBtn;
-    // for(l in Tools)
-    // {
-    //     console.log(l);
-    //     console.log(Tools[l]['button-id']);
-    //     console.log("");
-
-    //     let toolBtn;
-    //     toolBtn = document.getElementById(Tools[l]['button-id']);
-    //     toolBtn.addEventListener("click", function(e) {
-    //         Activate_Tool(Tools[l]);
-    //     })
-    // }
-
-    toolBtn = document.getElementById("pencil-button");
-    toolBtn.addEventListener("click", function(e) {
-        Activate_Tool(Tools["pencil"]);
-    })
-
-    toolBtn = document.getElementById("fill-button");
-    toolBtn.addEventListener("click", function(e) {
-        Activate_Tool(Tools["fill"]);
-    })
-
-    toolBtn = document.getElementById("eraser-button");
-    toolBtn.addEventListener("click", function(e) {
-        Activate_Tool(Tools["eraser"]);
-    })
-
-    toolBtn = document.getElementById("selection-button");
-    toolBtn.addEventListener("click", function(e) {
-        Activate_Tool(Tools["selection"]);
-    })
-
-    toolBtn = document.getElementById("colorpicker-button");
-    toolBtn.addEventListener("click", function(e) {
-        Activate_Tool(Tools["colorpicker"]);
-    })
-}
-
-
 Color_All_Toolbar_Buttons();
 Update_Active_Color_Preview();
 Populate_Canvas_With_Cells();
@@ -713,13 +686,12 @@ Populate_Palette_With_Cells();
 Set_Palette_Preview_Color();
 Add_Ids_To_Palette_Cells();
 Update_Tooltip_Text();
-Activate_Tool(Tools["pencil"]);
+Activate_Tool("pencil");
 
 Add_EventHandlers_To_Canvas_Cells();
 Add_EventHandlers_To_Canvas_Div();
 Add_EventHandlers_To_Document();
 Add_EventHandlers_To_Palette_Cells();
-Add_EventHandlers_To_Grid_Button();
 Add_EventHandlers_To_Copy_Button();
 Add_EventHandlers_To_Toolbar_Buttons();
 

@@ -14,15 +14,15 @@ const Tools = {
         "hotkey": "KeyE",
         "cursor": 'url("img/eraser.png") 10 7, auto',
     },
-    "selection": {
-        "button-id": "selection-button",
-        "hotkey": "KeyS",
-        "cursor": "crosshair",
-    },
     "colorpicker": {
         "button-id": "colorpicker-button",
         "hotkey": "KeyV",
         "cursor": 'url("img/colorpicker.png") -32 32, auto',
+    },
+    "selection": {
+        "button-id": "selection-button",
+        "hotkey": "KeyS",
+        "cursor": "crosshair",
     },
 }
 

@@ -19,10 +19,26 @@ colors = [0xff00ff, 0xbababa, ...]              # python
 ```
 
 ## specs
+- [x] vanilla javascript
 - [x] fixed resolution
 - [x] pencil, fill, eraser, selection and colorpicker tools
 - [x] toggle grid on or off
 - [x] copy the 32x32 grid's hex colors to clipboard
 - [x] home-made cursor icons
-- [ ] coordinates of cursor show up in bottom left corner
-- [ ] JSLint 100%
+- [x] coordinates of cursor show up in bottom left corner
+
+
+## hotkeys
+
+| Command       | Hotkey |
+| :-------      | :----- |
+| _pencil_      | P      |
+| _bucket_      | B      |
+| _eraser_      | E      |
+| _selection_   | S      |
+| _colorpicker_ | V      |
+| _grid_        | G      |
+| undo          | Z      |
+| redo          | X      |
+
+
