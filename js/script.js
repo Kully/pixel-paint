@@ -15,6 +15,7 @@ const State = {
     "grid": {
         "KeyG_Counter": 0,
         "hotkey": "KeyG",
+        "isToggled": false,
     },
     "selection": {
         "altKeyDown": false,
@@ -457,20 +458,24 @@ function Toggle_Grid(e)
     const gridButton = document.getElementById("grid-button");
     const canvasCells = document.querySelectorAll(".canvasCell");
 
-    // color toggle grid button
-    if(canvasCells[0].style.outline === "")
-        Color_Toolbar_Button_As_Down(gridButton);
-    else
-        Color_Toolbar_Button_When_Up(gridButton);
-
-    canvasCells.forEach(function(cell)
+    if(State["grid"]["isToggled"] === false)
     {
-        if(cell.style.outline === "")
+        Color_Toolbar_Button_As_Down(gridButton);
+        canvasCells.forEach(function(cell) {
             cell.style.outline = GRID_OUTLINE_CSS;
-        else
+        })
+        State["grid"]["isToggled"] = true;
+    }
+    else
+    {
+        Color_Toolbar_Button_When_Up(gridButton);
+        canvasCells.forEach(function(cell) {
             cell.style.outline = "";
-    })
+        })
+        State["grid"]["isToggled"] = false;
+    }
 
+    console.log(State["grid"]["isToggled"])
 }
 
 function Add_EventHandlers_To_Toolbar_Buttons()

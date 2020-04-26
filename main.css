@@ -109,10 +109,22 @@ body {
 	font-size: 14px;
 	margin: auto;
 	color: black;
+	display: inline-block;
 	background-color: var(--tooltiptext-background-color);
 	border-radius: var(--button-border-radius);
 	padding: 2px;
 	top: 48px;
+}
+
+.tooltipText::after {
+	content: "";
+	position: absolute;
+	bottom: 100%;
+	left: 16px;
+	margin-left: -5px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: transparent transparent var(--tooltiptext-background-color) transparent;
 }
 
 .toolbarButton {
