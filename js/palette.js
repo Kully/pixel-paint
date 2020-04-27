@@ -70,4 +70,4 @@ let palette_color_array = [
     "#000000",
 ];
 
-console.log("palette.js loaded");
+console.log("palette.js");

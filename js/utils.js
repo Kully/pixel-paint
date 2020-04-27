@@ -103,4 +103,14 @@ function Update_Tooltip_Text()
     }
 }
 
-console.log("utils.js loaded");
+function Set_Cursor(newCursorString)
+{
+    document.getElementById("canvas-div").style.cursor = newCursorString;
+}
+
+function Get_Cursor()
+{
+    return document.getElementById("canvas-div").style.cursor;
+}
+
+console.log("utils.js");

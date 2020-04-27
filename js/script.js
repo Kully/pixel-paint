@@ -277,7 +277,7 @@ function Add_EventHandlers_To_Canvas_Cells()
 
     function Selection_Mousedown(e)
     {
-        let cursor = document.getElementById("canvas-div").style.cursor;
+        let cursor = Get_Cursor();
         if(cursor === Tools["selection"]["cursor"])
         {
             if(State["selection"]["altKeyDown"] === true)
@@ -291,17 +291,16 @@ function Add_EventHandlers_To_Canvas_Cells()
                 Remove_Selection();
                 Unlock_Selection_Div();
                 Create_Selection_Div(e);
-                Add_EventHandlers_To_Selection_Div();
             }
         }
     }
 
     function Selection_Mousemove(e)
     {
-        let cursor = document.getElementById("canvas-div").style.cursor;
+        let cursor = Get_Cursor();
         const selection = document.getElementById("selection");
 
-        if( (cursor === Tools["selection"]["cursor"]) &&
+        if( (State["activeTool"] === "selection") &&
             (State["selection"]["selectionLocked"] === false) )
         {
             const canvasDiv = document.getElementById("canvas-div");
@@ -327,11 +326,11 @@ function Add_EventHandlers_To_Canvas_Cells()
             return;
         }
         else
-        if( (cursor === Tools["selection"]["cursor"]) &&
+        if( (State["activeTool"] === "selection") &&
             (State["selection"]["selectionLocked"]) )
         {
             let cursorXY = Canvas_Cursor_XY(e);
-            function Boolean_CursorXY_In_Selection(cursorXY, selection)
+            function CursorXY_In_Selection(cursorXY, selection)
             {
                 let selectionLeft = Px_To_Int(selection.style.left);
                 let selectionTop = Px_To_Int(selection.style.top);
@@ -346,20 +345,21 @@ function Add_EventHandlers_To_Canvas_Cells()
                 return 0;
             }
 
-            if( Boolean_CursorXY_In_Selection(cursorXY, selection) )
+            if( CursorXY_In_Selection(cursorXY, selection) && 
+                State["selection"]["altKeyDown"] === true )
             {
-                // selection.style.backgroundColor = "green"; 
+                Set_Cursor("move");
             }
             else
             {
-                // selection.style.backgroundColor = "blue";
+                Set_Cursor(Tools["selection"]["cursor"]);
             }
         }
     }
 
     function Selection_Mouseup(e)
     {
-        let cursor = document.getElementById("canvas-div").style.cursor;
+        let cursor = Get_Cursor();
         if(cursor === Tools["selection"]["cursor"])
         {
             Selection_Locked_To_Grid();
@@ -368,7 +368,7 @@ function Add_EventHandlers_To_Canvas_Cells()
 
     function Tool_Action_On_Canvas_Cell(e)
     {
-        let cursor = document.getElementById("canvas-div").style.cursor;
+        let cursor = Get_Cursor();
         if(cursor === Tools["eraser"]["cursor"])
         {
             e.target.style.backgroundColor = CANVAS_INIT_COLOR;
@@ -410,7 +410,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         });
 
         canvasCells[i].addEventListener("mouseup", function(e) {
-            let cursor = document.getElementById("canvas-div").style.cursor;
+            let cursor = Get_Cursor();
             if(cursor === Tools["fill"]["cursor"])
             {
                 let cell_id = e.target.id;
@@ -544,11 +544,6 @@ function Add_EventHandlers_To_Copy_Button()
     CopyButton.addEventListener("click", Copy_To_Clipboard);
 }
 
-function Add_EventHandlers_To_Selection_Div()
-{
-
-}
-
 function Remove_EventListeners_From_Selection()
 {
     let selection = document.getElementById("selection");
@@ -597,7 +592,8 @@ function Activate_Tool(label)
 
     if(State["activeTool"] !== label)
     {
-        document.getElementById("canvas-div").style.cursor = object["cursor"];
+        console.log("activeTool");
+        Set_Cursor(object["cursor"]);
         Color_Toolbar_Button_As_Down(button);
 
         for(let l in Tools)
@@ -610,7 +606,6 @@ function Activate_Tool(label)
         }
 
         State["activeTool"] = label;
-        console.log(State);
     }
 }
 
@@ -639,6 +634,7 @@ function Add_EventHandlers_To_Document()
         {
             Remove_Selection();
             Unlock_Selection_Div();
+            Set_Cursor(Tools[State["activeTool"]]["cursor"]);
         }
         if(e.code === "KeyZ")
         {
@@ -702,5 +698,4 @@ Add_EventHandlers_To_Toolbar_Buttons();
 
 let array = new History_States(MAX_UNDOS);
 
-console.log("script");
 console.log("https://github.com/Kully/pixel-paint/issues/1");
