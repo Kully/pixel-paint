@@ -76,7 +76,7 @@ body {
 .fadeOutAnimation {
 	animation: fadeOut 4s;
 	animation-fill-mode: forwards;
-	animation-play-state: running;
+	animation-play-state: paused;
 }
 
 @keyframes fadeOut 
@@ -304,7 +304,8 @@ body {
 #selection {
 	position: absolute;
 	z-index: 2;
-	outline: 1px dashed #ff000066;
+	/*outline: 1px dashed #ff000066;*/
+	outline: 1px dashed #ff0000;
 	pointer-events: none;
 }
 
