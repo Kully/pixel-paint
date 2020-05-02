@@ -4,6 +4,11 @@ function History_States(maxSize) {
     this.ptr = 0;              // pointer
     this.maxSize = maxSize;    // maximum size
 }
+History_States.prototype.getCurrentState = function()
+{
+    return this.array[this.ptr];
+}
+
 History_States.prototype.decPtr = function()
 {
     if(this.ptr <= 0)

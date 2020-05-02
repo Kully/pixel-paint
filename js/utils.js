@@ -33,7 +33,7 @@ function Get_Y_From_CellInt(idx)
     return Math.floor(idx / CELLS_PER_ROW);
 }
 
-function Get_CellInt_From_XY(x, y)
+function Get_CellInt_From_CellXY(x, y)
 {
     return x + (y * CELLS_PER_ROW);
 }
