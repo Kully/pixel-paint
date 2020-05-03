@@ -182,7 +182,7 @@ body {
 	background-repeat: no-repeat;
 }
 .selectionImg {
-	background-image: url(img/crosshair.png);
+	background-image: url(img/selection.png);
 	background-position: center;
 	background-repeat: no-repeat;
 }
