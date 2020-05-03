@@ -25,5 +25,3 @@ const Tools = {
         "cursor": "crosshair",
     },
 }
-
-console.log("tools.js loaded");

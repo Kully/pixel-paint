@@ -1,3 +1,16 @@
+var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+
+
+function doesCursorMatch(cursorPath, cursorFromTools)
+{
+    // console.log("Safari: ", isSafari);
+    // console.log("Chrome: ", isChrome);
+
+    // cursor =
+    // cursorFromTools = Tools["pencil"]["cursor"];
+}
+
 function Rgb_To_Hex(rgb)
 {
     if(rgb.includes("#"))
@@ -138,5 +151,3 @@ function Get_Canvas_Pixels()
     })
     return canvasPixels;
 }
-
-console.log("utils.js");

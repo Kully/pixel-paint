@@ -325,7 +325,6 @@ function Add_EventHandlers_To_Canvas_Cells()
                 (selection) &&  // selection in DOM
                 CursorXY_In_Selection(cursorXY, selection) )
             {
-                console.log("FloatingCopy mode activated!");
                 STATE["selection"]["floatingCopy"] = true;
 
                 let colorArray = Canvas_Pixels_From_Selection();
@@ -404,7 +403,6 @@ function Add_EventHandlers_To_Canvas_Cells()
             if( STATE["selection"]["floatingCopy"] === true )
             {
                 Set_Cursor("move");
-                console.log("Move_Floating_Copy");
 
                 // drag copied selection
                 let dx = (cursorXY[0]/CELL_WIDTH_PX) - STATE["selectionCopy"]["initCursorX"];
@@ -451,7 +449,6 @@ function Add_EventHandlers_To_Canvas_Cells()
                  STATE["altKeyDown"] === true) )
             {
                 Set_Cursor("move");
-                console.log("mousemove: cursorInSelection + altDown");
             }
         }
     }
@@ -486,7 +483,6 @@ function Add_EventHandlers_To_Canvas_Cells()
         if( STATE["activeTool"] === "selection" &&
             STATE["selection"]["isLocked"] === true )
         {
-            console.log("floatingCopy placed");
             let selection = document.getElementById("selection");
             let selectionWidth = selection.style.width;
             let selectionHeight = selection.style.height;
@@ -506,6 +502,8 @@ function Add_EventHandlers_To_Canvas_Cells()
     function Tool_Action_On_Canvas_Cell(e)
     {
         let cursor = Get_Cursor();
+        console.log("cursor is", cursor);
+        console.log("Tools is", Tools);
         if(cursor === Tools["eraser"]["cursor"])
         {
             e.target.style.backgroundColor = CANVAS_INIT_COLOR;
@@ -531,6 +529,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         {
             e.target.style.backgroundColor = STATE["activeColor"];
         }
+        // cursor, Tools["pencil"]["cursor"];
     }
 
     const canvasCells = document.querySelectorAll(".canvasCell");
@@ -601,8 +600,6 @@ function Toggle_Grid(e)
         })
         STATE["grid"]["isToggled"] = false;
     }
-
-    console.log(STATE["grid"]["isToggled"])
 }
 
 function Add_EventHandlers_To_Toolbar_Buttons()
@@ -820,5 +817,3 @@ Add_EventHandlers_To_Copy_Button();
 Add_EventHandlers_To_Toolbar_Buttons();
 
 let HISTORY_STATES = new History_States(MAX_UNDOS);
-
-console.log("https://github.com/Kully/pixel-paint/issues/1");
