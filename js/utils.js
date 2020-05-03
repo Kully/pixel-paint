@@ -113,4 +113,30 @@ function Get_Cursor()
     return document.getElementById("canvas-div").style.cursor;
 }
 
+function Set_Palette_Preview_Color()
+{
+    palettePreview = document.getElementById("palette-preview");
+    palettePreview.style.backgroundColor = STATE["activeColor"];
+}
+
+function Color_Toolbar_Button_As_Down(elem)
+{
+    elem.style.backgroundColor = BUTTON_DOWN_COLOR;
+}
+
+function Color_Toolbar_Button_When_Up(elem)
+{
+    elem.style.backgroundColor = BUTTON_UP_COLOR;
+}
+
+function Get_Canvas_Pixels()
+{
+    let canvasCells = document.querySelectorAll(".canvasCell");
+    let canvasPixels = [];
+    canvasCells.forEach(function(cell){
+        canvasPixels.push(cell.style.backgroundColor);
+    })
+    return canvasPixels;
+}
+
 console.log("utils.js");

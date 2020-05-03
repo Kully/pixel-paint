@@ -7,12 +7,10 @@ const BUTTON_UP_COLOR = "#a0a0a0";
 const BUTTON_DOWN_COLOR = "#f0f0f0";
 const CANVAS_INIT_COLOR = palette_color_array[0];
 
-
-const State = {
+const STATE = {
     "activeColor": palette_color_array[2],
     "activeTool": "pencil-button",
     "brushDown": false,
-    "canvasLayer2": new Array( Math.pow(CELLS_PER_ROW, 2) ).fill(-1),
     "grid": {
         "KeyG_Counter": 0,
         "hotkey": "KeyG",
@@ -20,6 +18,7 @@ const State = {
     },
     "altKeyDown": false,
     "selection": {
+        "totalCount": 0,
         "startX": 0,
         "startY": 0,
         "isLocked": false,
@@ -103,7 +102,7 @@ function Add_EventHandlers_To_Canvas_Div()
 
     const canvasDiv = document.getElementById("canvas-div");
     canvasDiv.addEventListener("mousedown", function() {
-        State["brushDown"] = true;
+        STATE["brushDown"] = true;
     });
 
     canvasDiv.addEventListener("mousemove", Update_Cursor_Coordinates_On_Screen)
@@ -122,7 +121,7 @@ function Add_Ids_To_Palette_Cells()
 function Update_Active_Color_Preview()
 {
     let activeColorDiv = document.getElementById("active-color-preview");
-    activeColorDiv.style.backgroundColor = State["activeColor"];
+    activeColorDiv.style.backgroundColor = STATE["activeColor"];
     Update_Active_Color_Label();
 }
 
@@ -140,10 +139,9 @@ function Update_Active_Color_Label()
 {
     activeColorLabel = document.getElementById("active-color-label");
 
-    State["activeColor"] = Rgb_To_Hex(State["activeColor"]);
-
-    activeColorLabel.innerHTML = State["activeColor"];    // label
-    activeColorLabel.style.color = State["activeColor"];  // text color
+    STATE["activeColor"] = Rgb_To_Hex(STATE["activeColor"]);
+    activeColorLabel.innerHTML = STATE["activeColor"];    // label
+    activeColorLabel.style.color = STATE["activeColor"];  // text color
 }
 
 function Add_EventHandlers_To_Palette_Cells()
@@ -154,7 +152,7 @@ function Add_EventHandlers_To_Palette_Cells()
     allPaletteCells.forEach(function(cell){
         // click palette to change color
         cell.addEventListener("click", function(e){
-            State["activeColor"] = e.target.style.backgroundColor;
+            STATE["activeColor"] = e.target.style.backgroundColor;
             Update_Active_Color_Preview();
             Update_Active_Color_Label();
         })
@@ -171,8 +169,6 @@ function Canvas_Pixels_From_Selection(selection)
     let selectionTop = Px_To_Int(selection.style.top);
     let selectionWidth = Px_To_Int(selection.style.width);
     let selectionHeight = Px_To_Int(selection.style.height);
-
-    console.log("")
 }
 
 function Reset_Color_Of_Canvas_Cells()
@@ -193,7 +189,6 @@ function Remove_Selection()
 
 function Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
 {
-
     function Cell_Coordinates_Out_Of_Bounds(x, y)
     {
         if((0<=x) && (x<=CELLS_PER_ROW-1) && (0<=y) && (y<=CELLS_PER_ROW-1))
@@ -208,7 +203,6 @@ function Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
         return false;
     }
 
-    // grab X,Y from ID of Cell
     let cell_int = Number(cell_id);
     let cell_x = Get_X_From_CellInt(cell_int);
     let cell_y = Get_Y_From_CellInt(cell_int);
@@ -267,8 +261,6 @@ function Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
 function Canvas_Pixels_From_Selection()
 {
     const selection = document.getElementById("selection");
-
-    // calculate
     let left = Px_To_Int(selection.style.left);
     let top = Px_To_Int(selection.style.top);
     let cell0 = Get_CellInt_From_CellXY(left / CELL_WIDTH_PX, top / CELL_WIDTH_PX);
@@ -286,7 +278,6 @@ function Canvas_Pixels_From_Selection()
     }
     return colorArray;
 }
-
 
 function CursorXY_In_Selection(cursorXY, selection)
 {
@@ -316,37 +307,36 @@ function Add_EventHandlers_To_Canvas_Cells()
         selection.style.left = cursorXY[0] + "px";
         selection.style.top = cursorXY[1] + "px";
 
-        State["selection"]["startX"] = cursorXY[0];
-        State["selection"]["startY"] = cursorXY[1];
+        STATE["selection"]["startX"] = cursorXY[0];
+        STATE["selection"]["startY"] = cursorXY[1];
 
         canvasDiv.appendChild(selection);
     }
 
     function Selection_Mousedown(e)
     {
-        if(State["activeTool"] === "selection")
+        if(STATE["activeTool"] === "selection")
         {
             let selection = document.getElementById("selection");
             let cursorXY = Canvas_Cursor_XY(e);
 
-            if( (State["altKeyDown"] === true) &&
-                (State["selection"]["isLocked"] === true) &&
+            if( (STATE["altKeyDown"] === true) &&
+                (STATE["selection"]["isLocked"] === true) &&
                 (selection) &&  // selection in DOM
                 CursorXY_In_Selection(cursorXY, selection) )
             {
                 console.log("FloatingCopy mode activated!");
-                State["selection"]["floatingCopy"] = true;
+                STATE["selection"]["floatingCopy"] = true;
 
                 let colorArray = Canvas_Pixels_From_Selection();
-                State["selectionCopy"]["colorArray"] = colorArray;
+                STATE["selectionCopy"]["colorArray"] = colorArray;
 
-                State["selectionCopy"]["initCursorX"] = cursorXY[0] / CELL_WIDTH_PX;
-                State["selectionCopy"]["initCursorY"] = cursorXY[1] / CELL_WIDTH_PX;
+                STATE["selectionCopy"]["initCursorX"] = cursorXY[0] / CELL_WIDTH_PX;
+                STATE["selectionCopy"]["initCursorY"] = cursorXY[1] / CELL_WIDTH_PX;
             }
             else
             {
                 Remove_Selection();
-                Init_Selection_Pixels();
                 Unlock_Selection();
                 Create_Selection_Div(e);
             }
@@ -358,8 +348,8 @@ function Add_EventHandlers_To_Canvas_Cells()
         let cursor = Get_Cursor();
         const selection = document.getElementById("selection");
 
-        if( (State["activeTool"] === "selection") &&
-            (State["selection"]["isLocked"] === false) )
+        if( (STATE["activeTool"] === "selection") &&
+            (STATE["selection"]["isLocked"] === false) )
         {
             const canvasDiv = document.getElementById("canvas-div");
 
@@ -368,10 +358,10 @@ function Add_EventHandlers_To_Canvas_Cells()
 
             // update selection coordinates and dimensions
             const cursorXY = Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e);
-            if(cursorXY[0] < State["selection"]["startX"])
+            if(cursorXY[0] < STATE["selection"]["startX"])
             {
                 selection.style.left = cursorXY[0] + "px";
-                selection.style.width = Math.abs(cursorXY[0] - State["selection"]["startX"]) + "px";
+                selection.style.width = Math.abs(cursorXY[0] - STATE["selection"]["startX"]) + "px";
             }
             else
             {
@@ -379,14 +369,14 @@ function Add_EventHandlers_To_Canvas_Cells()
                 newWidth = Math.ceil(newWidth);
                 newWidth = newWidth - (newWidth % CELL_WIDTH_PX);
 
-                selection.style.left = State["selection"]["startX"] + "px";
+                selection.style.left = STATE["selection"]["startX"] + "px";
                 selection.style.width = newWidth + "px";
             }
 
-            if(cursorXY[1] < State["selection"]["startY"])
+            if(cursorXY[1] < STATE["selection"]["startY"])
             {
                 selection.style.top = cursorXY[1] + "px";
-                selection.style.height = Math.abs(cursorXY[1] - State["selection"]["startY"]) + "px";
+                selection.style.height = Math.abs(cursorXY[1] - STATE["selection"]["startY"]) + "px";
             }
             else
             {
@@ -394,7 +384,7 @@ function Add_EventHandlers_To_Canvas_Cells()
                 newHeight = Math.floor(newHeight);
                 newHeight = newHeight - (newHeight % CELL_WIDTH_PX);
 
-                selection.style.top = State["selection"]["startY"] + "px";
+                selection.style.top = STATE["selection"]["startY"] + "px";
                 selection.style.height = newHeight + "px";
             }
 
@@ -407,26 +397,31 @@ function Add_EventHandlers_To_Canvas_Cells()
             return;
         }
         else
-        if( (State["activeTool"] === "selection") &&
-            (State["selection"]["isLocked"] === true) )
+        if( (STATE["activeTool"] === "selection") &&
+            (STATE["selection"]["isLocked"] === true) )
         {
             let cursorXY = Canvas_Cursor_XY(e);
-            if( State["selection"]["floatingCopy"] === true )
+            if( STATE["selection"]["floatingCopy"] === true )
             {
                 Set_Cursor("move");
                 console.log("Move_Floating_Copy");
 
                 // drag copied selection
-                let selection_dx = (cursorXY[0]/CELL_WIDTH_PX) - State["selectionCopy"]["initCursorX"];
-                let selection_dy = (cursorXY[1]/CELL_WIDTH_PX) - State["selectionCopy"]["initCursorY"];
+                let dx = (cursorXY[0]/CELL_WIDTH_PX) - STATE["selectionCopy"]["initCursorX"];
+                let dy = (cursorXY[1]/CELL_WIDTH_PX) - STATE["selectionCopy"]["initCursorY"];
                 let selectionLeft = Px_To_Int(selection.style.left) / CELL_WIDTH_PX;
                 let selectionTop = Px_To_Int(selection.style.top) / CELL_WIDTH_PX;
 
-                // boundaries check: newSelectionCopy strictly within canvas
-                // ...
+                let selectionWidth = (Px_To_Int(selection.style.width)+1) / CELL_WIDTH_PX;
+                let selectionHeight = (Px_To_Int(selection.style.height)+1) / CELL_WIDTH_PX;
 
-                if(1 === 2)
-                    return;
+                let SelectionOffScreen = (
+                    (selectionTop + dy < 0) ||
+                    (selectionTop + dy + selectionHeight > CELLS_PER_ROW) ||
+                    (selectionLeft + dx + selectionWidth > CELLS_PER_ROW) ||
+                    (selectionLeft + dx < 0)
+                );
+                if( SelectionOffScreen ) { return; }
 
                 // draw canvas state before drag start
                 for(let i=0; i<Math.pow(CELLS_PER_ROW, 2); i+=1)
@@ -436,26 +431,24 @@ function Add_EventHandlers_To_Canvas_Cells()
                 }
 
                 // draw selectionCopy to screen
-                let width = (Px_To_Int(selection.style.width)+1) / CELL_WIDTH_PX;
-                let height = (Px_To_Int(selection.style.height)+1) / CELL_WIDTH_PX;
-                let cell0 = Get_CellInt_From_CellXY(selectionLeft + selection_dx,
-                                                    selectionTop + selection_dy);
-                for(let y=0; y<height; y+=1)
-                for(let x=0; x<width; x+=1)
+                let cell0 = Get_CellInt_From_CellXY(selectionLeft + dx,
+                                                    selectionTop + dy);
+                for(let y=0; y<selectionHeight; y+=1)
+                for(let x=0; x<selectionWidth; x+=1)
                 {
                     let id = Pad_Start_Int(cell0 + y*CELLS_PER_ROW + x);
                     let cell = document.getElementById(id);
-                    let color = State["selectionCopy"]["colorArray"][x + y*width];
+                    let color = STATE["selectionCopy"]["colorArray"][x + y*selectionWidth];
                     cell.style.backgroundColor = color;
                 }
 
                 // record new left and right
-                State["selectionCopy"]["left"] = selectionLeft + selection_dx;
-                State["selectionCopy"]["top"] = selectionTop + selection_dy;
+                STATE["selectionCopy"]["left"] = selectionLeft + dx;
+                STATE["selectionCopy"]["top"] = selectionTop + dy;
             }
             else
             if( (CursorXY_In_Selection(cursorXY, selection) &&
-                 State["altKeyDown"] === true) )
+                 STATE["altKeyDown"] === true) )
             {
                 Set_Cursor("move");
                 console.log("mousemove: cursorInSelection + altDown");
@@ -467,8 +460,8 @@ function Add_EventHandlers_To_Canvas_Cells()
     {
         let cursor = Get_Cursor();
 
-        if( State["activeTool"] === "selection" &&
-            State["selection"]["isLocked"] === false )
+        if( STATE["activeTool"] === "selection" &&
+            STATE["selection"]["isLocked"] === false )
         {
             let selection = document.getElementById("selection");
             let selectionWidth = selection.style.width;
@@ -478,18 +471,20 @@ function Add_EventHandlers_To_Canvas_Cells()
                 (selectionHeight === "0px") || (selectionHeight === "") )
             {
                 Remove_Selection();
-                Init_Selection_Pixels();
                 Unlock_Selection();
             }
             else
             {
                 Selection_Locked_To_Grid();
-                Alert_User("<i>Alt+Drag</i> to Copy");
+
+                if(STATE["selection"]["totalCount"] < 3)
+                    Alert_User("<i>Alt</i> to copy");
+                STATE["selection"]["totalCount"] += 1;
             }
         }
         else
-        if( State["activeTool"] === "selection" &&
-            State["selection"]["isLocked"] === true )
+        if( STATE["activeTool"] === "selection" &&
+            STATE["selection"]["isLocked"] === true )
         {
             console.log("floatingCopy placed");
             let selection = document.getElementById("selection");
@@ -497,11 +492,11 @@ function Add_EventHandlers_To_Canvas_Cells()
             let selectionHeight = selection.style.height;
 
             // draw selection around placed copy
-            selection.style.left = State["selectionCopy"]["left"] * CELL_WIDTH_PX + "px";
-            selection.style.top = State["selectionCopy"]["top"] * CELL_WIDTH_PX + "px";
-            State["selection"]["floatingCopy"] = false;
+            selection.style.left = STATE["selectionCopy"]["left"] * CELL_WIDTH_PX + "px";
+            selection.style.top = STATE["selectionCopy"]["top"] * CELL_WIDTH_PX + "px";
+            STATE["selection"]["floatingCopy"] = false;
 
-            if(State["altKeyDown"] === false)
+            if(STATE["altKeyDown"] === false)
             {
                 Set_Cursor(Tools["selection"]["cursor"]);
             }
@@ -518,7 +513,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         else
         if(cursor === Tools["colorpicker"]["cursor"])
         {
-            State["activeColor"] = e.target.style.backgroundColor;
+            STATE["activeColor"] = e.target.style.backgroundColor;
             Update_Active_Color_Preview();
             Update_Active_Color_Label();
         }
@@ -534,7 +529,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         }
         else if(cursor === Tools["pencil"]["cursor"])
         {
-            e.target.style.backgroundColor = State["activeColor"];
+            e.target.style.backgroundColor = STATE["activeColor"];
         }
     }
 
@@ -547,7 +542,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         canvasCells[i].addEventListener("mousedown", Tool_Action_On_Canvas_Cell);
 
         canvasCells[i].addEventListener("mousemove", function(e) {
-            if(State["brushDown"])
+            if(STATE["brushDown"])
                 Tool_Action_On_Canvas_Cell(e)
         });
 
@@ -557,7 +552,7 @@ function Add_EventHandlers_To_Canvas_Cells()
             {
                 let cell_id = e.target.id;
                 let target_color = e.target.style.backgroundColor;
-                let replacement_color = State["activeColor"];
+                let replacement_color = STATE["activeColor"];
 
                 Flood_Fill_Algorithm(cell_id,
                                      target_color,
@@ -574,7 +569,7 @@ function Add_EventHandlers_To_Canvas_Cells()
 
 function Selection_Locked_To_Grid()
 {
-    State["selection"]["isLocked"] = true;
+    STATE["selection"]["isLocked"] = true;
 
     let selection = document.getElementById("selection");
     selection.style.outline = SELECTION_LOCKED_OUTLINE;
@@ -582,17 +577,7 @@ function Selection_Locked_To_Grid()
 
 function Unlock_Selection()
 {
-    State["selection"]["isLocked"] = false;
-}
-
-function Color_Toolbar_Button_As_Down(elem)
-{
-    elem.style.backgroundColor = BUTTON_DOWN_COLOR;
-}
-
-function Color_Toolbar_Button_When_Up(elem)
-{
-    elem.style.backgroundColor = BUTTON_UP_COLOR;
+    STATE["selection"]["isLocked"] = false;
 }
 
 function Toggle_Grid(e)
@@ -600,13 +585,13 @@ function Toggle_Grid(e)
     const gridButton = document.getElementById("grid-button");
     const canvasCells = document.querySelectorAll(".canvasCell");
 
-    if(State["grid"]["isToggled"] === false)
+    if(STATE["grid"]["isToggled"] === false)
     {
         Color_Toolbar_Button_As_Down(gridButton);
         canvasCells.forEach(function(cell) {
             cell.style.outline = GRID_OUTLINE_CSS;
         })
-        State["grid"]["isToggled"] = true;
+        STATE["grid"]["isToggled"] = true;
     }
     else
     {
@@ -614,25 +599,21 @@ function Toggle_Grid(e)
         canvasCells.forEach(function(cell) {
             cell.style.outline = "";
         })
-        State["grid"]["isToggled"] = false;
+        STATE["grid"]["isToggled"] = false;
     }
 
-    console.log(State["grid"]["isToggled"])
+    console.log(STATE["grid"]["isToggled"])
 }
 
 function Add_EventHandlers_To_Toolbar_Buttons()
 {
-    // let toolBtn;
+    let toolBtn;
 
     toolBtn = document.getElementById("undo-button");
     toolBtn.addEventListener("click", Undo);
 
     toolBtn = document.getElementById("redo-button");
     toolBtn.addEventListener("click", Redo);
-    // toolBtn.addEventListener("click", function(e) {
-    //     console.log("redo");
-    //     Redo();
-    // })
 
     toolBtn = document.getElementById("pencil-button");
     toolBtn.addEventListener("click", function(e) {
@@ -686,7 +667,7 @@ function Add_EventHandlers_To_Copy_Button()
         document.execCommand("copy");
         element.remove();
 
-        Alert_User("Copied to Clipboard!");
+        Alert_User("Copied!");
     }
 
     let CopyButton = document.getElementById("copy-button");
@@ -698,43 +679,24 @@ function Remove_EventListeners_From_Selection()
     let selection = document.getElementById("selection");
 }
 
-function Get_Canvas_Pixels()
-{
-    let canvasCells = document.querySelectorAll(".canvasCell");
-    let canvasPixels = [];
-    canvasCells.forEach(function(cell){
-        canvasPixels.push(cell.style.backgroundColor);
-    })
-    return canvasPixels;
-}
-
 function Transfer_Canvas_State_To_Screen(ptr)
 {
     let savedCanvas = HISTORY_STATES.array[ptr];
     let canvasCells = document.querySelectorAll(".canvasCell");
 
-    for(let i=0; i<CELLS_PER_ROW*CELLS_PER_ROW; i += 1)
+    for(let i=0; i<CELLS_PER_ROW*CELLS_PER_ROW; i+=1)
         canvasCells[i].style.backgroundColor = savedCanvas[i];
-}
-
-function Init_Selection_Pixels()
-{
-    State["selection"]["pixels"] = [];
 }
 
 function Undo()
 {
     HISTORY_STATES.decPtr();
-    console.log(HISTORY_STATES);
-
     Transfer_Canvas_State_To_Screen(HISTORY_STATES.ptr);
 }
 
 function Redo()
 {
     HISTORY_STATES.incPtr();
-    console.log(HISTORY_STATES);
-
     Transfer_Canvas_State_To_Screen(HISTORY_STATES.ptr);
 }
 
@@ -744,7 +706,7 @@ function Activate_Tool(label)
     let button = document.getElementById(object["button-id"]);
     let buttonBkgdColor = button.style.backgroundColor;
 
-    if(State["activeTool"] !== label)
+    if(STATE["activeTool"] !== label)
     {
         Set_Cursor(object["cursor"]);
         Color_Toolbar_Button_As_Down(button);
@@ -758,7 +720,7 @@ function Activate_Tool(label)
             }
         }
 
-        State["activeTool"] = label;
+        STATE["activeTool"] = label;
     }
 }
 
@@ -766,30 +728,28 @@ function Add_EventHandlers_To_Document()
 {
     function Exit_Drawing_Mode()
     {
-        State["brushDown"] = false;
+        STATE["brushDown"] = false;
     }
 
     function Canvas_Pixels_To_History_States_Array()
     {
-        console.log("Canvas_Pixels_To_History_States_Array");
         let canvasPixels = Get_Canvas_Pixels();
         HISTORY_STATES.pushToPtr(canvasPixels);
     }
 
     document.addEventListener("mouseup", function(e) {
-        console.log(e.target.id !== "undo-button" && e.target.id !== "redo-button");
+        if(e.target.id !== "undo-button" && e.target.id !== "redo-button")
             Canvas_Pixels_To_History_States_Array(e);
     });
     document.addEventListener("mouseup", Exit_Drawing_Mode);
     document.addEventListener("keydown", function(e) {
         if(e.code === "AltLeft" || e.code === "AltRight")
         {
-            State["altKeyDown"] = true;
-            console.log("altkey => down");
+            STATE["altKeyDown"] = true;
 
-            if( State["activeTool"] === "selection" &&
-                State["selection"]["isLocked"] === true &&
-                State["selection"]["isLocked"] === true)
+            if( STATE["activeTool"] === "selection" &&
+                STATE["selection"]["isLocked"] === true &&
+                STATE["selection"]["isLocked"] === true)
             {
                 Set_Cursor("move");
             }
@@ -798,9 +758,8 @@ function Add_EventHandlers_To_Document()
         if(e.code === "Escape")
         {
             Remove_Selection();
-            Init_Selection_Pixels();
             Unlock_Selection();
-            Set_Cursor(Tools[State["activeTool"]]["cursor"]);
+            Set_Cursor(Tools[STATE["activeTool"]]["cursor"]);
         }
         if(e.code === "KeyZ")
         {
@@ -819,37 +778,30 @@ function Add_EventHandlers_To_Document()
             }
         }
 
-        if(e.code === State["grid"]["hotkey"])
+        if(e.code === STATE["grid"]["hotkey"])
         {
-            State["grid"]["KeyG_Counter"] += 1;
+            STATE["grid"]["KeyG_Counter"] += 1;
         }
     })
 
     document.addEventListener("keyup", function(e){
         if(e.code === "AltLeft" || e.code === "AltRight")
         {
-            State["altKeyDown"] = false;
+            STATE["altKeyDown"] = false;
             
-            if( State["activeTool"] === "selection" &&
-                State["selection"]["floatingCopy"] === false)
+            if( STATE["activeTool"] === "selection" &&
+                STATE["selection"]["floatingCopy"] === false)
             {
                 Set_Cursor(Tools["selection"]["cursor"]);
             }
         }
-        if(e.code == State["grid"]["hotkey"])
+        if(e.code == STATE["grid"]["hotkey"])
         {
-            State["grid"]["KeyG_Counter"] = 0;
+            STATE["grid"]["KeyG_Counter"] = 0;
             Toggle_Grid();
         }
     })
 }
-
-function Set_Palette_Preview_Color()
-{
-    palettePreview = document.getElementById("palette-preview");
-    palettePreview.style.backgroundColor = State["activeColor"];
-}
-
 
 Color_All_Toolbar_Buttons();
 Update_Active_Color_Preview();

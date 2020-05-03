@@ -7,7 +7,6 @@
   --toolbar-width: 512px;
   --toolbar-height: 32px;
   --line-height-toolbar-text: 30px;
-  --popup-message-background-color: purple; /*#aacfcf*/
 
   --palette-width: 80px;
   --palette-cell-width: 20px;
@@ -16,13 +15,13 @@
   
   --tooltiptext-background-color: #ffffc9;
 
-  --canvas-width: 512px;  /* 19*32 = 608 */
+  --canvas-width: 512px;  /* 16*32 */
   --canvas-cell-width: 16px;
 
   /* COLORS */
   --body-background-color: #161619;
   --blanket-background-color: #2a2a2a;
-  --toolbar-background-color: #777;  /*grey*/
+  --toolbar-background-color: #777;
 
   --shadow: 2px 2px 8px #224;
 }
@@ -53,13 +52,17 @@ body {
 #blanket-around-body {
 	position: relative;
 	background-color: var(--blanket-background-color);
-	width: 620px;
-	height: 574px;
+	/*width: 602px;
+	height: 550px;*/
+	width: 602px;
+	height: 550px;
+	padding-right: 20px;
+	padding-bottom: 20px;
 }
 
 #popup-message {
 	position: relative;
-	float: right;
+	float: left;
 	margin-right: 10px;
 	color: #000010;
 	top: 1px;
@@ -74,24 +77,24 @@ body {
 }
 
 .fadeOutAnimation {
-	animation: fadeOut 4s;
+	animation: fadeOut 3s;
 	animation-fill-mode: forwards;
 	animation-play-state: paused;
 }
 
 @keyframes fadeOut 
 {
-	0%   {opacity: 0;}
-	1.5% {opacity: 1;}
-	50%  {opacity: 1;}
+	0%   {opacity: 0; transform: translate(0, -10px);}
+	2% {opacity: 1; transform: none;}
+	80%  {opacity: 1;}
 	100% {opacity: 0;}
 }
 
-#cursor-coords-display {
+/*#cursor-coords-display {
 	position: fixed;
 	z-index: 100;
-	top: 548px;  /* toolbar-height + canvas-width + body-margin */
-}
+	top: 548px;
+}*/
 
 #hidden-text-div {
 	position: absolute;
