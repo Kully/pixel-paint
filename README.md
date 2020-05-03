@@ -16,14 +16,14 @@ A simple spirte art tool for developers
 
 ## hotkeys
 
-| Command       | Hotkey |
-| :-------      | :----- |
-| pencil mode      | P      |
-| bucket mode   | B      |
-| mode eraser mode      | E      |
-| colorpicker mode | V      |
-| selection mode   | S      |
+| Command          | Hotkey              |
+| :--------------- | :------------------ |
+| pencil mode      | P                   |
+| bucket mode      | B                   |
+| mode eraser mode | E                   |
+| colorpicker mode | V                   |
+| selection mode   | S                   |
 | copy selection   | ALT+click and drag  |
-| toggle grid        | G      |
-| undo          | Z      |
-| redo          | X      |
+| toggle grid      | G                   |
+| undo             | Z                   |
+| redo             | X                   |
