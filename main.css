@@ -166,6 +166,16 @@ body {
 }
 
 /* for toolbar icons */
+.undoImg {
+	background-image: url(img/undo.png);
+	background-position: center;
+	background-repeat: no-repeat;
+}
+.redoImg {
+	background-image: url(img/redo.png);
+	background-position: center;
+	background-repeat: no-repeat;
+}
 .pencilImg {
 	background-image: url(img/pencil.png);
 	background-position: center;

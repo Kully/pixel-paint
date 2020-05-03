@@ -622,6 +622,18 @@ function Toggle_Grid(e)
 
 function Add_EventHandlers_To_Toolbar_Buttons()
 {
+    // let toolBtn;
+
+    toolBtn = document.getElementById("undo-button");
+    toolBtn.addEventListener("click", Undo);
+
+    toolBtn = document.getElementById("redo-button");
+    toolBtn.addEventListener("click", Redo);
+    // toolBtn.addEventListener("click", function(e) {
+    //     console.log("redo");
+    //     Redo();
+    // })
+
     toolBtn = document.getElementById("pencil-button");
     toolBtn.addEventListener("click", function(e) {
         Activate_Tool("pencil");
@@ -713,6 +725,7 @@ function Init_Selection_Pixels()
 function Undo()
 {
     HISTORY_STATES.decPtr();
+    console.log(HISTORY_STATES);
 
     Transfer_Canvas_State_To_Screen(HISTORY_STATES.ptr);
 }
@@ -720,6 +733,7 @@ function Undo()
 function Redo()
 {
     HISTORY_STATES.incPtr();
+    console.log(HISTORY_STATES);
 
     Transfer_Canvas_State_To_Screen(HISTORY_STATES.ptr);
 }
@@ -757,11 +771,15 @@ function Add_EventHandlers_To_Document()
 
     function Canvas_Pixels_To_History_States_Array()
     {
+        console.log("Canvas_Pixels_To_History_States_Array");
         let canvasPixels = Get_Canvas_Pixels();
         HISTORY_STATES.pushToPtr(canvasPixels);
     }
 
-    document.addEventListener("mouseup", Canvas_Pixels_To_History_States_Array);
+    document.addEventListener("mouseup", function(e) {
+        console.log(e.target.id !== "undo-button" && e.target.id !== "redo-button");
+            Canvas_Pixels_To_History_States_Array(e);
+    });
     document.addEventListener("mouseup", Exit_Drawing_Mode);
     document.addEventListener("keydown", function(e) {
         if(e.code === "AltLeft" || e.code === "AltRight")
