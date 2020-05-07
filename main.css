@@ -150,13 +150,6 @@ body {
 	visibility: visible;
 }
 
-#copy-button {
-	cursor: pointer;
-}
-#copy-button:hover {
-	background-color: #dee3e2;
-}
-
 #toolbar {
 	position: relative;
 	width: var(--toolbar-width);
@@ -211,8 +204,8 @@ body {
 	background-position: center;
 	background-repeat: no-repeat;
 }
-.copyImg {
-	background-image: url(img/clipboard.png);
+.saveImg {
+	background-image: url(img/floppy.png);
 	background-position: center;
 	background-repeat: no-repeat;
 }

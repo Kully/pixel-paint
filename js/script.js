@@ -643,34 +643,41 @@ function Add_EventHandlers_To_Toolbar_Buttons()
     toolBtn.addEventListener("click", Toggle_Grid);
 }
 
-function Add_EventHandlers_To_Copy_Button()
+function Add_EventHandlers_To_Save_Button()
 {
-    function Copy_To_Clipboard()
+    function Save_To_PNG()
     {
-        let canvasState = Get_Canvas_Pixels();
-        let copiedText = "";
-        canvasState.forEach(function(item) {
-            copiedText += Rgb_To_Hex(item);
-            copiedText += ",";
+        let temporaryCanvas = document.createElement("canvas");
+        let width = CELLS_PER_ROW;
+        let height = CELLS_PER_ROW;
+        
+        temporaryCanvas.width = width;
+        temporaryCanvas.height = height;
+        
+        let context = temporaryCanvas.getContext("2d");
+        let imageData = context.createImageData(width, height);
+
+        let pixelIndex = 0;
+        Get_Canvas_Pixels().forEach(function(pixel){
+            let rgbArray = Get_Array_From_Rgb(pixel);
+            imageData.data[pixelIndex    ] = rgbArray[0];
+            imageData.data[pixelIndex + 1] = rgbArray[1];
+            imageData.data[pixelIndex + 2] = rgbArray[2];
+            imageData.data[pixelIndex + 3] = 255;
+            pixelIndex += 4;
         })
+        context.putImageData(imageData, 0, 0);
 
-        // insert hidden element into DOM
-        const element = document.createElement("textarea");
-        element.id = "hidden-text-div";
-        element.value = copiedText;
+        let download = document.createElement('a');
+        download.href = temporaryCanvas.toDataURL("image/png");
+        download.download = 'pixelArt.png';
+        download.click();
 
-        document.body.appendChild(element);
-
-        // copy and remove element from DOM
-        element.select();
-        document.execCommand("copy");
-        element.remove();
-
-        Alert_User("Copied!");
+        Alert_User("Saved!");
     }
 
-    let CopyButton = document.getElementById("copy-button");
-    CopyButton.addEventListener("click", Copy_To_Clipboard);
+    let saveButton = document.getElementById("save-button");
+    saveButton.addEventListener("click", Save_To_PNG);
 }
 
 function Remove_EventListeners_From_Selection()
@@ -816,7 +823,7 @@ Add_EventHandlers_To_Canvas_Cells();
 Add_EventHandlers_To_Canvas_Div();
 Add_EventHandlers_To_Document();
 Add_EventHandlers_To_Palette_Cells();
-Add_EventHandlers_To_Copy_Button();
+Add_EventHandlers_To_Save_Button();
 Add_EventHandlers_To_Toolbar_Buttons();
 
 let HISTORY_STATES = new History_States(MAX_UNDOS);

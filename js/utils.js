@@ -8,6 +8,20 @@ function doesCursorMatch(cursorPath, cursorFromTools)
     // cursorFromTools = Tools["pencil"]["cursor"];
 }
 
+function Get_Array_From_Rgb(rgb)
+{
+    rgb = rgb.replace(" ", "");
+    rgb = rgb.slice(4,rgb.length-1);
+
+    let rgb_split = rgb.split(",");
+
+    let r = parseInt(rgb_split[0]);
+    let g = parseInt(rgb_split[1]);
+    let b = parseInt(rgb_split[2]);
+
+    return [r,g,b];
+}
+
 function Rgb_To_Hex(rgb)
 {
     if(rgb.includes("#"))
@@ -66,7 +80,7 @@ function Pad_Start_Int(int, pad=4)
 
 function Color_All_Toolbar_Buttons()
 {
-    let buttons = document.querySelectorAll(".toolbarButton");  // :not(#copy-button)
+    let buttons = document.querySelectorAll(".toolbarButton");
     buttons.forEach(function(b) {
         b.style.backgroundColor = BUTTON_UP_COLOR;
         // b.style.outline = BUTTON_UP_COLOR;
