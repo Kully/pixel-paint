@@ -4,10 +4,7 @@ var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.r
 
 function doesCursorMatch(cursorPath, cursorFromTools)
 {
-    // console.log("Safari: ", isSafari);
-    // console.log("Chrome: ", isChrome);
-
-    // cursor =
+    // cursor = ...
     // cursorFromTools = Tools["pencil"]["cursor"];
 }
 

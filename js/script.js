@@ -502,8 +502,6 @@ function Add_EventHandlers_To_Canvas_Cells()
     function Tool_Action_On_Canvas_Cell(e)
     {
         let cursor = Get_Cursor();
-        console.log("cursor is", cursor);
-        console.log("Tools is", Tools);
         if(cursor === Tools["eraser"]["cursor"])
         {
             e.target.style.backgroundColor = CANVAS_INIT_COLOR;
