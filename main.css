@@ -257,11 +257,10 @@ body {
 	text-shadow: var(--shadow);
 }
 
-#palette-preview {
+#palette-color-preview {
 	position: absolute;
 	width: var(--palette-width);
 	height: var(--toolbar-height);
-	top: -1px;
 	border: 1px solid black;
 	left: var(--toolbar-width);
 	border-radius: var(--border-radius);

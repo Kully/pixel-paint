@@ -69,6 +69,8 @@ function Color_All_Toolbar_Buttons()
     let buttons = document.querySelectorAll(".toolbarButton");  // :not(#copy-button)
     buttons.forEach(function(b) {
         b.style.backgroundColor = BUTTON_UP_COLOR;
+        // b.style.outline = BUTTON_UP_COLOR;
+        // BUTTON_UP_BORDER
     })
 }
 
@@ -123,20 +125,22 @@ function Get_Cursor()
     return document.getElementById("canvas-div").style.cursor;
 }
 
-function Set_Palette_Preview_Color()
+function Init_Preview_Color()
 {
-    palettePreview = document.getElementById("palette-preview");
-    palettePreview.style.backgroundColor = STATE["activeColor"];
+    div = document.getElementById("palette-color-preview");
+    div.style.backgroundColor = CANVAS_INIT_COLOR;
 }
 
 function Color_Toolbar_Button_As_Down(elem)
 {
     elem.style.backgroundColor = BUTTON_DOWN_COLOR;
+    elem.style.outline = BUTTON_DOWN_OUTLINE;
 }
 
 function Color_Toolbar_Button_When_Up(elem)
 {
     elem.style.backgroundColor = BUTTON_UP_COLOR;
+    elem.style.outline = BUTTON_UP_OUTLINE;
 }
 
 function Get_Canvas_Pixels()

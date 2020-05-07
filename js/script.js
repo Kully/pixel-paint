@@ -4,11 +4,13 @@ const MAX_UNDOS = 35;
 const GRID_OUTLINE_CSS = "1px dashed #aaa";
 const SELECTION_LOCKED_OUTLINE = "1px dashed #ff0000";
 const BUTTON_UP_COLOR = "#a0a0a0";
+const BUTTON_UP_OUTLINE = "";
 const BUTTON_DOWN_COLOR = "#f0f0f0";
+const BUTTON_DOWN_OUTLINE = "1px solid blue";
 const CANVAS_INIT_COLOR = palette_color_array[0];
 
 const STATE = {
-    "activeColor": palette_color_array[2],
+    "activeColor": palette_color_array[palette_color_array.length - 1],
     "activeTool": "pencil-button",
     "brushDown": false,
     "grid": {
@@ -147,7 +149,8 @@ function Update_Active_Color_Label()
 function Add_EventHandlers_To_Palette_Cells()
 {
     const allPaletteCells = document.querySelectorAll(".paletteCell");
-    const colorPreview = document.getElementById("palette-preview");
+    const colorPreview = document.getElementById("palette-color-preview");
+
 
     allPaletteCells.forEach(function(cell){
         // click palette to change color
@@ -531,6 +534,7 @@ function Add_EventHandlers_To_Canvas_Cells()
     }
 
     const canvasCells = document.querySelectorAll(".canvasCell");
+    const colorPreview = document.getElementById("palette-color-preview");
     for(let i=0; i<CELLS_PER_ROW*CELLS_PER_ROW; i += 1)
     {
         canvasCells[i].addEventListener("mousedown", Selection_Mousedown);
@@ -802,7 +806,7 @@ Color_All_Toolbar_Buttons();
 Update_Active_Color_Preview();
 Populate_Canvas_With_Cells();
 Populate_Palette_With_Cells();
-Set_Palette_Preview_Color();
+Init_Preview_Color();
 Add_Ids_To_Palette_Cells();
 Update_Tooltip_Text();
 Activate_Tool("pencil");
