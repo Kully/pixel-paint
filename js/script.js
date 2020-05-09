@@ -526,11 +526,12 @@ function Add_EventHandlers_To_Canvas_Cells()
         {
             // nothing
         }
-        else if(cursor === Tools["pencil"]["cursor"])
+        else
+        if(cursor === Tools["pencil"]["cursor"])
         {
             e.target.style.backgroundColor = STATE["activeColor"];
         }
-        // cursor, Tools["pencil"]["cursor"];
+
     }
 
     const canvasCells = document.querySelectorAll(".canvasCell");
@@ -564,7 +565,6 @@ function Add_EventHandlers_To_Canvas_Cells()
                 // nothing
             }
         });
-    
     }
 }
 
