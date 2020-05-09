@@ -24,6 +24,7 @@ A simple spirte art tool for developers
 | colorpicker mode | V                   |
 | selection mode   | S                   |
 | copy selection   | ALT+click and drag  |
+| remove selection | Esc                 |
 | toggle grid      | G                   |
 | undo             | Z                   |
 | redo             | X                   |
