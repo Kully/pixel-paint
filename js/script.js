@@ -422,10 +422,11 @@ function Add_EventHandlers_To_Canvas_Cells()
                     (selectionLeft + dx + selectionWidth > CELLS_PER_ROW) ||
                     (selectionLeft + dx < 0)
                 );
+
                 if( SelectionOffScreen ) { return; }
 
-                // draw canvas state before drag start
-                for(let i=0; i<Math.pow(CELLS_PER_ROW, 2); i+=1)
+                // canvas state to look before drag start
+                for(let i=0; i<CELLS_PER_ROW*CELLS_PER_ROW; i+=1)
                 {
                     let cell = document.getElementById(Pad_Start_Int(i,4));
                     cell.style.backgroundColor = HISTORY_STATES.getCurrentState()[i];
@@ -439,7 +440,8 @@ function Add_EventHandlers_To_Canvas_Cells()
                 {
                     let id = Pad_Start_Int(cell0 + y*CELLS_PER_ROW + x);
                     let cell = document.getElementById(id);
-                    let color = STATE["selectionCopy"]["colorArray"][x + y*selectionWidth];
+                    let idx = x + y*selectionWidth;
+                    let color = STATE["selectionCopy"]["colorArray"][idx];
                     cell.style.backgroundColor = color;
                 }
 
@@ -490,7 +492,7 @@ function Add_EventHandlers_To_Canvas_Cells()
             let selectionWidth = selection.style.width;
             let selectionHeight = selection.style.height;
 
-            // draw selection around placed copy
+            // redraw selection
             selection.style.left = STATE["selectionCopy"]["left"] * CELL_WIDTH_PX + "px";
             selection.style.top = STATE["selectionCopy"]["top"] * CELL_WIDTH_PX + "px";
             STATE["selection"]["floatingCopy"] = false;
@@ -766,6 +768,7 @@ function Add_EventHandlers_To_Document()
             Remove_Selection();
             Unlock_Selection();
             Set_Cursor(Tools[STATE["activeTool"]]["cursor"]);
+            STATE["selection"]["floatingCopy"] = false;
         }
         if(e.code === "KeyZ")
         {
@@ -817,7 +820,7 @@ Init_Preview_Color();
 Add_Ids_To_Palette_Cells();
 Update_Tooltip_Text();
 Activate_Tool("pencil");
-Toggle_Grid();
+// Toggle_Grid();  <- it is very slow with grid on
 
 Add_EventHandlers_To_Canvas_Cells();
 Add_EventHandlers_To_Canvas_Div();
