@@ -4,11 +4,13 @@ const MAX_UNDOS = 35;
 const GRID_OUTLINE_CSS = "1px dashed #aaa";
 const SELECTION_LOCKED_OUTLINE = "1px dashed #ff0000";
 const BUTTON_UP_COLOR = "#a0a0a0";
+const BUTTON_UP_OUTLINE = "";
 const BUTTON_DOWN_COLOR = "#f0f0f0";
+const BUTTON_DOWN_OUTLINE = "1px solid blue";
 const CANVAS_INIT_COLOR = palette_color_array[0];
 
 const STATE = {
-    "activeColor": palette_color_array[2],
+    "activeColor": palette_color_array[palette_color_array.length - 1],
     "activeTool": "pencil-button",
     "brushDown": false,
     "grid": {
@@ -147,7 +149,8 @@ function Update_Active_Color_Label()
 function Add_EventHandlers_To_Palette_Cells()
 {
     const allPaletteCells = document.querySelectorAll(".paletteCell");
-    const colorPreview = document.getElementById("palette-preview");
+    const colorPreview = document.getElementById("palette-color-preview");
+
 
     allPaletteCells.forEach(function(cell){
         // click palette to change color
@@ -419,10 +422,11 @@ function Add_EventHandlers_To_Canvas_Cells()
                     (selectionLeft + dx + selectionWidth > CELLS_PER_ROW) ||
                     (selectionLeft + dx < 0)
                 );
+
                 if( SelectionOffScreen ) { return; }
 
-                // draw canvas state before drag start
-                for(let i=0; i<Math.pow(CELLS_PER_ROW, 2); i+=1)
+                // canvas state to look before drag start
+                for(let i=0; i<CELLS_PER_ROW*CELLS_PER_ROW; i+=1)
                 {
                     let cell = document.getElementById(Pad_Start_Int(i,4));
                     cell.style.backgroundColor = HISTORY_STATES.getCurrentState()[i];
@@ -436,7 +440,8 @@ function Add_EventHandlers_To_Canvas_Cells()
                 {
                     let id = Pad_Start_Int(cell0 + y*CELLS_PER_ROW + x);
                     let cell = document.getElementById(id);
-                    let color = STATE["selectionCopy"]["colorArray"][x + y*selectionWidth];
+                    let idx = x + y*selectionWidth;
+                    let color = STATE["selectionCopy"]["colorArray"][idx];
                     cell.style.backgroundColor = color;
                 }
 
@@ -487,7 +492,7 @@ function Add_EventHandlers_To_Canvas_Cells()
             let selectionWidth = selection.style.width;
             let selectionHeight = selection.style.height;
 
-            // draw selection around placed copy
+            // redraw selection
             selection.style.left = STATE["selectionCopy"]["left"] * CELL_WIDTH_PX + "px";
             selection.style.top = STATE["selectionCopy"]["top"] * CELL_WIDTH_PX + "px";
             STATE["selection"]["floatingCopy"] = false;
@@ -523,14 +528,16 @@ function Add_EventHandlers_To_Canvas_Cells()
         {
             // nothing
         }
-        else if(cursor === Tools["pencil"]["cursor"])
+        else
+        if(cursor === Tools["pencil"]["cursor"])
         {
             e.target.style.backgroundColor = STATE["activeColor"];
         }
-        // cursor, Tools["pencil"]["cursor"];
+
     }
 
     const canvasCells = document.querySelectorAll(".canvasCell");
+    const colorPreview = document.getElementById("palette-color-preview");
     for(let i=0; i<CELLS_PER_ROW*CELLS_PER_ROW; i += 1)
     {
         canvasCells[i].addEventListener("mousedown", Selection_Mousedown);
@@ -560,7 +567,6 @@ function Add_EventHandlers_To_Canvas_Cells()
                 // nothing
             }
         });
-    
     }
 }
 
@@ -639,34 +645,41 @@ function Add_EventHandlers_To_Toolbar_Buttons()
     toolBtn.addEventListener("click", Toggle_Grid);
 }
 
-function Add_EventHandlers_To_Copy_Button()
+function Add_EventHandlers_To_Save_Button()
 {
-    function Copy_To_Clipboard()
+    function Save_To_PNG()
     {
-        let canvasState = Get_Canvas_Pixels();
-        let copiedText = "";
-        canvasState.forEach(function(item) {
-            copiedText += Rgb_To_Hex(item);
-            copiedText += ",";
+        let temporaryCanvas = document.createElement("canvas");
+        let width = CELLS_PER_ROW;
+        let height = CELLS_PER_ROW;
+        
+        temporaryCanvas.width = width;
+        temporaryCanvas.height = height;
+        
+        let context = temporaryCanvas.getContext("2d");
+        let imageData = context.createImageData(width, height);
+
+        let pixelIndex = 0;
+        Get_Canvas_Pixels().forEach(function(pixel){
+            let rgbArray = Get_Array_From_Rgb(pixel);
+            imageData.data[pixelIndex    ] = rgbArray[0];
+            imageData.data[pixelIndex + 1] = rgbArray[1];
+            imageData.data[pixelIndex + 2] = rgbArray[2];
+            imageData.data[pixelIndex + 3] = 255;
+            pixelIndex += 4;
         })
+        context.putImageData(imageData, 0, 0);
 
-        // insert hidden element into DOM
-        const element = document.createElement("textarea");
-        element.id = "hidden-text-div";
-        element.value = copiedText;
+        let download = document.createElement('a');
+        download.href = temporaryCanvas.toDataURL("image/png");
+        download.download = 'pixelArt.png';
+        download.click();
 
-        document.body.appendChild(element);
-
-        // copy and remove element from DOM
-        element.select();
-        document.execCommand("copy");
-        element.remove();
-
-        Alert_User("Copied!");
+        Alert_User("Saved!");
     }
 
-    let CopyButton = document.getElementById("copy-button");
-    CopyButton.addEventListener("click", Copy_To_Clipboard);
+    let saveButton = document.getElementById("save-button");
+    saveButton.addEventListener("click", Save_To_PNG);
 }
 
 function Remove_EventListeners_From_Selection()
@@ -755,6 +768,7 @@ function Add_EventHandlers_To_Document()
             Remove_Selection();
             Unlock_Selection();
             Set_Cursor(Tools[STATE["activeTool"]]["cursor"]);
+            STATE["selection"]["floatingCopy"] = false;
         }
         if(e.code === "KeyZ")
         {
@@ -802,16 +816,17 @@ Color_All_Toolbar_Buttons();
 Update_Active_Color_Preview();
 Populate_Canvas_With_Cells();
 Populate_Palette_With_Cells();
-Set_Palette_Preview_Color();
+Init_Preview_Color();
 Add_Ids_To_Palette_Cells();
 Update_Tooltip_Text();
 Activate_Tool("pencil");
+// Toggle_Grid();  <- it is very slow with grid on
 
 Add_EventHandlers_To_Canvas_Cells();
 Add_EventHandlers_To_Canvas_Div();
 Add_EventHandlers_To_Document();
 Add_EventHandlers_To_Palette_Cells();
-Add_EventHandlers_To_Copy_Button();
+Add_EventHandlers_To_Save_Button();
 Add_EventHandlers_To_Toolbar_Buttons();
 
 let HISTORY_STATES = new History_States(MAX_UNDOS);

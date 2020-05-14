@@ -12,7 +12,7 @@ const Tools = {
     "eraser": {
         "button-id": "eraser-button",
         "hotkey": "KeyE",
-        "cursor": 'url("img/eraser.png") 10 7, auto',
+        "cursor": 'url("img/eraser.png") 0 34, auto',  // 10 7
     },
     "colorpicker": {
         "button-id": "colorpicker-button",

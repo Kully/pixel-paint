@@ -1,11 +1,15 @@
-var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
-var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
-
-
-function doesCursorMatch(cursorPath, cursorFromTools)
+function Get_Array_From_Rgb(rgb)
 {
-    // cursor = ...
-    // cursorFromTools = Tools["pencil"]["cursor"];
+    rgb = rgb.replace(" ", "");
+    rgb = rgb.slice(4,rgb.length-1);
+
+    let rgb_split = rgb.split(",");
+
+    let r = parseInt(rgb_split[0]);
+    let g = parseInt(rgb_split[1]);
+    let b = parseInt(rgb_split[2]);
+
+    return [r,g,b];
 }
 
 function Rgb_To_Hex(rgb)
@@ -66,9 +70,11 @@ function Pad_Start_Int(int, pad=4)
 
 function Color_All_Toolbar_Buttons()
 {
-    let buttons = document.querySelectorAll(".toolbarButton");  // :not(#copy-button)
+    let buttons = document.querySelectorAll(".toolbarButton");
     buttons.forEach(function(b) {
         b.style.backgroundColor = BUTTON_UP_COLOR;
+        // b.style.outline = BUTTON_UP_COLOR;
+        // BUTTON_UP_BORDER
     })
 }
 
@@ -123,20 +129,22 @@ function Get_Cursor()
     return document.getElementById("canvas-div").style.cursor;
 }
 
-function Set_Palette_Preview_Color()
+function Init_Preview_Color()
 {
-    palettePreview = document.getElementById("palette-preview");
-    palettePreview.style.backgroundColor = STATE["activeColor"];
+    div = document.getElementById("palette-color-preview");
+    div.style.backgroundColor = CANVAS_INIT_COLOR;
 }
 
 function Color_Toolbar_Button_As_Down(elem)
 {
     elem.style.backgroundColor = BUTTON_DOWN_COLOR;
+    elem.style.outline = BUTTON_DOWN_OUTLINE;
 }
 
 function Color_Toolbar_Button_When_Up(elem)
 {
     elem.style.backgroundColor = BUTTON_UP_COLOR;
+    elem.style.outline = BUTTON_UP_OUTLINE;
 }
 
 function Get_Canvas_Pixels()
