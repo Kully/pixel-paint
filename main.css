@@ -230,16 +230,6 @@ body {
 	box-shadow: none;
 }
 
-#active-color-preview {
-	width: 24px;  /* var(--toolbar-height) */
-	height: 24px;
-	transform: translate(0, 4px);  /* center along y-axis */
-	border-radius: var(--border-radius);
-	float: right;
-	margin-right: var(--border-radius);
-	box-shadow: var(--shadow);
-}
-
 #active-color-label {
 	position: relative;
 	float: right;
@@ -250,15 +240,25 @@ body {
 	text-shadow: var(--shadow);
 }
 
-#palette-color-preview {
+/*#active-color-preview {
+	width: 24px;
+	height: 24px;
+	transform: translate(0, 4px);
+	border-radius: var(--border-radius);
+	float: right;
+	margin-right: var(--border-radius);
+	box-shadow: var(--shadow);
+}*/
+
+#active-color-preview {
 	position: absolute;
 	width: var(--palette-width);
 	height: var(--toolbar-height);
-	border: 1px solid black;
+	border: 1px solid #eef;
 	left: var(--toolbar-width);
 	border-radius: var(--border-radius);
 	margin-left: var(--palette-margin-right);
-	transform: translate(-2px, 0);
+	transform: translate(-2px, -1px);
 }
 
 #canvas-div {

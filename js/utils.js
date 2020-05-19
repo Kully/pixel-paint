@@ -129,12 +129,6 @@ function Get_Cursor()
     return document.getElementById("canvas-div").style.cursor;
 }
 
-function Init_Preview_Color()
-{
-    div = document.getElementById("palette-color-preview");
-    div.style.backgroundColor = CANVAS_INIT_COLOR;
-}
-
 function Color_Toolbar_Button_As_Down(elem)
 {
     elem.style.backgroundColor = BUTTON_DOWN_COLOR;
