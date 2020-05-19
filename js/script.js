@@ -507,29 +507,29 @@ function Add_EventHandlers_To_Canvas_Cells()
     function Tool_Action_On_Canvas_Cell(e)
     {
         let cursor = Get_Cursor();
-        if(cursor === Tools["eraser"]["cursor"])
+        if(cursor.includes("eraser.png"))
         {
             e.target.style.backgroundColor = CANVAS_INIT_COLOR;
         }
         else
-        if(cursor === Tools["colorpicker"]["cursor"])
+        if(cursor.includes("colorpicker.png"))
         {
             STATE["activeColor"] = e.target.style.backgroundColor;
             Update_Active_Color_Preview();
             Update_Active_Color_Label();
         }
         else
-        if(cursor === Tools["fill"]["cursor"])
+        if(cursor.includes("fill.png"))
         {
             // nothing
         }
         else
-        if(cursor === Tools["selection"]["cursor"])
+        if(cursor.includes("selection.png"))
         {
             // nothing
         }
         else
-        if(cursor === Tools["pencil"]["cursor"])
+        if(cursor.includes("pencil.png"))
         {
             e.target.style.backgroundColor = STATE["activeColor"];
         }
@@ -552,7 +552,7 @@ function Add_EventHandlers_To_Canvas_Cells()
 
         canvasCells[i].addEventListener("mouseup", function(e) {
             let cursor = Get_Cursor();
-            if(cursor === Tools["fill"]["cursor"])
+            if(cursor.includes("fill.png"))
             {
                 let cell_id = e.target.id;
                 let target_color = e.target.style.backgroundColor;
@@ -562,7 +562,8 @@ function Add_EventHandlers_To_Canvas_Cells()
                                      target_color,
                                      replacement_color)
             }
-            else if(cursor === Tools["selection"]["cursor"])
+            else
+            if(cursor.includes("selection.png"))
             {
                 // nothing
             }
