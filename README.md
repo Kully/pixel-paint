@@ -13,7 +13,7 @@ A spirte art tool for making 32x32 sprites with the NES Palette
 
 ## how to use selection tool
 
-1. Press the selection tool button ![Image](img/selectionOnToolbar.png)
+1. Select the selection tool from the toolbar ![Image](img/selectionOnToolbar.png)
 2. Click and drag across the canvas to create rectangular outline
 3. After you release the mouse you can copy and move copied selection by doing the following
     - hold `Alt`
