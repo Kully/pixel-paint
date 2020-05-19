@@ -2,7 +2,7 @@
 
 A simple spirte art tool for developers
 
-<!-- add GIFs -->
+![Image](gifs/selectionCopy.gif)
 
 ## specs
 - [x] vanilla javascript
