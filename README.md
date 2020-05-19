@@ -11,7 +11,6 @@ A simple spirte art tool for developers
 - [x] original cursor icons (png)
 - [x] copy 1024 canvas colors to clipboard
 - [x] displays cursor coordinates
-- [x] Chrome support only
 
 
 ## hotkeys
