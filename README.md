@@ -2,9 +2,9 @@
 
 A spirte art tool for making 32x32 sprites with the NES Palette
 
-![Image](gifs/selectionCopy.gif)
+![Image](gif/speedDrawing.gif)
 
-## specs
+## features
 - [x] written in 100% vanilla javascript
 - [x] save your pixel creation as a PNG
 - [x] toggle grid (press `G`)
@@ -13,7 +13,9 @@ A spirte art tool for making 32x32 sprites with the NES Palette
 
 ## how to use selection tool
 
-1. Press the selection tool button ![Image](img/selection.png)
+![Image](gif/selectionCopy.gif)
+
+1. Press the selection tool button ![Image](img/selectionOnToolbar.png)
 2. Click and drag across the canvas to create rectangular outline
 3. After you release the mouse you can copy and move copied selection by doing the following
     - hold `Alt`
