@@ -4,11 +4,13 @@ An intuitive pixel art webapp for 32x32 NES-palette sprites. <b>100% Vanilla JS!
 
 ![Image](gif/selectionCopy.gif)
 
-## specs
+## features
 - [x] 100% vanilla javascript!
 - [x] pencil, fill, eraser, selection and colorpicker tools
+- [x] implements undo and redo with a stack of canvas states
+- [x] color palette from the NES
 - [x] save your pixel art to PNG
-- [x] original handmade cursors and button images
+- [x] original 32x32 cursors/button icons
 
 ## hotkeys
 
