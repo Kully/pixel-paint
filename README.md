@@ -26,6 +26,7 @@ An intuitive pixel art webapp for 32x32 NES-palette sprites
 | redo             | X                   |
 
 ## how to use selection tool
+_similar controls to GIMP_
 
 1. Select the selection tool from the toolbar ![Image](img/selectionOnToolbar.png)
 2. Click and drag across the canvas to create rectangular outline
