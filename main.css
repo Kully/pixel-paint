@@ -14,11 +14,8 @@
   --palette-margin-right: 10px;
   
   --tooltiptext-background-color: #ffffc9;
-
   --canvas-width: 512px;  /* 16*32 */
   --canvas-cell-width: 16px;
-
-  /* COLORS */
   --body-background-color: #161619;
   --blanket-background-color: #2a2a2a;
   --toolbar-background-color: #777;
@@ -47,6 +44,10 @@ body {
 	font-family: 'Open Sans', sans-serif;
 	font-weight: 100;
 	pointer-events: fill;
+}
+
+.hotkeyText {
+	color: blue;
 }
 
 #blanket-around-body {

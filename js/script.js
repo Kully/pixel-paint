@@ -511,21 +511,10 @@ function Add_EventHandlers_To_Canvas_Cells()
             Update_Active_Color_Label();
         }
         else
-        if(cursor.includes("fill.png"))
-        {
-            // nothing
-        }
-        else
-        if(cursor.includes("selection.png"))
-        {
-            // nothing
-        }
-        else
         if(cursor.includes("pencil.png"))
         {
             e.target.style.backgroundColor = STATE["activeColor"];
         }
-
     }
 
     const canvasCells = document.querySelectorAll(".canvasCell");
@@ -542,7 +531,6 @@ function Add_EventHandlers_To_Canvas_Cells()
         });
 
         canvasCells[i].addEventListener("mouseup", function(e) {
-            console.log("yoyo");
             let cursor = Get_Cursor();
             if(cursor.includes("fill.png"))
             {
@@ -715,7 +703,6 @@ function Activate_Tool(label)
                 Color_Toolbar_Button_When_Up(btn);
             }
         }
-
         STATE["activeTool"] = label;
     }
 }
@@ -815,4 +802,4 @@ Add_EventHandlers_To_Palette_Cells();
 Add_EventHandlers_To_Save_Button();
 Add_EventHandlers_To_Toolbar_Buttons();
 
-let HISTORY_STATES = new History_States(MAX_UNDOS);
+const HISTORY_STATES = new History_States(MAX_UNDOS);

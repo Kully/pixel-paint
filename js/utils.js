@@ -115,7 +115,7 @@ function Update_Tooltip_Text()
 
         const btn = document.getElementById(id);
         const tooltip = btn.children[0];
-        tooltip.innerHTML = label + " (" + hotkey[3] + ")";
+        tooltip.innerHTML = label + "<span class='hotkeyText'>" + " (" + hotkey[3] + ")" + "</span>";
     }
 }
 
