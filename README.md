@@ -1,6 +1,6 @@
 # Pixel Paint
 
-An intuitive pixelArt webapp for making 32x32 sprites
+An intuitive pixel art webapp for 32x32 NES-palette sprites
 
 ![Image](gif/selectionCopy.gif)
 
