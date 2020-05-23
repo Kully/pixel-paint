@@ -8,7 +8,6 @@ const BUTTON_UP_OUTLINE = "";
 const BUTTON_DOWN_COLOR = "#f0f0f0";
 const BUTTON_DOWN_OUTLINE = "1px solid blue";
 const CANVAS_INIT_COLOR = palette_color_array[0];
-
 const STATE = {
     "activeColor": palette_color_array[palette_color_array.length - 1],
     "activeTool": "pencil-button",
@@ -543,6 +542,7 @@ function Add_EventHandlers_To_Canvas_Cells()
         });
 
         canvasCells[i].addEventListener("mouseup", function(e) {
+            console.log("yoyo");
             let cursor = Get_Cursor();
             if(cursor.includes("fill.png"))
             {
@@ -553,11 +553,6 @@ function Add_EventHandlers_To_Canvas_Cells()
                 Flood_Fill_Algorithm(cell_id,
                                      target_color,
                                      replacement_color)
-            }
-            else
-            if(cursor.includes("selection.png"))
-            {
-                // nothing
             }
         });
     }
@@ -665,7 +660,7 @@ function Add_EventHandlers_To_Save_Button()
 
         let download = document.createElement('a');
         download.href = temporaryCanvas.toDataURL("image/png");
-        download.download = 'pixelArt.png';
+        download.download = 'pixelpaint.png';
         download.click();
 
         Alert_User("Saved!");
