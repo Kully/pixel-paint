@@ -1,6 +1,6 @@
 # Pixel Paint
 
-An intuitive pixel art webapp for 32x32 NES-palette sprites. <b>100% Vanilla JS!</b>
+An intuitive pixel art drawing tool for making 32x32 NES-palette sprites. <b>100% Vanilla JS!</b>
 
 ![Image](gif/selectionCopy.gif)
 
