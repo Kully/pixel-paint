@@ -31,6 +31,6 @@ Make intuitve pixel art in this simple drawing tool written in _vanilla javascri
 
 One of the joys of posting this project on Github is to get people excited and wanting to contribute to them. Feel free to create Pull Requests for any changes that you think the app could benifit from, or something that you would like to use.
 
-Have a look at some of the [Issues](https://github.com/Kully/pixel-paint/issues) in the repo. Would love to be able to generate discussion.
+Have a look at some of the [Issues](https://github.com/Kully/pixel-paint/issues) in the repo. If you see something you want to add or comment on, by all means do so!
 
 Have fun and be creative! :art:
