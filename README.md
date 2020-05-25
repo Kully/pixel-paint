@@ -4,7 +4,7 @@ Make intuitve pixel art in this simple drawing tool written in _vanilla javascri
 
 ![Image](gif/selectionCopy.gif)
 
-## features
+## Features
 - [x] 100% vanilla javascript!
 - [x] pencil, fill, eraser, selection and colorpicker tools
 - [x] implements undo and redo with a stack of canvas states
@@ -12,7 +12,7 @@ Make intuitve pixel art in this simple drawing tool written in _vanilla javascri
 - [x] save your pixel art to PNG
 - [x] original 32x32 cursors/button icons
 
-## hotkeys
+## Hotkeys
 
 | Command          | Hotkey              |
 | :--------------- | :------------------ |
@@ -27,14 +27,8 @@ Make intuitve pixel art in this simple drawing tool written in _vanilla javascri
 | undo             | Z                   |
 | redo             | X                   |
 
-## how to use selection tool
+## Contributing
 
-1. Select the selection tool from the toolbar ![Image](img/selectionOnToolbar.png)
-2. Click and drag across the canvas to create rectangular outline
-3. After you release the mouse you can copy and move copied selection by doing the following
-    - hold `Alt`
-    - click within the rectangular outline (this copies the selection)
-    - move your mouse, dragging the copied selection across the canvas
-    - release the mouse to lock the copied selection to the canvas
+One of the joys of posting this project on Github is to get people excited and wanting to contribute to them. Feel free to create Pull Requests for any changes that you think the app could benifit from, or something that you would like to use.
 
-Have fun! :cake:
+Have fun and be creative! :art:
