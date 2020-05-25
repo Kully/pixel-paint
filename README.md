@@ -1,6 +1,6 @@
 # Pixel Paint
 
-Make intuitve pixel art in this simple drawing tool in _vanilla javascript_
+Make intuitve pixel art in this simple drawing tool written in _vanilla javascript_
 
 ![Image](gif/selectionCopy.gif)
 
