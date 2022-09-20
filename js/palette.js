@@ -1,3 +1,4 @@
+//NES color palette
 let palette_color_array = [
     "#fcfcfc",
     "#f8f8f8",
@@ -67,5 +68,18 @@ let palette_color_array = [
     "#c4c4c4",
     "#787878",
     "#000001",
+    "#000000",
+];
+
+//Classic Gameboy and Gameboy pocket color palettes
+let gb_palette_color_array = [
+    "#0f380f",
+    "#306230",
+    "#8bac0f",
+    "#9bbc0f",
+
+    "#ffffff",
+    "#a9a9a9",
+    "#545454",
     "#000000",
 ];

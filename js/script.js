@@ -791,6 +791,7 @@ Color_All_Toolbar_Buttons();
 Update_Active_Color_Preview();
 Populate_Canvas_With_Cells();
 Populate_Palette_With_Cells();
+Populate_GBPalette_With_Cells();
 Add_Ids_To_Palette_Cells();
 Update_Tooltip_Text();
 Activate_Tool("pencil");
