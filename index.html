@@ -60,8 +60,17 @@
 				How to Copy <img class="imgInSelectionExplanation" src="img/selectionBright.png"></img> Selection: <b>hold down</b> <span>alt</span> and <b>drag</b> the selected area.
 			</label>
 			<div id="cursor-coords-display"></div>
-			<div id="palette-select"></div> <!-- Radio buttons or drop-down menu? -->
-		</div> <!-- https://www.w3schools.com/howto/howto_js_toggle_hide_show.asp https://www.w3schools.com/tags/tryit.asp?filename=tryhtml5_input_type_radio-->
+			<div id="palette-select">
+				<label class="container">NES
+					<input type="radio" onclick="selectPalette()" name="radio" id="radioNES">
+					<span class="checkmark"></span>
+			  	</label><br>
+			  	<label class="container">GB
+					<input type="radio" onclick="selectPalette()" name="radio" id="radioGB">
+					<span class="checkmark"></span>
+			  	</label>
+			</div>
+		</div>
 	</body>
 
 	<script type="text/javascript" src="js/tools.js"></script>

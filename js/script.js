@@ -787,6 +787,22 @@ function Add_EventHandlers_To_Document()
     })
 }
 
+function selectPalette() {
+    var nes = document.getElementById("palette-div");
+    var gameboy = document.getElementById("gameboy-palette-div");
+    var radioNES = document.getElementById("radioNES");
+    var radioGameboy =document.getElementById("radioGB");
+
+    if (radioNES.checked) {
+        nes.style.display = "block";
+        gameboy.style.display = "none";
+    }
+    else if (radioGameboy.checked) {
+        nes.style.display = "none";
+        gameboy.style.display = "block";
+    }
+}
+
 Color_All_Toolbar_Buttons();
 Update_Active_Color_Preview();
 Populate_Canvas_With_Cells();

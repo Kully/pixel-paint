@@ -348,3 +348,17 @@ body {
 	overflow-y: scroll;
 	background-color: #eee;
 }
+
+#palette-select {
+	position: fixed;
+	right: 8%;
+	top: 70%;
+}
+
+#palette-div {
+	display: none;
+}
+
+#gameboy-palette-div {
+	display: none;
+}
