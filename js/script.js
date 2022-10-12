@@ -787,17 +787,20 @@ function Add_EventHandlers_To_Document()
     })
 }
 
-function selectPalette() {
+function Select_Palette() {
     var nes = document.getElementById("palette-div");
     var gameboy = document.getElementById("gameboy-palette-div");
     var radioNES = document.getElementById("radioNES");
     var radioGameboy =document.getElementById("radioGB");
 
-    if (radioNES.checked) {
+    if(radioNES.checked)
+    {
         nes.style.display = "block";
         gameboy.style.display = "none";
     }
-    else if (radioGameboy.checked) {
+    else
+    if(radioGameboy.checked)
+    {
         nes.style.display = "none";
         gameboy.style.display = "block";
     }

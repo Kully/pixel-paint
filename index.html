@@ -54,22 +54,22 @@
 			</div>
 
 			<div id="canvas-div"></div>
-			<div id="palette-div"></div>
-			<div id="gameboy-palette-div"></div>
+			<div id="palette-select">
+				<label class="container">NES
+					<input type="radio" onclick="Select_Palette()" name="radio" class="radio" id="radioNES">
+					<span class="checkmark"></span>
+			  	</label><br>
+			  	<label class="container">GameBoy
+					<input type="radio" onclick="Select_Palette()" name="radio" class="radio" id="radioGB">
+					<span class="checkmark"></span>
+			  	</label>
+			</div>
+			<div class="palette" id="palette-div"></div>
+			<div class="palette" id="gameboy-palette-div"></div>
 			<label id="selection-explanation-text">
 				How to Copy <img class="imgInSelectionExplanation" src="img/selectionBright.png"></img> Selection: <b>hold down</b> <span>alt</span> and <b>drag</b> the selected area.
 			</label>
 			<div id="cursor-coords-display"></div>
-			<div id="palette-select">
-				<label class="container">NES
-					<input type="radio" onclick="selectPalette()" name="radio" id="radioNES">
-					<span class="checkmark"></span>
-			  	</label><br>
-			  	<label class="container">GB
-					<input type="radio" onclick="selectPalette()" name="radio" id="radioGB">
-					<span class="checkmark"></span>
-			  	</label>
-			</div>
 		</div>
 	</body>
 

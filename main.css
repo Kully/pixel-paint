@@ -349,16 +349,14 @@ body {
 	background-color: #eee;
 }
 
-#palette-select {
-	position: fixed;
-	right: 8%;
-	top: 70%;
-}
-
-#palette-div {
+.palette {
 	display: none;
 }
 
-#gameboy-palette-div {
-	display: none;
+.container {
+	font-size: 14.5px;
+}
+
+input[type="radio"] {
+	margin: 0;
 }
