@@ -33,6 +33,13 @@ const STATE = {
         "colorArray": [],
     },
 }
+const PALETTE_DISPLAY = {
+    nes: document.getElementById("palette-div"),
+    gameboy: document.getElementById("gameboy-palette-div"),
+    radioNES: document.getElementById("radioNES"),
+    radioGameboy: document.getElementById("radioGB")
+}
+
 
 
 function Canvas_Cursor_XY(e)
@@ -788,21 +795,15 @@ function Add_EventHandlers_To_Document()
 }
 
 function Select_Palette() {
-    var nes = document.getElementById("palette-div");
-    var gameboy = document.getElementById("gameboy-palette-div");
-    var radioNES = document.getElementById("radioNES");
-    var radioGameboy =document.getElementById("radioGB");
-
-    if(radioNES.checked)
+    if(PALETTE_DISPLAY.radioNES.checked)
     {
-        nes.style.display = "block";
-        gameboy.style.display = "none";
+        PALETTE_DISPLAY.nes.style.display = "block";
+        PALETTE_DISPLAY.gameboy.style.display = "none";
     }
     else
-    if(radioGameboy.checked)
     {
-        nes.style.display = "none";
-        gameboy.style.display = "block";
+        PALETTE_DISPLAY.nes.style.display = "none";
+        PALETTE_DISPLAY.gameboy.style.display = "block";
     }
 }
 

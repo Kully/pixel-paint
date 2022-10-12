@@ -73,10 +73,10 @@ let palette_color_array = [
 
 //Classic Gameboy and Gameboy pocket color palettes
 let gb_palette_color_array = [
-    "#0f380f",
-    "#306230",
-    "#8bac0f",
     "#9bbc0f",
+    "#8bac0f",
+    "#306230",
+    "#0f380f",
 
     "#ffffff",
     "#a9a9a9",
