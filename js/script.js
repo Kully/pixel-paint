@@ -815,6 +815,7 @@ Populate_GBPalette_With_Cells();
 Add_Ids_To_Palette_Cells();
 Update_Tooltip_Text();
 Activate_Tool("pencil");
+Select_Palette();
 
 Add_EventHandlers_To_Canvas_Cells();
 Add_EventHandlers_To_Canvas_Div();
