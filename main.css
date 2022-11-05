@@ -348,3 +348,17 @@ body {
 	overflow-y: scroll;
 	background-color: #eee;
 }
+
+.palette {
+	display: none;
+	padding-top: 5px;
+}
+
+.container {
+	font-size: 14.5px;
+	padding-bottom: 5px;
+}
+
+input[type="radio"] {
+	margin: 0;
+}
