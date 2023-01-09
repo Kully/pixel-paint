@@ -8,7 +8,7 @@ Make intuitve pixel art in this simple drawing tool written in _vanilla javascri
 - [x] 100% vanilla javascript!
 - [x] pencil, fill, eraser, selection and colorpicker tools
 - [x] implements undo and redo with a stack of canvas states
-- [x] color palette from the NES
+- [x] color palette from the NES and Gameboy
 - [x] save your pixel art to PNG
 - [x] original 32x32 cursors/button icons
 
