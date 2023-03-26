@@ -8,8 +8,10 @@ const BUTTON_UP_OUTLINE = "";
 const BUTTON_DOWN_COLOR = "#f0f0f0";
 const BUTTON_DOWN_OUTLINE = "1px solid blue";
 const CANVAS_INIT_COLOR = palette_color_array[0];
+let ACTIVE_COLOR_SELECT = "1nd-Color";
 const STATE = {
-    "activeColor": palette_color_array[palette_color_array.length - 1],
+    "1nd-Color": palette_color_array[palette_color_array.length - 1],
+    "2nd-Color": palette_color_array[0],
     "activeTool": "pencil-button",
     "brushDown": false,
     "grid": {
@@ -128,8 +130,10 @@ function Add_Ids_To_Palette_Cells()
 
 function Update_Active_Color_Preview()
 {
-    let activeColorDiv = document.getElementById("active-color-preview");
-    activeColorDiv.style.backgroundColor = STATE["activeColor"];
+    let activeColorDiv_1 = document.getElementById("active-color-preview-1");
+    let activeColorDiv_2 = document.getElementById("active-color-preview-2");
+    activeColorDiv_1.style.backgroundColor = STATE["1nd-Color"];
+    activeColorDiv_2.style.backgroundColor = STATE["2nd-Color"];
     Update_Active_Color_Label();
 }
 
@@ -143,13 +147,33 @@ function Alert_User(text)
     popupMessage.classList.add("fadeOutAnimation");
 }
 
+function Swap_Active_Color()
+{
+    let activeColorDiv_1 = document.getElementById("active-color-preview-1");
+    let activeColorDiv_2 = document.getElementById("active-color-preview-2");
+    if(ACTIVE_COLOR_SELECT === "1nd-Color")
+     {
+       ACTIVE_COLOR_SELECT = "2nd-Color";
+       activeColorDiv_2.classList.add("active_indicator");
+       activeColorDiv_1.classList.remove("active_indicator");
+     }
+       
+    else
+     {
+       ACTIVE_COLOR_SELECT = "1nd-Color";
+       activeColorDiv_1.classList.add("active_indicator");
+       activeColorDiv_2.classList.remove("active_indicator");
+     }
+    Update_Active_Color_Label();
+}
+
 function Update_Active_Color_Label()
 {
     activeColorLabel = document.getElementById("active-color-label");
 
-    STATE["activeColor"] = Rgb_To_Hex(STATE["activeColor"]);
-    activeColorLabel.innerHTML = STATE["activeColor"];    // label
-    activeColorLabel.style.color = STATE["activeColor"];  // text color
+    STATE[ACTIVE_COLOR_SELECT] = Rgb_To_Hex(STATE[ACTIVE_COLOR_SELECT]);
+    activeColorLabel.innerHTML = STATE[ACTIVE_COLOR_SELECT];    // label
+    activeColorLabel.style.color = STATE[ACTIVE_COLOR_SELECT];  // text color
 }
 
 function Add_EventHandlers_To_Palette_Cells()
@@ -158,7 +182,7 @@ function Add_EventHandlers_To_Palette_Cells()
     allPaletteCells.forEach(function(cell){
         // click palette to change color
         cell.addEventListener("click", function(e){
-            STATE["activeColor"] = e.target.style.backgroundColor;
+            STATE[ACTIVE_COLOR_SELECT] = e.target.style.backgroundColor;
             Update_Active_Color_Preview();
             Update_Active_Color_Label();
         })
@@ -513,14 +537,14 @@ function Add_EventHandlers_To_Canvas_Cells()
         else
         if(cursor.includes("colorpicker.png"))
         {
-            STATE["activeColor"] = e.target.style.backgroundColor;
+            STATE[ACTIVE_COLOR_SELECT] = e.target.style.backgroundColor;
             Update_Active_Color_Preview();
             Update_Active_Color_Label();
         }
         else
         if(cursor.includes("pencil.png"))
         {
-            e.target.style.backgroundColor = STATE["activeColor"];
+            e.target.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
         }
     }
 
@@ -543,7 +567,7 @@ function Add_EventHandlers_To_Canvas_Cells()
             {
                 let cell_id = e.target.id;
                 let target_color = e.target.style.backgroundColor;
-                let replacement_color = STATE["activeColor"];
+                let replacement_color = STATE[ACTIVE_COLOR_SELECT];
 
                 Flood_Fill_Algorithm(cell_id,
                                      target_color,
@@ -759,6 +783,10 @@ function Add_EventHandlers_To_Document()
         if(e.code === "KeyX")
         {
             Redo();
+        }
+        if(e.code === "KeyC")
+        {
+          Swap_Active_Color();
         }
 
         for(label in Tools)

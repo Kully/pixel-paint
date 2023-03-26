@@ -275,15 +275,28 @@ body {
 	font-family: Menlo;
 }
 
-#active-color-preview {
+#active-color-preview-1 {
 	position: absolute;
-	width: var(--palette-width);
+	width: calc(var(--palette-width)/2.4);
 	height: var(--toolbar-height);
 	border: 1px solid #eef;
 	left: var(--toolbar-width);
 	border-radius: var(--border-radius);
 	margin-left: var(--palette-margin-right);
 	transform: translate(-2px, -1px);
+}
+#active-color-preview-2 {
+	position: absolute;
+	width: calc(var(--palette-width)/2.4);
+	height: var(--toolbar-height);
+	border: 1px solid #eef;
+	left: calc(var(--toolbar-width) + var(--palette-width)/2);
+	border-radius: var(--border-radius);
+	margin-left: var(--palette-margin-right);
+	transform: translate(-2px, -1px);
+}
+.active_indicator {
+  border: 2px solid #eef !important;
 }
 
 #canvas-div {
