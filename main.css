@@ -9,6 +9,7 @@
   --line-height-toolbar-text: 30px;
 
   --palette-width: 80px;
+  --color-preview-width: 35px;
   --palette-cell-width: 20px;
   --palette-cell-height: 20px;
   --palette-margin-right: 10px;
@@ -275,25 +276,20 @@ body {
 	font-family: Menlo;
 }
 
-#active-color-preview-1 {
+#active-color-preview-1, #active-color-preview-2{
 	position: absolute;
-	width: calc(var(--palette-width)/2.4);
+	width: var(--color-preview-width);
 	height: var(--toolbar-height);
 	border: 1px solid #eef;
-	left: var(--toolbar-width);
 	border-radius: var(--border-radius);
 	margin-left: var(--palette-margin-right);
 	transform: translate(-2px, -1px);
 }
+#active-color-preview-1 {
+	left: var(--toolbar-width);
+}
 #active-color-preview-2 {
-	position: absolute;
-	width: calc(var(--palette-width)/2.4);
-	height: var(--toolbar-height);
-	border: 1px solid #eef;
-	left: calc(var(--toolbar-width) + var(--palette-width)/2);
-	border-radius: var(--border-radius);
-	margin-left: var(--palette-margin-right);
-	transform: translate(-2px, -1px);
+	left: calc(var(--toolbar-width) + var(--palette-width) - var(--color-preview-width));
 }
 .active_indicator {
   border: 2px solid #eef !important;

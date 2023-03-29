@@ -8,10 +8,10 @@ const BUTTON_UP_OUTLINE = "";
 const BUTTON_DOWN_COLOR = "#f0f0f0";
 const BUTTON_DOWN_OUTLINE = "1px solid blue";
 const CANVAS_INIT_COLOR = palette_color_array[0];
-let ACTIVE_COLOR_SELECT = "1nd-Color";
+let ACTIVE_COLOR_SELECT = "firstColor";
 const STATE = {
-    "1nd-Color": palette_color_array[palette_color_array.length - 1],
-    "2nd-Color": palette_color_array[0],
+    "firstColor": palette_color_array[palette_color_array.length - 1],
+    "secondColor": palette_color_array[0],
     "activeTool": "pencil-button",
     "brushDown": false,
     "grid": {
@@ -132,8 +132,8 @@ function Update_Active_Color_Preview()
 {
     let activeColorDiv_1 = document.getElementById("active-color-preview-1");
     let activeColorDiv_2 = document.getElementById("active-color-preview-2");
-    activeColorDiv_1.style.backgroundColor = STATE["1nd-Color"];
-    activeColorDiv_2.style.backgroundColor = STATE["2nd-Color"];
+    activeColorDiv_1.style.backgroundColor = STATE["firstColor"];
+    activeColorDiv_2.style.backgroundColor = STATE["secondColor"];
     Update_Active_Color_Label();
 }
 
@@ -151,16 +151,15 @@ function Swap_Active_Color()
 {
     let activeColorDiv_1 = document.getElementById("active-color-preview-1");
     let activeColorDiv_2 = document.getElementById("active-color-preview-2");
-    if(ACTIVE_COLOR_SELECT === "1nd-Color")
+    if(ACTIVE_COLOR_SELECT === "firstColor")
      {
-       ACTIVE_COLOR_SELECT = "2nd-Color";
+       ACTIVE_COLOR_SELECT = "secondColor";
        activeColorDiv_2.classList.add("active_indicator");
        activeColorDiv_1.classList.remove("active_indicator");
      }
-       
     else
      {
-       ACTIVE_COLOR_SELECT = "1nd-Color";
+       ACTIVE_COLOR_SELECT = "firstColor";
        activeColorDiv_1.classList.add("active_indicator");
        activeColorDiv_2.classList.remove("active_indicator");
      }
