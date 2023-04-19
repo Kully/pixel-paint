@@ -20,6 +20,7 @@ const STATE = {
         "isToggled": false,
     },
     "altKeyDown": false,
+    "delKeyDown": false,
     "selection": {
         "totalCount": 0,
         "startX": 0,
@@ -768,6 +769,9 @@ function Add_EventHandlers_To_Document()
             }
 
         }
+        if(e.code === "Delete"){
+            console.log("delete");
+        }
         if(e.code === "Escape")
         {
             Remove_Selection();
@@ -813,6 +817,11 @@ function Add_EventHandlers_To_Document()
                 Set_Cursor(Tools["selection"]["cursor"]);
             }
         }
+        if(e.code === "Delete"){
+            STATE["delKeyDown"] = false;
+            console.log("DeleteUp");
+        }
+        
         if(e.code == STATE["grid"]["hotkey"])
         {
             STATE["grid"]["KeyG_Counter"] = 0;
