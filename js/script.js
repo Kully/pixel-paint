@@ -20,7 +20,6 @@ const STATE = {
         "isToggled": false,
     },
     "altKeyDown": false,
-    "delKeyDown": false,
     "selection": {
         "totalCount": 0,
         "startX": 0,
@@ -201,6 +200,16 @@ function Reset_Color_Of_Canvas_Cells()
 {
     let canvasCells = document.querySelectorAll(".canvasCell");
     for(let i=0; i<CELLS_PER_ROW*CELLS_PER_ROW; i += 1)
+    {
+        canvasCells[i].style.backgroundColor = CANVAS_INIT_COLOR;
+    }
+}
+
+function Reset_Color_Of_Selection(x)
+{
+    let canvasCells = x;
+    console.log(x)
+    for(let i=0; i<STATE["selection"].startX*STATE["selection"].startY; i += 1)
     {
         canvasCells[i].style.backgroundColor = CANVAS_INIT_COLOR;
     }
@@ -738,6 +747,15 @@ function Activate_Tool(label)
     }
 }
 
+function Delete_Selected()
+{
+    if( STATE["activeTool"] === "selection" ){
+        //console.log(STATE["selection"]);
+        //console.log(Canvas_Pixels_From_Selection());
+        Reset_Color_Of_Selection(Canvas_Pixels_From_Selection())
+    }
+}
+
 function Add_EventHandlers_To_Document()
 {
     function Exit_Drawing_Mode()
@@ -770,7 +788,8 @@ function Add_EventHandlers_To_Document()
 
         }
         if(e.code === "Delete"){
-            console.log("delete");
+            console.log("deleteKeyDown");
+            Delete_Selected();
         }
         if(e.code === "Escape")
         {
@@ -818,7 +837,6 @@ function Add_EventHandlers_To_Document()
             }
         }
         if(e.code === "Delete"){
-            STATE["delKeyDown"] = false;
             console.log("DeleteUp");
         }
         
