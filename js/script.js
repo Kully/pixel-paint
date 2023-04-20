@@ -205,20 +205,27 @@ function Reset_Color_Of_Canvas_Cells()
     }
 }
 
-function Reset_Color_Of_Selection(selection)
+function Delete_Selected()
 {
-    let left = Px_To_Int(selection.style.left);
-    let top = Px_To_Int(selection.style.top);
-    let cell0 = Get_CellInt_From_CellXY(left / CELL_WIDTH_PX, top / CELL_WIDTH_PX);
-    let width = Px_To_Int(selection.style.width) / CELL_WIDTH_PX;
-    let height = Px_To_Int(selection.style.height) / CELL_WIDTH_PX;
-
-    for(let y=0; y<height; y+=1)
-    for(let x=0; x<width; x+=1)
+    const selection = document.getElementById("selection");
+    if( STATE["activeTool"] === "selection")
     {
-        let id = Pad_Start_Int(y * CELLS_PER_ROW + cell0 + x);
-        let cell = document.getElementById(id);
-        cell.style.backgroundColor = CANVAS_INIT_COLOR;
+        if (selection != null)
+        {
+            let left = Px_To_Int(selection.style.left);
+            let top = Px_To_Int(selection.style.top);
+            let cell0 = Get_CellInt_From_CellXY(left / CELL_WIDTH_PX, top / CELL_WIDTH_PX);
+            let width = Px_To_Int(selection.style.width) / CELL_WIDTH_PX;
+            let height = Px_To_Int(selection.style.height) / CELL_WIDTH_PX;
+
+            for(let y=0; y<height; y+=1)
+            for(let x=0; x<width; x+=1)
+            {
+                let id = Pad_Start_Int(y * CELLS_PER_ROW + cell0 + x);
+                let cell = document.getElementById(id);
+                cell.style.backgroundColor = CANVAS_INIT_COLOR;
+            }
+        }
     }
 }
 
@@ -751,18 +758,6 @@ function Activate_Tool(label)
             }
         }
         STATE["activeTool"] = label;
-    }
-}
-
-function Delete_Selected()
-{
-    const selection = document.getElementById("selection");
-    if( STATE["activeTool"] === "selection")
-    {
-        if (selection != null)
-        {
-            Reset_Color_Of_Selection(selection);
-        }
     }
 }
 
