@@ -205,13 +205,20 @@ function Reset_Color_Of_Canvas_Cells()
     }
 }
 
-function Reset_Color_Of_Selection(x)
+function Reset_Color_Of_Selection(selection)
 {
-    let canvasCells = x;
-    console.log(x)
-    for(let i=0; i<STATE["selection"].startX*STATE["selection"].startY; i += 1)
+    let left = Px_To_Int(selection.style.left);
+    let top = Px_To_Int(selection.style.top);
+    let cell0 = Get_CellInt_From_CellXY(left / CELL_WIDTH_PX, top / CELL_WIDTH_PX);
+    let width = Px_To_Int(selection.style.width) / CELL_WIDTH_PX;
+    let height = Px_To_Int(selection.style.height) / CELL_WIDTH_PX;
+
+    for(let y=0; y<height; y+=1)
+    for(let x=0; x<width; x+=1)
     {
-        canvasCells[i].style.backgroundColor = CANVAS_INIT_COLOR;
+        let id = Pad_Start_Int(y * CELLS_PER_ROW + cell0 + x);
+        let cell = document.getElementById(id);
+        cell.style.backgroundColor = CANVAS_INIT_COLOR;
     }
 }
 
@@ -749,10 +756,13 @@ function Activate_Tool(label)
 
 function Delete_Selected()
 {
-    if( STATE["activeTool"] === "selection" ){
-        //console.log(STATE["selection"]);
-        //console.log(Canvas_Pixels_From_Selection());
-        Reset_Color_Of_Selection(Canvas_Pixels_From_Selection())
+    const selection = document.getElementById("selection");
+    if( STATE["activeTool"] === "selection")
+    {
+        if (selection != null)
+        {
+            Reset_Color_Of_Selection(selection);
+        }
     }
 }
 
@@ -787,8 +797,8 @@ function Add_EventHandlers_To_Document()
             }
 
         }
-        if(e.code === "Delete"){
-            console.log("deleteKeyDown");
+        if(e.code === "Delete")
+        {
             Delete_Selected();
         }
         if(e.code === "Escape")
@@ -836,10 +846,6 @@ function Add_EventHandlers_To_Document()
                 Set_Cursor(Tools["selection"]["cursor"]);
             }
         }
-        if(e.code === "Delete"){
-            console.log("DeleteUp");
-        }
-        
         if(e.code == STATE["grid"]["hotkey"])
         {
             STATE["grid"]["KeyG_Counter"] = 0;
