@@ -27,6 +27,7 @@ Make intuitve pixel art in this simple drawing tool written in _vanilla javascri
 | undo             | Z                   |
 | redo             | X                   |
 | color swap       | C                   |
+| delete selected area | Del                 | 
 
 ## Contributing
 
