@@ -22,12 +22,13 @@ Make intuitve pixel art in this simple drawing tool written in _vanilla javascri
 | colorpicker mode | V                   |
 | selection mode   | S                   |
 | copy selection   | ALT+click and drag  |
+| delete selected area | Del or Backspace| 
 | remove selection | Esc                 |
 | toggle grid      | G                   |
 | undo             | Z                   |
 | redo             | X                   |
 | color swap       | C                   |
-| delete selected area | Del                 | 
+
 
 ## Contributing
 
