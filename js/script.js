@@ -208,9 +208,9 @@ function Reset_Color_Of_Canvas_Cells()
 function Delete_Selected()
 {
     const selection = document.getElementById("selection");
-    if( STATE["activeTool"] === "selection")
+    if(STATE["activeTool"] === "selection")
     {
-        if (selection != null)
+        if(selection != null)
         {
             let left = Px_To_Int(selection.style.left);
             let top = Px_To_Int(selection.style.top);
@@ -792,7 +792,7 @@ function Add_EventHandlers_To_Document()
             }
 
         }
-        if(e.code === "Delete")
+        if(e.code === "Delete" || e.code === "Backspace")
         {
             Delete_Selected();
         }
