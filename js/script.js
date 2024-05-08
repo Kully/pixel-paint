@@ -172,7 +172,6 @@ function Update_Active_Color_Label()
 
     STATE[ACTIVE_COLOR_SELECT] = Rgb_To_Hex(STATE[ACTIVE_COLOR_SELECT]);
     activeColorLabel.innerHTML = STATE[ACTIVE_COLOR_SELECT];    // label
-    activeColorLabel.style.color = STATE[ACTIVE_COLOR_SELECT];  // text color
 }
 
 function Add_EventHandlers_To_Palette_Cells()
