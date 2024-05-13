@@ -188,6 +188,17 @@ function Add_EventHandlers_To_Palette_Cells()
     })
 }
 
+function Add_EventHandlers_To_Color_Preview()
+{
+    const allColorPreviews = document.querySelectorAll(".active-color-preview");
+    allColorPreviews.forEach(function(preview){
+        // click color preview to change active
+        preview.addEventListener("click", function(e){
+            Swap_Active_Color()
+        })
+    })
+}
+
 function Canvas_Pixels_From_Selection(selection)
 {
     let selectionLeft = Px_To_Int(selection.style.left);
@@ -876,6 +887,7 @@ Add_EventHandlers_To_Canvas_Cells();
 Add_EventHandlers_To_Canvas_Div();
 Add_EventHandlers_To_Document();
 Add_EventHandlers_To_Palette_Cells();
+Add_EventHandlers_To_Color_Preview();
 Add_EventHandlers_To_Save_Button();
 Add_EventHandlers_To_Toolbar_Buttons();
 
