@@ -119,6 +119,19 @@ function Populate_GBPalette_With_Cells()
     }
 }
 
+function Populate_CustomPalette_With_Cells()
+{
+    const someDiv = document.getElementById("custom-palette-div");
+
+    for(let i=0; i<custom_palette_color_array.length; i += 1)
+    {
+        let cell = document.createElement("div");
+        cell.className = "paletteCell";
+        cell.style.backgroundColor = custom_palette_color_array[i];
+        someDiv.appendChild(cell);
+    }
+}
+
 function Update_Tooltip_Text()
 {
     for(label in Tools)

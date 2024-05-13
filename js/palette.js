@@ -83,3 +83,13 @@ let gb_palette_color_array = [
     "#545454",
     "#000000",
 ];
+
+let custom_palette_color_array = [
+    "#0E121A",
+    "#090909",
+    "#042029",
+    "#082D45",
+    "#0D5675",
+    "#1286B0",
+    "#7BDAE3",
+];

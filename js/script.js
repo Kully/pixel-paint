@@ -38,8 +38,10 @@ const STATE = {
 const PALETTE_DISPLAY = {
     nes: document.getElementById("palette-div"),
     gameboy: document.getElementById("gameboy-palette-div"),
+    custom: document.getElementById("custom-palette-div"),
     radioNES: document.getElementById("radioNES"),
-    radioGameboy: document.getElementById("radioGB")
+    radioGameboy: document.getElementById("radioGB"),
+    radioCustom: document.getElementById("radioCustom"),
 }
 
 
@@ -850,23 +852,38 @@ function Add_EventHandlers_To_Document()
 }
 
 function Select_Palette() {
+    PALETTE_DISPLAY.custom.style.display = "block";
     if(PALETTE_DISPLAY.radioNES.checked)
     {
         PALETTE_DISPLAY.nes.style.display = "block";
         PALETTE_DISPLAY.gameboy.style.display = "none";
+        PALETTE_DISPLAY.custom.style.display = "none";
     }
     else
+    if(PALETTE_DISPLAY.radioGameboy.checked)
     {
         PALETTE_DISPLAY.nes.style.display = "none";
         PALETTE_DISPLAY.gameboy.style.display = "block";
+        PALETTE_DISPLAY.custom.style.display = "none";
     }
+    else
+    if(PALETTE_DISPLAY.radioCustom.checked)
+    {
+        PALETTE_DISPLAY.nes.style.display = "none";
+        PALETTE_DISPLAY.gameboy.style.display = "none";
+        PALETTE_DISPLAY.custom.style.display = "block";
+    }
+
 }
 
 Color_All_Toolbar_Buttons();
 Update_Active_Color_Preview();
 Populate_Canvas_With_Cells();
+
 Populate_Palette_With_Cells();
 Populate_GBPalette_With_Cells();
+Populate_CustomPalette_With_Cells();
+
 Add_Ids_To_Palette_Cells();
 Update_Tooltip_Text();
 Activate_Tool("pencil");
