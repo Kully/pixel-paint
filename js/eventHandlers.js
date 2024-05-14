@@ -254,39 +254,40 @@ function Add_EventHandlers_To_Canvas_Cells() {
 		let x = cell.offsetLeft / CELL_WIDTH_PX;
 		let y = cell.offsetTop / CELL_WIDTH_PX;
 
-		if (previousCursorX !== null && previousCursorY !== null) {
-			// calculate point between previous and current cursor position
-			let dx = x - previousCursorX;
-			let dy = y - previousCursorY;
-			let steps = Math.max(Math.abs(dx), Math.abs(dy));
-			
-			for (let i = 0; i <= steps; i++) {
-				let intermediateX = previousCursorX + (dx * i) / steps;
-				let intermediateY = previousCursorY + (dy * i) / steps;
-				let cellId = Pad_Start_Int(Get_CellInt_From_CellXY(Math.round(intermediateX), Math.round(intermediateY)));
-				let intermediateCell = document.getElementById(cellId);
-				if (intermediateCell) {
-					if (cursor.includes("eraser.png")) {
-						intermediateCell.style.backgroundColor = CANVAS_INIT_COLOR;
-					} else if (cursor.includes("pencil.png")) {
-						intermediateCell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+		if (STATE["brushDown"]) {
+			if (previousCursorX !== null && previousCursorY !== null) {
+				// calculate points between cursor and previous cursor
+				let dx = x - previousCursorX;
+				let dy = y - previousCursorY;
+				let steps = Math.max(Math.abs(dx), Math.abs(dy));
+				
+				for (let i = 0; i <= steps; i++) {
+					let intermediateX = previousCursorX + (dx * i) / steps;
+					let intermediateY = previousCursorY + (dy * i) / steps;
+					let cellId = Pad_Start_Int(Get_CellInt_From_CellXY(Math.round(intermediateX), Math.round(intermediateY)));
+					let intermediateCell = document.getElementById(cellId);
+					if (intermediateCell) {
+						if (cursor.includes("eraser.png")) {
+							intermediateCell.style.backgroundColor = CANVAS_INIT_COLOR;
+						} else if (cursor.includes("pencil.png")) {
+							intermediateCell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						}
 					}
 				}
 			}
-		}
+			if (cursor.includes("eraser.png")) {
+				cell.style.backgroundColor = CANVAS_INIT_COLOR;
+			} else if (cursor.includes("colorpicker.png")) {
+				STATE[ACTIVE_COLOR_SELECT] = cell.style.backgroundColor;
+				Update_Active_Color_Preview();
+				Update_Active_Color_Label();
+			} else if (cursor.includes("pencil.png")) {
+				cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+			}
 
-		if (cursor.includes("eraser.png")) {
-			cell.style.backgroundColor = CANVAS_INIT_COLOR;
-		} else if (cursor.includes("colorpicker.png")) {
-			STATE[ACTIVE_COLOR_SELECT] = cell.style.backgroundColor;
-			Update_Active_Color_Preview();
-			Update_Active_Color_Label();
-		} else if (cursor.includes("pencil.png")) {
-			cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+			previousCursorX = x;
+			previousCursorY = y;
 		}
-
-		previousCursorX = x;
-		previousCursorY = y;
 	}
 
 	function Reset_Previous_Cursor_Position() {
@@ -296,7 +297,11 @@ function Add_EventHandlers_To_Canvas_Cells() {
 
 	const canvasCells = document.querySelectorAll(".canvasCell");
 	for(let i = 0; i < CELLS_PER_ROW * CELLS_PER_ROW; i += 1) {
-		canvasCells[i].addEventListener("mousedown", Selection_Mousedown);
+		canvasCells[i].addEventListener("mousedown", function(e) {
+			Reset_Previous_Cursor_Position(); // Reset mouse position before start a new draw
+			Selection_Mousedown(e);
+			Tool_Action_On_Canvas_Cell(e);
+		});
 		canvasCells[i].addEventListener("mousemove", Selection_Mousemove);
 		canvasCells[i].addEventListener("mouseup", Selection_Mouseup);
 		canvasCells[i].addEventListener("mousedown", Tool_Action_On_Canvas_Cell);
@@ -315,7 +320,7 @@ function Add_EventHandlers_To_Canvas_Cells() {
 
 				Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
 			}
-			Reset_Previous_Cursor_Position(); // reset mouse position
+			Reset_Previous_Cursor_Position(); // Reset mouse position
 		});
 	}
 }
@@ -393,8 +398,7 @@ function Add_EventHandlers_To_Save_Button() {
 	saveButton.addEventListener("click", Save_To_PNG);
 }
 
-function Remove_EventListeners_From_Selection()
-{
+function Remove_EventListeners_From_Selection() {
 	let selection = document.getElementById("selection");
 }
 
@@ -409,6 +413,8 @@ function Add_EventHandlers_To_Document() {
 	}
 
 	document.addEventListener("mouseup", function(e) {
+		Exit_Drawing_Mode();
+		Reset_Previous_Cursor_Position(); // Reset mouse position when mouse up
 		if(e.target.id !== "undo-button" && e.target.id !== "redo-button")
 			Canvas_Pixels_To_History_States_Array(e);
 	});
@@ -444,10 +450,8 @@ function Add_EventHandlers_To_Document() {
 		  Swap_Active_Color();
 		}
 
-		for(label in Tools)
-		{
-			if(e.code === Tools[label]["hotkey"])
-			{
+		for(label in Tools) {
+			if(e.code === Tools[label]["hotkey"]) {
 				Activate_Tool(label);
 			}
 		}
