@@ -1,36 +1,37 @@
+@charset "utf-8";
 :root {
-  --body-height: 556px;
-  --body-margin: 8px;
-  --border-radius: 4px;
-  --button-border-radius: 1px;
+	--body-height: 556px;
+	--body-margin: 8px;
+	--border-radius: 4px;
+	--button-border-radius: 1px;
 
-  --toolbar-width: 512px;
-  --toolbar-height: 32px;
-  --line-height-toolbar-text: 30px;
+	--toolbar-width: 512px;
+	--toolbar-height: 32px;
+	--line-height-toolbar-text: 30px;
 
-  --palette-width: 80px;
-  --color-preview-width: 35px;
-  --palette-cell-width: 20px;
-  --palette-cell-height: 20px;
-  --palette-margin-right: 10px;
-  
-  --tooltiptext-background-color: #ffffc9;
-  --canvas-width: 512px;  /* 16*32 */
-  --canvas-cell-width: 16px;
-  --body-background-color: #161619;
-  --blanket-background-color: #2a2a2a;
-  --toolbar-background-color: #777;
+	--palette-width: 80px;
+	--color-preview-width: 35px;
+	--palette-cell-width: 20px;
+	--palette-cell-height: 20px;
+	--palette-margin-right: 10px;
+	
+	--tooltiptext-background-color: #ffffc9;
+	--canvas-width: 512px;  /* 16*32 */
+	--canvas-cell-width: 16px;
+	--body-background-color: #161619;
+	--blanket-background-color: #2a2a2a;
+	--toolbar-background-color: #777;
 
-  --shadow: 2px 2px 8px #224;
+	--shadow: 2px 2px 8px #224;
 }
 
 .no-select {
   -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Old versions of Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Chrome, Opera and Firefox */
+	-webkit-user-select: none; /* Safari */
+	 -khtml-user-select: none; /* Konqueror HTML */
+	   -moz-user-select: none; /* Old versions of Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+			user-select: none; /* Chrome, Opera and Firefox */
 }
 
 body {
