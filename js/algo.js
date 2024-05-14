@@ -1,4 +1,3 @@
-
 function Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
 {
 	function Cell_Coordinates_Out_Of_Bounds(x, y)
@@ -70,8 +69,4 @@ function Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
 	}
 };
 
-function Bresenham_Algorithm(x0, y0, x1, y1) 
-{
-
-};
 

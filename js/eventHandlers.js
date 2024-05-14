@@ -1,7 +1,8 @@
-function Add_EventHandlers_To_Canvas_Div()
-{
-	function Update_Cursor_Coordinates_On_Screen(e)
-	{
+let previousCursorX = null;
+let previousCursorY = null;
+
+function Add_EventHandlers_To_Canvas_Div() {
+	function Update_Cursor_Coordinates_On_Screen(e) {
 		const coords = Canvas_Cursor_XY(e);
 		let cursorX = coords[0];
 		let cursorY = coords[1];
@@ -24,8 +25,7 @@ function Add_EventHandlers_To_Canvas_Div()
 	canvasDiv.addEventListener("mousemove", Update_Cursor_Coordinates_On_Screen)
 }
 
-function Add_EventHandlers_To_Palette_Cells()
-{
+function Add_EventHandlers_To_Palette_Cells() {
 	const allPaletteCells = document.querySelectorAll(".paletteCell");
 	allPaletteCells.forEach(function(cell){
 		// click palette to change color
@@ -37,8 +37,7 @@ function Add_EventHandlers_To_Palette_Cells()
 	})
 }
 
-function Add_EventHandlers_To_Color_Preview()
-{
+function Add_EventHandlers_To_Color_Preview() {
 	const allColorPreviews = document.querySelectorAll(".active-color-preview");
 	allColorPreviews.forEach(function(preview){
 		// click color preview to change active
@@ -48,10 +47,8 @@ function Add_EventHandlers_To_Color_Preview()
 	})
 }
 
-function Add_EventHandlers_To_Canvas_Cells()
-{
-	function Create_Selection_Div(e)
-	{
+function Add_EventHandlers_To_Canvas_Cells() {
+	function Create_Selection_Div(e) {
 		const canvasDiv = document.getElementById("canvas-div");
 
 		let selection = document.createElement("div");
@@ -67,10 +64,8 @@ function Add_EventHandlers_To_Canvas_Cells()
 		canvasDiv.appendChild(selection);
 	}
 
-	function Selection_Mousedown(e)
-	{
-		if(STATE["activeTool"] === "selection")
-		{
+	function Selection_Mousedown(e) {
+		if(STATE["activeTool"] === "selection") {
 			let selection = document.getElementById("selection");
 			let cursorXY = Canvas_Cursor_XY(e);
 
@@ -96,8 +91,7 @@ function Add_EventHandlers_To_Canvas_Cells()
 		}
 	}
 
-	function Selection_Mousemove(e)
-	{
+	function Selection_Mousemove(e) {
 		let cursor = Get_Cursor();
 		const selection = document.getElementById("selection");
 
@@ -209,8 +203,7 @@ function Add_EventHandlers_To_Canvas_Cells()
 		}
 	}
 
-	function Selection_Mouseup(e)
-	{
+	function Selection_Mouseup(e) {
 		let cursor = Get_Cursor();
 
 		if( STATE["activeTool"] === "selection" &&
@@ -255,30 +248,54 @@ function Add_EventHandlers_To_Canvas_Cells()
 		}
 	}
 
-	function Tool_Action_On_Canvas_Cell(e)
-	{
+	function Tool_Action_On_Canvas_Cell(e) {
 		let cursor = Get_Cursor();
-		if(cursor.includes("eraser.png"))
-		{
-			e.target.style.backgroundColor = CANVAS_INIT_COLOR;
+		let cell = e.target;
+		let x = cell.offsetLeft / CELL_WIDTH_PX;
+		let y = cell.offsetTop / CELL_WIDTH_PX;
+
+		if (previousCursorX !== null && previousCursorY !== null) {
+			// calculate point between previous and current cursor position
+			let dx = x - previousCursorX;
+			let dy = y - previousCursorY;
+			let steps = Math.max(Math.abs(dx), Math.abs(dy));
+			
+			for (let i = 0; i <= steps; i++) {
+				let intermediateX = previousCursorX + (dx * i) / steps;
+				let intermediateY = previousCursorY + (dy * i) / steps;
+				let cellId = Pad_Start_Int(Get_CellInt_From_CellXY(Math.round(intermediateX), Math.round(intermediateY)));
+				let intermediateCell = document.getElementById(cellId);
+				if (intermediateCell) {
+					if (cursor.includes("eraser.png")) {
+						intermediateCell.style.backgroundColor = CANVAS_INIT_COLOR;
+					} else if (cursor.includes("pencil.png")) {
+						intermediateCell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+					}
+				}
+			}
 		}
-		else
-		if(cursor.includes("colorpicker.png"))
-		{
-			STATE[ACTIVE_COLOR_SELECT] = e.target.style.backgroundColor;
+
+		if (cursor.includes("eraser.png")) {
+			cell.style.backgroundColor = CANVAS_INIT_COLOR;
+		} else if (cursor.includes("colorpicker.png")) {
+			STATE[ACTIVE_COLOR_SELECT] = cell.style.backgroundColor;
 			Update_Active_Color_Preview();
 			Update_Active_Color_Label();
+		} else if (cursor.includes("pencil.png")) {
+			cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
 		}
-		else
-		if(cursor.includes("pencil.png"))
-		{
-			e.target.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-		}
+
+		previousCursorX = x;
+		previousCursorY = y;
+	}
+
+	function Reset_Previous_Cursor_Position() {
+		previousCursorX = null;
+		previousCursorY = null;
 	}
 
 	const canvasCells = document.querySelectorAll(".canvasCell");
-	for(let i=0; i<CELLS_PER_ROW*CELLS_PER_ROW; i += 1)
-	{
+	for(let i = 0; i < CELLS_PER_ROW * CELLS_PER_ROW; i += 1) {
 		canvasCells[i].addEventListener("mousedown", Selection_Mousedown);
 		canvasCells[i].addEventListener("mousemove", Selection_Mousemove);
 		canvasCells[i].addEventListener("mouseup", Selection_Mouseup);
@@ -291,22 +308,19 @@ function Add_EventHandlers_To_Canvas_Cells()
 
 		canvasCells[i].addEventListener("mouseup", function(e) {
 			let cursor = Get_Cursor();
-			if(cursor.includes("fill.png"))
-			{
+			if(cursor.includes("fill.png")) {
 				let cell_id = e.target.id;
 				let target_color = e.target.style.backgroundColor;
 				let replacement_color = STATE[ACTIVE_COLOR_SELECT];
 
-				Flood_Fill_Algorithm(cell_id,
-									 target_color,
-									 replacement_color)
+				Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
 			}
+			Reset_Previous_Cursor_Position(); // reset mouse position
 		});
 	}
 }
 
-function Add_EventHandlers_To_Toolbar_Buttons()
-{
+function Add_EventHandlers_To_Toolbar_Buttons() {
 	let toolBtn;
 
 	toolBtn = document.getElementById("undo-button");
@@ -344,10 +358,8 @@ function Add_EventHandlers_To_Toolbar_Buttons()
 	toolBtn.addEventListener("click", Toggle_Grid);
 }
 
-function Add_EventHandlers_To_Save_Button()
-{
-	function Save_To_PNG()
-	{
+function Add_EventHandlers_To_Save_Button() {
+	function Save_To_PNG() {
 		let temporaryCanvas = document.createElement("canvas");
 		let width = CELLS_PER_ROW;
 		let height = CELLS_PER_ROW;
@@ -386,15 +398,12 @@ function Remove_EventListeners_From_Selection()
 	let selection = document.getElementById("selection");
 }
 
-function Add_EventHandlers_To_Document()
-{
-	function Exit_Drawing_Mode()
-	{
+function Add_EventHandlers_To_Document() {
+	function Exit_Drawing_Mode() {
 		STATE["brushDown"] = false;
 	}
 
-	function Canvas_Pixels_To_History_States_Array()
-	{
+	function Canvas_Pixels_To_History_States_Array() {
 		let canvasPixels = Get_Canvas_Pixels();
 		HISTORY_STATES.pushToPtr(canvasPixels);
 	}
@@ -405,8 +414,7 @@ function Add_EventHandlers_To_Document()
 	});
 	document.addEventListener("mouseup", Exit_Drawing_Mode);
 	document.addEventListener("keydown", function(e) {
-		if(e.code === "AltLeft" || e.code === "AltRight")
-		{
+		if(e.code === "AltLeft" || e.code === "AltRight") {
 			STATE["altKeyDown"] = true;
 
 			if( STATE["activeTool"] === "selection" &&
@@ -417,27 +425,22 @@ function Add_EventHandlers_To_Document()
 			}
 
 		}
-		if(e.code === "Delete" || e.code === "Backspace")
-		{
+		if(e.code === "Delete" || e.code === "Backspace") {
 			Delete_Selected();
 		}
-		if(e.code === "Escape")
-		{
+		if(e.code === "Escape") {
 			Remove_Selection();
 			Unlock_Selection();
 			Set_Cursor(Tools[STATE["activeTool"]]["cursor"]);
 			STATE["selection"]["floatingCopy"] = false;
 		}
-		if(e.code === "KeyZ")
-		{
+		if(e.code === "KeyZ") {
 			Undo();
 		}
-		if(e.code === "KeyX")
-		{
+		if(e.code === "KeyX") {
 			Redo();
 		}
-		if(e.code === "KeyC")
-		{
+		if(e.code === "KeyC") {
 		  Swap_Active_Color();
 		}
 
@@ -449,15 +452,13 @@ function Add_EventHandlers_To_Document()
 			}
 		}
 
-		if(e.code === STATE["grid"]["hotkey"])
-		{
+		if(e.code === STATE["grid"]["hotkey"]) {
 			STATE["grid"]["KeyG_Counter"] += 1;
 		}
 	})
 
 	document.addEventListener("keyup", function(e){
-		if(e.code === "AltLeft" || e.code === "AltRight")
-		{
+		if(e.code === "AltLeft" || e.code === "AltRight") {
 			STATE["altKeyDown"] = false;
 			
 			if( STATE["activeTool"] === "selection" &&
@@ -466,16 +467,14 @@ function Add_EventHandlers_To_Document()
 				Set_Cursor(Tools["selection"]["cursor"]);
 			}
 		}
-		if(e.code == STATE["grid"]["hotkey"])
-		{
+		if(e.code == STATE["grid"]["hotkey"]) {
 			STATE["grid"]["KeyG_Counter"] = 0;
 			Toggle_Grid();
 		}
 	})
 }
 
-function Add_EventHandlers()
-{
+function Add_EventHandlers() {
 	Add_EventHandlers_To_Canvas_Cells();
 	Add_EventHandlers_To_Canvas_Div();
 	Add_EventHandlers_To_Document();

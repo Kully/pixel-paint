@@ -25,3 +25,26 @@ const Tools = {
 		"cursor": "crosshair",
 	},
 }
+
+function Activate_Tool(label)
+{
+	let object = Tools[label];
+	let button = document.getElementById(object["button-id"]);
+	let buttonBkgdColor = button.style.backgroundColor;
+
+	if(STATE["activeTool"] !== label)
+	{
+		Set_Cursor(object["cursor"]);
+		Color_Toolbar_Button_As_Down(button);
+
+		for(let l in Tools)
+		{
+			if(Tools[l]["button-id"] !== object["button-id"])
+			{
+				let btn = document.getElementById(Tools[l]["button-id"]);
+				Color_Toolbar_Button_When_Up(btn);
+			}
+		}
+		STATE["activeTool"] = label;
+	}
+}

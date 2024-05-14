@@ -45,7 +45,6 @@ class History_States {
 	}
 }
 
-
 function _Can_Push(thisState, array, ptr)
 {
 	if(ptr === 0)

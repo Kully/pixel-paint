@@ -258,15 +258,8 @@ body {
 	width: var(--palette-cell-height);
 }
 
-#add-color-button:hover
-{
-	box-shadow: 0px 0px 10px aqua;
-}
-
-#add-color-button:active
-{
-	box-shadow: none;
-}
+#add-color-button:hover { box-shadow: 0px 0px 10px aqua; }
+#add-color-button:active { box-shadow: none; }
 
 #active-color-label {
 	position: relative;
@@ -293,7 +286,7 @@ body {
 	left: calc(var(--toolbar-width) + var(--palette-width) - var(--color-preview-width));
 }
 .active_indicator {
-  border: 2px solid #eef !important;
+	border: 2px solid #eef !important;
 }
 
 #canvas-div {
