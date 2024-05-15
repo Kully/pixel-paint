@@ -27,13 +27,13 @@ function Add_EventHandlers_To_Canvas_Div() {
 		STATE["brushDown"] = false;
 		previousCursorX = null;
 		previousCursorY = null;
+		Save_Canvas_State(); // save the state after drawing is completed
 	});
 }
 
 function Add_EventHandlers_To_Palette_Cells() {
 	const allPaletteCells = document.querySelectorAll(".paletteCell");
 	allPaletteCells.forEach(function (cell) {
-		// click palette to change color
 		cell.addEventListener("click", function (e) {
 			STATE[ACTIVE_COLOR_SELECT] = e.target.style.backgroundColor;
 			Update_Active_Color_Preview();
@@ -45,7 +45,6 @@ function Add_EventHandlers_To_Palette_Cells() {
 function Add_EventHandlers_To_Color_Preview() {
 	const allColorPreviews = document.querySelectorAll(".active-color-preview");
 	allColorPreviews.forEach(function (preview) {
-		// click color preview to change active
 		preview.addEventListener("click", function (e) {
 			Swap_Active_Color()
 		})
@@ -104,7 +103,6 @@ function Add_EventHandlers_To_Canvas_Cells() {
 			if (!selection)
 				return;
 
-			// update selection coordinates and dimensions
 			const cursorXY = Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e);
 			if (cursorXY[0] < STATE["selection"]["startX"]) {
 				selection.style.left = cursorXY[0] + "px";
@@ -130,15 +128,13 @@ function Add_EventHandlers_To_Canvas_Cells() {
 				selection.style.height = newHeight + "px";
 			}
 
-			// trim off a pixel for width and height
 			let width = Px_To_Int(selection.style.width);
 			selection.style.width = (width - 1) + "px";
 			let height = Px_To_Int(selection.style.height);
 			selection.style.height = (height - 1) + "px";
 
 			return;
-		} else
-		if ((STATE["activeTool"] === "selection") &&
+		} else if ((STATE["activeTool"] === "selection") &&
 			(STATE["selection"]["isLocked"] === true)) {
 			let cursorXY = Canvas_Cursor_XY(e);
 			if (STATE["selection"]["floatingCopy"] === true) {
@@ -162,13 +158,11 @@ function Add_EventHandlers_To_Canvas_Cells() {
 
 				if (SelectionOffScreen) { return; }
 
-				// canvas state to look before drag start
 				for (let i = 0; i < CELLS_PER_ROW * CELLS_PER_ROW; i += 1) {
 					let cell = document.getElementById(Pad_Start_Int(i, 4));
 					cell.style.backgroundColor = HISTORY_STATES.getCurrentState()[i];
 				}
 
-				// draw selectionCopy to screen
 				let cell0 = Get_CellInt_From_CellXY(selectionLeft + dx,
 					selectionTop + dy);
 				for (let y = 0; y < selectionHeight; y += 1)
@@ -180,12 +174,10 @@ function Add_EventHandlers_To_Canvas_Cells() {
 						cell.style.backgroundColor = color;
 					}
 
-				// record new left and right
 				STATE["selectionCopy"]["left"] = selectionLeft + dx;
 				STATE["selectionCopy"]["top"] = selectionTop + dy;
-			} else
-			if ((CursorXY_In_Selection(cursorXY, selection) &&
-					STATE["altKeyDown"] === true)) {
+			} else if ((CursorXY_In_Selection(cursorXY, selection) &&
+				STATE["altKeyDown"] === true)) {
 				Set_Cursor("move");
 			}
 		}
@@ -211,14 +203,12 @@ function Add_EventHandlers_To_Canvas_Cells() {
 					Alert_User("<i>Alt</i> to copy");
 				STATE["selection"]["totalCount"] += 1;
 			}
-		} else
-		if (STATE["activeTool"] === "selection" &&
+		} else if (STATE["activeTool"] === "selection" &&
 			STATE["selection"]["isLocked"] === true) {
 			let selection = document.getElementById("selection");
 			let selectionWidth = selection.style.width;
 			let selectionHeight = selection.style.height;
 
-			// redraw selection
 			selection.style.left = STATE["selectionCopy"]["left"] * CELL_WIDTH_PX + "px";
 			selection.style.top = STATE["selectionCopy"]["top"] * CELL_WIDTH_PX + "px";
 			STATE["selection"]["floatingCopy"] = false;
@@ -235,7 +225,6 @@ function Add_EventHandlers_To_Canvas_Cells() {
 		let x = cell.offsetLeft / CELL_WIDTH_PX;
 		let y = cell.offsetTop / CELL_WIDTH_PX;
 
-		// using bresenham algorithm to draw line between cursor and cell
 		if (previousCursorX !== null && previousCursorY !== null) {
 			Bresenham_Line_Algorithm(previousCursorX, previousCursorY, x, y, function (intermediateCell) {
 				if (cursor.includes("eraser.png")) {
@@ -268,7 +257,7 @@ function Add_EventHandlers_To_Canvas_Cells() {
 	const canvasCells = document.querySelectorAll(".canvasCell");
 	for (let i = 0; i < CELLS_PER_ROW * CELLS_PER_ROW; i += 1) {
 		canvasCells[i].addEventListener("mousedown", function (e) {
-			Reset_Previous_Cursor_Position(); // reset mouse position when mouse down
+			Reset_Previous_Cursor_Position();
 			Selection_Mousedown(e);
 			Tool_Action_On_Canvas_Cell(e);
 		});
@@ -277,8 +266,9 @@ function Add_EventHandlers_To_Canvas_Cells() {
 		canvasCells[i].addEventListener("mousedown", Tool_Action_On_Canvas_Cell);
 
 		canvasCells[i].addEventListener("mousemove", function (e) {
-			if (STATE["brushDown"])
+			if (STATE["brushDown"]) {
 				Tool_Action_On_Canvas_Cell(e);
+			}
 		});
 
 		canvasCells[i].addEventListener("mouseup", function (e) {
@@ -290,15 +280,16 @@ function Add_EventHandlers_To_Canvas_Cells() {
 
 				Flood_Fill_Algorithm(cell_id, target_color, replacement_color);
 			}
-			Reset_Previous_Cursor_Position(); // reset mouse position when mouse up
+			Reset_Previous_Cursor_Position();
 		});
 	}
 
 	document.addEventListener("mouseup", function (e) {
 		Exit_Drawing_Mode();
-		Reset_Previous_Cursor_Position(); // reset mouse position when mouse up
-		if (e.target.id !== "undo-button" && e.target.id !== "redo-button")
-			Canvas_Pixels_To_History_States_Array(e);
+		Reset_Previous_Cursor_Position();
+		if (e.target.id !== "undo-button" && e.target.id !== "redo-button") {
+			Save_Canvas_State();
+		}
 	});
 }
 
@@ -309,7 +300,9 @@ function Add_EventHandlers_To_Toolbar_Buttons() {
 	toolBtn.addEventListener("click", Undo);
 
 	toolBtn = document.getElementById("redo-button");
-	toolBtn.addEventListener("click", Redo);
+	toolBtn.addEventListener("click", function () {
+		Redo();
+	});
 
 	toolBtn = document.getElementById("pencil-button");
 	toolBtn.addEventListener("click", function (e) {
@@ -384,16 +377,12 @@ function Add_EventHandlers_To_Document() {
 		STATE["brushDown"] = false;
 	}
 
-	function Canvas_Pixels_To_History_States_Array() {
-		let canvasPixels = Get_Canvas_Pixels();
-		HISTORY_STATES.pushToPtr(canvasPixels);
-	}
-
 	document.addEventListener("mouseup", function (e) {
 		Exit_Drawing_Mode();
-		Reset_Previous_Cursor_Position(); // reset mouse position when mouse up
-		if (e.target.id !== "undo-button" && e.target.id !== "redo-button")
-			Canvas_Pixels_To_History_States_Array(e);
+		Reset_Previous_Cursor_Position();
+		if (e.target.id !== "undo-button" && e.target.id !== "redo-button") {
+			Save_Canvas_State();
+		}
 	});
 	document.addEventListener("mouseup", Exit_Drawing_Mode);
 	document.addEventListener("keydown", function (e) {

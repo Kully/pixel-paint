@@ -9,20 +9,18 @@ class History_States {
 		return this.array[this.ptr];
 	}
 	decPtr() {
-		if (this.ptr <= 0)
-			return;
-
-		this.ptr--;
+		if (this.ptr > 0) {
+			this.ptr--;
+		}
 	}
 	incPtr() {
-		if (this.ptr >= this.array.length - 1)
-			return;
-
-		this.ptr += 1;
+		if (this.ptr < this.array.length - 1) {
+			this.ptr++;
+		}
 	}
 	pushToPtr(item) {
-		if (_Can_Push(item, this.array, this.ptr)) {
-			this.ptr += 1;
+		if (this._canPush(item)) {
+			this.ptr++;
 			this.array.splice(this.ptr, 0, item);
 		}
 
@@ -31,7 +29,14 @@ class History_States {
 
 		this._manageSize();
 	}
-	_manageSize(item) {
+	_canPush(item) {
+		if (this.ptr === 0) {
+			return true;
+		}
+		return !_arraysAreEqual(this.array[this.ptr], item);
+	}
+
+	_manageSize() {
 		if (this.array.length > this.maxSize) {
 			this.array.shift();
 			this.ptr--;
@@ -45,31 +50,24 @@ class History_States {
 	}
 }
 
-function _Can_Push(thisState, array, ptr)
+function _arraysAreEqual(a, b)
 {
-	if(ptr === 0)
-	{
+	if (a === b) {
 		return true;
 	}
-	if(_Arrays_Are_Equal(thisState, array[ptr]) === false)
-	{
-		return true;
-	}
-	
-	return false;
-}
-
-function _Arrays_Are_Equal(a, b)
-{
-	if(a === b)
-		return true;
-	if(a.length !== b.length)
+	if (a.length !== b.length) {
 		return false;
-
-	for(let i=0; i<a.length; i += 1)
-	{
-		if(a[i] !== b[i])
+	}
+	for (let i = 0; i < a.length; i++) {
+		if (a[i] !== b[i]) {
 			return false;
+		}
 	}
 	return true;
+}
+
+function Save_Canvas_State()
+{
+	let canvasPixels = Get_Canvas_Pixels();
+	HISTORY_STATES.pushToPtr(canvasPixels);
 }

@@ -315,3 +315,4 @@ Select_Palette();
 Add_EventHandlers();
 
 const HISTORY_STATES = new History_States(MAX_UNDOS);
+Save_Canvas_State();
