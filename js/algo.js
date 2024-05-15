@@ -69,4 +69,29 @@ function Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
 	}
 };
 
+function Bresenham_Line_Algorithm(x0, y0, x1, y1, action)
+{
+	let dx = Math.abs(x1 - x0);
+	let dy = Math.abs(y1 - y0);
+	let sx = (x0 < x1) ? 1 : -1;
+	let sy = (y0 < y1) ? 1 : -1;
+	let err = dx - dy;
 
+	while (true) {
+		let cellId = Pad_Start_Int(Get_CellInt_From_CellXY(Math.round(x0), Math.round(y0)));
+		let cell = document.getElementById(cellId);
+		if (cell) {
+			action(cell);
+		}
+		if (Math.round(x0) === Math.round(x1) && Math.round(y0) === Math.round(y1)) break;
+		let e2 = 2 * err;
+		if (e2 > -dy) {
+			err -= dy;
+			x0 += sx;
+		}
+		if (e2 < dx) {
+			err += dx;
+			y0 += sy;
+		}
+	}
+};

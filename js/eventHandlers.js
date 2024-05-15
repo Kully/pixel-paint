@@ -18,18 +18,23 @@ function Add_EventHandlers_To_Canvas_Div() {
 	}
 
 	const canvasDiv = document.getElementById("canvas-div");
-	canvasDiv.addEventListener("mousedown", function() {
+	canvasDiv.addEventListener("mousedown", function () {
 		STATE["brushDown"] = true;
 	});
 
-	canvasDiv.addEventListener("mousemove", Update_Cursor_Coordinates_On_Screen)
+	canvasDiv.addEventListener("mousemove", Update_Cursor_Coordinates_On_Screen);
+	canvasDiv.addEventListener("mouseup", function () {
+		STATE["brushDown"] = false;
+		previousCursorX = null;
+		previousCursorY = null;
+	});
 }
 
 function Add_EventHandlers_To_Palette_Cells() {
 	const allPaletteCells = document.querySelectorAll(".paletteCell");
-	allPaletteCells.forEach(function(cell){
+	allPaletteCells.forEach(function (cell) {
 		// click palette to change color
-		cell.addEventListener("click", function(e){
+		cell.addEventListener("click", function (e) {
 			STATE[ACTIVE_COLOR_SELECT] = e.target.style.backgroundColor;
 			Update_Active_Color_Preview();
 			Update_Active_Color_Label();
@@ -39,9 +44,9 @@ function Add_EventHandlers_To_Palette_Cells() {
 
 function Add_EventHandlers_To_Color_Preview() {
 	const allColorPreviews = document.querySelectorAll(".active-color-preview");
-	allColorPreviews.forEach(function(preview){
+	allColorPreviews.forEach(function (preview) {
 		// click color preview to change active
-		preview.addEventListener("click", function(e){
+		preview.addEventListener("click", function (e) {
 			Swap_Active_Color()
 		})
 	})
@@ -65,15 +70,14 @@ function Add_EventHandlers_To_Canvas_Cells() {
 	}
 
 	function Selection_Mousedown(e) {
-		if(STATE["activeTool"] === "selection") {
+		if (STATE["activeTool"] === "selection") {
 			let selection = document.getElementById("selection");
 			let cursorXY = Canvas_Cursor_XY(e);
 
-			if( (STATE["altKeyDown"] === true) &&
+			if ((STATE["altKeyDown"] === true) &&
 				(STATE["selection"]["isLocked"] === true) &&
 				(selection) &&  // selection in DOM
-				CursorXY_In_Selection(cursorXY, selection) )
-			{
+				CursorXY_In_Selection(cursorXY, selection)) {
 				STATE["selection"]["floatingCopy"] = true;
 
 				let colorArray = Canvas_Pixels_From_Selection();
@@ -81,9 +85,7 @@ function Add_EventHandlers_To_Canvas_Cells() {
 
 				STATE["selectionCopy"]["initCursorX"] = cursorXY[0] / CELL_WIDTH_PX;
 				STATE["selectionCopy"]["initCursorY"] = cursorXY[1] / CELL_WIDTH_PX;
-			}
-			else
-			{
+			} else {
 				Remove_Selection();
 				Unlock_Selection();
 				Create_Selection_Div(e);
@@ -95,23 +97,19 @@ function Add_EventHandlers_To_Canvas_Cells() {
 		let cursor = Get_Cursor();
 		const selection = document.getElementById("selection");
 
-		if( (STATE["activeTool"] === "selection") &&
-			(STATE["selection"]["isLocked"] === false) )
-		{
+		if ((STATE["activeTool"] === "selection") &&
+			(STATE["selection"]["isLocked"] === false)) {
 			const canvasDiv = document.getElementById("canvas-div");
 
-			if(!selection)
+			if (!selection)
 				return;
 
 			// update selection coordinates and dimensions
 			const cursorXY = Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e);
-			if(cursorXY[0] < STATE["selection"]["startX"])
-			{
+			if (cursorXY[0] < STATE["selection"]["startX"]) {
 				selection.style.left = cursorXY[0] + "px";
 				selection.style.width = Math.abs(cursorXY[0] - STATE["selection"]["startX"]) + "px";
-			}
-			else
-			{
+			} else {
 				let newWidth = cursorXY[0] - Px_To_Int(selection.style.left);
 				newWidth = Math.ceil(newWidth);
 				newWidth = newWidth - (newWidth % CELL_WIDTH_PX);
@@ -120,13 +118,10 @@ function Add_EventHandlers_To_Canvas_Cells() {
 				selection.style.width = newWidth + "px";
 			}
 
-			if(cursorXY[1] < STATE["selection"]["startY"])
-			{
+			if (cursorXY[1] < STATE["selection"]["startY"]) {
 				selection.style.top = cursorXY[1] + "px";
 				selection.style.height = Math.abs(cursorXY[1] - STATE["selection"]["startY"]) + "px";
-			}
-			else
-			{
+			} else {
 				let newHeight = cursorXY[1] - Px_To_Int(selection.style.top);
 				newHeight = Math.floor(newHeight);
 				newHeight = newHeight - (newHeight % CELL_WIDTH_PX);
@@ -142,24 +137,21 @@ function Add_EventHandlers_To_Canvas_Cells() {
 			selection.style.height = (height - 1) + "px";
 
 			return;
-		}
-		else
-		if( (STATE["activeTool"] === "selection") &&
-			(STATE["selection"]["isLocked"] === true) )
-		{
+		} else
+		if ((STATE["activeTool"] === "selection") &&
+			(STATE["selection"]["isLocked"] === true)) {
 			let cursorXY = Canvas_Cursor_XY(e);
-			if( STATE["selection"]["floatingCopy"] === true )
-			{
+			if (STATE["selection"]["floatingCopy"] === true) {
 				Set_Cursor("move");
 
 				// drag copied selection
-				let dx = (cursorXY[0]/CELL_WIDTH_PX) - STATE["selectionCopy"]["initCursorX"];
-				let dy = (cursorXY[1]/CELL_WIDTH_PX) - STATE["selectionCopy"]["initCursorY"];
+				let dx = (cursorXY[0] / CELL_WIDTH_PX) - STATE["selectionCopy"]["initCursorX"];
+				let dy = (cursorXY[1] / CELL_WIDTH_PX) - STATE["selectionCopy"]["initCursorY"];
 				let selectionLeft = Px_To_Int(selection.style.left) / CELL_WIDTH_PX;
 				let selectionTop = Px_To_Int(selection.style.top) / CELL_WIDTH_PX;
 
-				let selectionWidth = (Px_To_Int(selection.style.width)+1) / CELL_WIDTH_PX;
-				let selectionHeight = (Px_To_Int(selection.style.height)+1) / CELL_WIDTH_PX;
+				let selectionWidth = (Px_To_Int(selection.style.width) + 1) / CELL_WIDTH_PX;
+				let selectionHeight = (Px_To_Int(selection.style.height) + 1) / CELL_WIDTH_PX;
 
 				let SelectionOffScreen = (
 					(selectionTop + dy < 0) ||
@@ -168,36 +160,32 @@ function Add_EventHandlers_To_Canvas_Cells() {
 					(selectionLeft + dx < 0)
 				);
 
-				if( SelectionOffScreen ) { return; }
+				if (SelectionOffScreen) { return; }
 
 				// canvas state to look before drag start
-				for(let i=0; i<CELLS_PER_ROW*CELLS_PER_ROW; i+=1)
-				{
-					let cell = document.getElementById(Pad_Start_Int(i,4));
+				for (let i = 0; i < CELLS_PER_ROW * CELLS_PER_ROW; i += 1) {
+					let cell = document.getElementById(Pad_Start_Int(i, 4));
 					cell.style.backgroundColor = HISTORY_STATES.getCurrentState()[i];
 				}
 
 				// draw selectionCopy to screen
 				let cell0 = Get_CellInt_From_CellXY(selectionLeft + dx,
-													selectionTop + dy);
-				for(let y=0; y<selectionHeight; y+=1)
-				for(let x=0; x<selectionWidth; x+=1)
-				{
-					let id = Pad_Start_Int(cell0 + y*CELLS_PER_ROW + x);
-					let cell = document.getElementById(id);
-					let idx = x + y*selectionWidth;
-					let color = STATE["selectionCopy"]["colorArray"][idx];
-					cell.style.backgroundColor = color;
-				}
+					selectionTop + dy);
+				for (let y = 0; y < selectionHeight; y += 1)
+					for (let x = 0; x < selectionWidth; x += 1) {
+						let id = Pad_Start_Int(cell0 + y * CELLS_PER_ROW + x);
+						let cell = document.getElementById(id);
+						let idx = x + y * selectionWidth;
+						let color = STATE["selectionCopy"]["colorArray"][idx];
+						cell.style.backgroundColor = color;
+					}
 
 				// record new left and right
 				STATE["selectionCopy"]["left"] = selectionLeft + dx;
 				STATE["selectionCopy"]["top"] = selectionTop + dy;
-			}
-			else
-			if( (CursorXY_In_Selection(cursorXY, selection) &&
-				 STATE["altKeyDown"] === true) )
-			{
+			} else
+			if ((CursorXY_In_Selection(cursorXY, selection) &&
+					STATE["altKeyDown"] === true)) {
 				Set_Cursor("move");
 			}
 		}
@@ -206,32 +194,26 @@ function Add_EventHandlers_To_Canvas_Cells() {
 	function Selection_Mouseup(e) {
 		let cursor = Get_Cursor();
 
-		if( STATE["activeTool"] === "selection" &&
-			STATE["selection"]["isLocked"] === false )
-		{
+		if (STATE["activeTool"] === "selection" &&
+			STATE["selection"]["isLocked"] === false) {
 			let selection = document.getElementById("selection");
 			let selectionWidth = selection.style.width;
 			let selectionHeight = selection.style.height;
 
-			if( (selectionWidth === "0px") || (selectionWidth === "") ||
-				(selectionHeight === "0px") || (selectionHeight === "") )
-			{
+			if ((selectionWidth === "0px") || (selectionWidth === "") ||
+				(selectionHeight === "0px") || (selectionHeight === "")) {
 				Remove_Selection();
 				Unlock_Selection();
-			}
-			else
-			{
+			} else {
 				Selection_Locked_To_Grid();
 
-				if(STATE["selection"]["totalCount"] < 3)
+				if (STATE["selection"]["totalCount"] < 3)
 					Alert_User("<i>Alt</i> to copy");
 				STATE["selection"]["totalCount"] += 1;
 			}
-		}
-		else
-		if( STATE["activeTool"] === "selection" &&
-			STATE["selection"]["isLocked"] === true )
-		{
+		} else
+		if (STATE["activeTool"] === "selection" &&
+			STATE["selection"]["isLocked"] === true) {
 			let selection = document.getElementById("selection");
 			let selectionWidth = selection.style.width;
 			let selectionHeight = selection.style.height;
@@ -241,8 +223,7 @@ function Add_EventHandlers_To_Canvas_Cells() {
 			selection.style.top = STATE["selectionCopy"]["top"] * CELL_WIDTH_PX + "px";
 			STATE["selection"]["floatingCopy"] = false;
 
-			if(STATE["altKeyDown"] === false)
-			{
+			if (STATE["altKeyDown"] === false) {
 				Set_Cursor(Tools["selection"]["cursor"]);
 			}
 		}
@@ -254,40 +235,29 @@ function Add_EventHandlers_To_Canvas_Cells() {
 		let x = cell.offsetLeft / CELL_WIDTH_PX;
 		let y = cell.offsetTop / CELL_WIDTH_PX;
 
-		if (STATE["brushDown"]) {
-			if (previousCursorX !== null && previousCursorY !== null) {
-				// calculate points between cursor and previous cursor
-				let dx = x - previousCursorX;
-				let dy = y - previousCursorY;
-				let steps = Math.max(Math.abs(dx), Math.abs(dy));
-				
-				for (let i = 0; i <= steps; i++) {
-					let intermediateX = previousCursorX + (dx * i) / steps;
-					let intermediateY = previousCursorY + (dy * i) / steps;
-					let cellId = Pad_Start_Int(Get_CellInt_From_CellXY(Math.round(intermediateX), Math.round(intermediateY)));
-					let intermediateCell = document.getElementById(cellId);
-					if (intermediateCell) {
-						if (cursor.includes("eraser.png")) {
-							intermediateCell.style.backgroundColor = CANVAS_INIT_COLOR;
-						} else if (cursor.includes("pencil.png")) {
-							intermediateCell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-						}
-					}
+		// using bresenham algorithm to draw line between cursor and cell
+		if (previousCursorX !== null && previousCursorY !== null) {
+			Bresenham_Line_Algorithm(previousCursorX, previousCursorY, x, y, function (intermediateCell) {
+				if (cursor.includes("eraser.png")) {
+					intermediateCell.style.backgroundColor = CANVAS_INIT_COLOR;
+				} else if (cursor.includes("pencil.png")) {
+					intermediateCell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
 				}
-			}
-			if (cursor.includes("eraser.png")) {
-				cell.style.backgroundColor = CANVAS_INIT_COLOR;
-			} else if (cursor.includes("colorpicker.png")) {
-				STATE[ACTIVE_COLOR_SELECT] = cell.style.backgroundColor;
-				Update_Active_Color_Preview();
-				Update_Active_Color_Label();
-			} else if (cursor.includes("pencil.png")) {
-				cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-			}
-
-			previousCursorX = x;
-			previousCursorY = y;
+			});
 		}
+
+		if (cursor.includes("eraser.png")) {
+			cell.style.backgroundColor = CANVAS_INIT_COLOR;
+		} else if (cursor.includes("colorpicker.png")) {
+			STATE[ACTIVE_COLOR_SELECT] = cell.style.backgroundColor;
+			Update_Active_Color_Preview();
+			Update_Active_Color_Label();
+		} else if (cursor.includes("pencil.png")) {
+			cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+		}
+
+		previousCursorX = x;
+		previousCursorY = y;
 	}
 
 	function Reset_Previous_Cursor_Position() {
@@ -296,9 +266,9 @@ function Add_EventHandlers_To_Canvas_Cells() {
 	}
 
 	const canvasCells = document.querySelectorAll(".canvasCell");
-	for(let i = 0; i < CELLS_PER_ROW * CELLS_PER_ROW; i += 1) {
-		canvasCells[i].addEventListener("mousedown", function(e) {
-			Reset_Previous_Cursor_Position(); // Reset mouse position before start a new draw
+	for (let i = 0; i < CELLS_PER_ROW * CELLS_PER_ROW; i += 1) {
+		canvasCells[i].addEventListener("mousedown", function (e) {
+			Reset_Previous_Cursor_Position(); // reset mouse position when mouse down
 			Selection_Mousedown(e);
 			Tool_Action_On_Canvas_Cell(e);
 		});
@@ -306,23 +276,30 @@ function Add_EventHandlers_To_Canvas_Cells() {
 		canvasCells[i].addEventListener("mouseup", Selection_Mouseup);
 		canvasCells[i].addEventListener("mousedown", Tool_Action_On_Canvas_Cell);
 
-		canvasCells[i].addEventListener("mousemove", function(e) {
-			if(STATE["brushDown"])
-				Tool_Action_On_Canvas_Cell(e)
+		canvasCells[i].addEventListener("mousemove", function (e) {
+			if (STATE["brushDown"])
+				Tool_Action_On_Canvas_Cell(e);
 		});
 
-		canvasCells[i].addEventListener("mouseup", function(e) {
+		canvasCells[i].addEventListener("mouseup", function (e) {
 			let cursor = Get_Cursor();
-			if(cursor.includes("fill.png")) {
+			if (cursor.includes("fill.png")) {
 				let cell_id = e.target.id;
 				let target_color = e.target.style.backgroundColor;
 				let replacement_color = STATE[ACTIVE_COLOR_SELECT];
 
-				Flood_Fill_Algorithm(cell_id, target_color, replacement_color)
+				Flood_Fill_Algorithm(cell_id, target_color, replacement_color);
 			}
-			Reset_Previous_Cursor_Position(); // Reset mouse position
+			Reset_Previous_Cursor_Position(); // reset mouse position when mouse up
 		});
 	}
+
+	document.addEventListener("mouseup", function (e) {
+		Exit_Drawing_Mode();
+		Reset_Previous_Cursor_Position(); // reset mouse position when mouse up
+		if (e.target.id !== "undo-button" && e.target.id !== "redo-button")
+			Canvas_Pixels_To_History_States_Array(e);
+	});
 }
 
 function Add_EventHandlers_To_Toolbar_Buttons() {
@@ -335,27 +312,27 @@ function Add_EventHandlers_To_Toolbar_Buttons() {
 	toolBtn.addEventListener("click", Redo);
 
 	toolBtn = document.getElementById("pencil-button");
-	toolBtn.addEventListener("click", function(e) {
+	toolBtn.addEventListener("click", function (e) {
 		Activate_Tool("pencil");
 	})
 
 	toolBtn = document.getElementById("fill-button");
-	toolBtn.addEventListener("click", function(e) {
+	toolBtn.addEventListener("click", function (e) {
 		Activate_Tool("fill");
 	})
 
 	toolBtn = document.getElementById("eraser-button");
-	toolBtn.addEventListener("click", function(e) {
+	toolBtn.addEventListener("click", function (e) {
 		Activate_Tool("eraser");
 	})
 
 	toolBtn = document.getElementById("selection-button");
-	toolBtn.addEventListener("click", function(e) {
+	toolBtn.addEventListener("click", function (e) {
 		Activate_Tool("selection");
 	})
 
 	toolBtn = document.getElementById("colorpicker-button");
-	toolBtn.addEventListener("click", function(e) {
+	toolBtn.addEventListener("click", function (e) {
 		Activate_Tool("colorpicker");
 	})
 
@@ -368,17 +345,17 @@ function Add_EventHandlers_To_Save_Button() {
 		let temporaryCanvas = document.createElement("canvas");
 		let width = CELLS_PER_ROW;
 		let height = CELLS_PER_ROW;
-		
+
 		temporaryCanvas.width = width;
 		temporaryCanvas.height = height;
-		
+
 		let context = temporaryCanvas.getContext("2d");
 		let imageData = context.createImageData(width, height);
 
 		let pixelIndex = 0;
-		Get_Canvas_Pixels().forEach(function(pixel){
+		Get_Canvas_Pixels().forEach(function (pixel) {
 			let rgbArray = Get_Array_From_Rgb(pixel);
-			imageData.data[pixelIndex    ] = rgbArray[0];
+			imageData.data[pixelIndex] = rgbArray[0];
 			imageData.data[pixelIndex + 1] = rgbArray[1];
 			imageData.data[pixelIndex + 2] = rgbArray[2];
 			imageData.data[pixelIndex + 3] = 255;
@@ -412,66 +389,64 @@ function Add_EventHandlers_To_Document() {
 		HISTORY_STATES.pushToPtr(canvasPixels);
 	}
 
-	document.addEventListener("mouseup", function(e) {
+	document.addEventListener("mouseup", function (e) {
 		Exit_Drawing_Mode();
-		Reset_Previous_Cursor_Position(); // Reset mouse position when mouse up
-		if(e.target.id !== "undo-button" && e.target.id !== "redo-button")
+		Reset_Previous_Cursor_Position(); // reset mouse position when mouse up
+		if (e.target.id !== "undo-button" && e.target.id !== "redo-button")
 			Canvas_Pixels_To_History_States_Array(e);
 	});
 	document.addEventListener("mouseup", Exit_Drawing_Mode);
-	document.addEventListener("keydown", function(e) {
-		if(e.code === "AltLeft" || e.code === "AltRight") {
+	document.addEventListener("keydown", function (e) {
+		if (e.code === "AltLeft" || e.code === "AltRight") {
 			STATE["altKeyDown"] = true;
 
-			if( STATE["activeTool"] === "selection" &&
+			if (STATE["activeTool"] === "selection" &&
 				STATE["selection"]["isLocked"] === true &&
-				STATE["selection"]["isLocked"] === true)
-			{
+				STATE["selection"]["isLocked"] === true) {
 				Set_Cursor("move");
 			}
 
 		}
-		if(e.code === "Delete" || e.code === "Backspace") {
+		if (e.code === "Delete" || e.code === "Backspace") {
 			Delete_Selected();
 		}
-		if(e.code === "Escape") {
+		if (e.code === "Escape") {
 			Remove_Selection();
 			Unlock_Selection();
 			Set_Cursor(Tools[STATE["activeTool"]]["cursor"]);
 			STATE["selection"]["floatingCopy"] = false;
 		}
-		if(e.code === "KeyZ") {
+		if (e.code === "KeyZ") {
 			Undo();
 		}
-		if(e.code === "KeyX") {
+		if (e.code === "KeyX") {
 			Redo();
 		}
-		if(e.code === "KeyC") {
-		  Swap_Active_Color();
+		if (e.code === "KeyC") {
+			Swap_Active_Color();
 		}
 
-		for(label in Tools) {
-			if(e.code === Tools[label]["hotkey"]) {
+		for (label in Tools) {
+			if (e.code === Tools[label]["hotkey"]) {
 				Activate_Tool(label);
 			}
 		}
 
-		if(e.code === STATE["grid"]["hotkey"]) {
+		if (e.code === STATE["grid"]["hotkey"]) {
 			STATE["grid"]["KeyG_Counter"] += 1;
 		}
 	})
 
-	document.addEventListener("keyup", function(e){
-		if(e.code === "AltLeft" || e.code === "AltRight") {
+	document.addEventListener("keyup", function (e) {
+		if (e.code === "AltLeft" || e.code === "AltRight") {
 			STATE["altKeyDown"] = false;
-			
-			if( STATE["activeTool"] === "selection" &&
-				STATE["selection"]["floatingCopy"] === false)
-			{
+
+			if (STATE["activeTool"] === "selection" &&
+				STATE["selection"]["floatingCopy"] === false) {
 				Set_Cursor(Tools["selection"]["cursor"]);
 			}
 		}
-		if(e.code == STATE["grid"]["hotkey"]) {
+		if (e.code == STATE["grid"]["hotkey"]) {
 			STATE["grid"]["KeyG_Counter"] = 0;
 			Toggle_Grid();
 		}
