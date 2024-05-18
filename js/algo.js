@@ -53,32 +53,43 @@ function Flood_Fill_Algorithm(cell_id, target_color, replacement_color) {
 	}
 };
 
-function Bresenham_Line_Algorithm(x0, y0, x1, y1, callback)
+/**
+ * Draws a line using the Bresenham's line algorithm. The line is drawn from (startX, startY) to (endX, endY)
+ *
+ * @param {number} startX - The x-coordinate of the starting point.
+ * @param {number} startY - The y-coordinate of the starting point.
+ * @param {number} endX - The x-coordinate of the ending point.
+ * @param {number} endY - The y-coordinate of the ending point.
+ * @param {function} callback - The callback function to be called for each cell on the line.
+ * @return {void} This function does not return a value.
+ */
+function Bresenham_Line_Algorithm(startX, startY, endX, endY, callback)
 {
-	let dx = Math.abs(x1 - x0);
-	let dy = Math.abs(y1 - y0);
-	let sx = (x0 < x1) ? 1 : -1;
-	let sy = (y0 < y1) ? 1 : -1;
-	let err = dx - dy;
+	let deltaX = Math.abs(endX - startX);
+	let deltaY = Math.abs(endY - startY);
+	let stepX = (startX < endX) ? 1 : -1;
+	let stepY = (startY < endY) ? 1 : -1;
+	let error = deltaX - deltaY;
 
-	while (true) {
-		let cellId = Pad_Start_Int(Get_CellInt_From_CellXY(Math.round(x0), Math.round(y0)));
-		let intermediateCell = document.getElementById(cellId);
+	while (true)
+	{
+		let cellId = Pad_Start_Int(Get_CellInt_From_CellXY(Math.round(startX), Math.round(startY)));
+		let currentCell = document.getElementById(cellId);
 		
-		if (intermediateCell) {
-			callback(intermediateCell);
+		if (currentCell) {
+			callback(currentCell);
 		}
-		if (Math.round(x0) === Math.round(x1) &&
-			Math.round(y0) === Math.round(y1)) break;
+		if (Math.round(startX) === Math.round(endX) &&
+			Math.round(startY) === Math.round(endY)) break;
 
-		let e2 = 2 * err;
-		if (e2 > -dy) {
-			err -= dy;
-			x0 += sx;
+		let error2 = 2 * error;
+		if (error2 > -deltaY) {
+			error -= deltaY;
+			startX += stepX;
 		}
-		if (e2 < dx) {
-			err += dx;
-			y0 += sy;
+		if (error2 < deltaX) {
+			error += deltaX;
+			startY += stepY;
 		}
 	}
 };

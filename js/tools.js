@@ -48,3 +48,19 @@ function Activate_Tool(label)
 		STATE["activeTool"] = label;
 	}
 }
+
+function Get_Tool_Action_Callback()
+{
+	const cursor = Get_Cursor();
+	if (cursor.includes("eraser.png")) {
+		return function (cell) {
+			cell.style.backgroundColor = CANVAS_INIT_COLOR;
+		};
+	} else if (cursor.includes("pencil.png")) {
+		return function (cell) {
+			cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+		};
+	} else {
+		return null;
+	}
+}

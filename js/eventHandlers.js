@@ -2,7 +2,8 @@ let previousCursorX = null;
 let previousCursorY = null;
 let isDrawingOutside = false;
 
-function Add_EventHandlers_To_Canvas_Div() {
+function Add_EventHandlers_To_Canvas_Div()
+{
 	function Update_Cursor_Coordinates_On_Screen(e) {
 		const coords = Canvas_Cursor_XY(e);
 		let cursorX = coords[0];
@@ -43,13 +44,8 @@ function Add_EventHandlers_To_Canvas_Div() {
 				const targetX = targetCell.offsetLeft / CELL_WIDTH_PX;
 				const targetY = targetCell.offsetTop / CELL_WIDTH_PX;
 
-				Bresenham_Line_Algorithm(previousCursorX, previousCursorY, targetX, targetY, function (intermediateCell) {
-					if (STATE["activeTool"] === "eraser") {
-						intermediateCell.style.backgroundColor = CANVAS_INIT_COLOR;
-					} else if (STATE["activeTool"] === "pencil") {
-						intermediateCell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-					}
-				});
+				let actionCallback = Get_Tool_Action_Callback();
+				Bresenham_Line_Algorithm(previousCursorX, previousCursorY, targetX, targetY, actionCallback);
 			}
 		}
 		isDrawingOutside = true;
@@ -63,7 +59,8 @@ function Add_EventHandlers_To_Canvas_Div() {
 	});
 }
 
-function Add_EventHandlers_To_Palette_Cells() {
+function Add_EventHandlers_To_Palette_Cells()
+{
 	const allPaletteCells = document.querySelectorAll(".paletteCell");
 	allPaletteCells.forEach(function (cell) {
 		cell.addEventListener("click", function (e) {
@@ -74,7 +71,8 @@ function Add_EventHandlers_To_Palette_Cells() {
 	})
 }
 
-function Add_EventHandlers_To_Color_Preview() {
+function Add_EventHandlers_To_Color_Preview()
+{
 	const allColorPreviews = document.querySelectorAll(".active-color-preview");
 	allColorPreviews.forEach(function (preview) {
 		preview.addEventListener("click", function (e) {
@@ -83,8 +81,10 @@ function Add_EventHandlers_To_Color_Preview() {
 	})
 }
 
-function Add_EventHandlers_To_Canvas_Cells() {
-	function Create_Selection_Div(e) {
+function Add_EventHandlers_To_Canvas_Cells()
+{
+	function Create_Selection_Div(e)
+	{
 		const canvasDiv = document.getElementById("canvas-div");
 
 		let selection = document.createElement("div");
@@ -100,7 +100,8 @@ function Add_EventHandlers_To_Canvas_Cells() {
 		canvasDiv.appendChild(selection);
 	}
 
-	function Selection_Mousedown(e) {
+	function Selection_Mousedown(e)
+	{
 		if (STATE["activeTool"] === "selection") {
 			let selection = document.getElementById("selection");
 			let cursorXY = Canvas_Cursor_XY(e);
@@ -124,7 +125,8 @@ function Add_EventHandlers_To_Canvas_Cells() {
 		}
 	}
 
-	function Selection_Mousemove(e) {
+	function Selection_Mousemove(e)
+	{
 		let cursor = Get_Cursor();
 		const selection = document.getElementById("selection");
 
@@ -166,8 +168,10 @@ function Add_EventHandlers_To_Canvas_Cells() {
 			selection.style.height = (height - 1) + "px";
 
 			return;
-		} else if ((STATE["activeTool"] === "selection") &&
-			(STATE["selection"]["isLocked"] === true)) {
+		} else
+		if ((STATE["activeTool"] === "selection") &&
+			(STATE["selection"]["isLocked"] === true))
+		{
 			let cursorXY = Canvas_Cursor_XY(e);
 			if (STATE["selection"]["floatingCopy"] === true) {
 				Set_Cursor("move"); // drag copied selection
@@ -206,8 +210,10 @@ function Add_EventHandlers_To_Canvas_Cells() {
 
 				STATE["selectionCopy"]["left"] = selectionLeft + dx;
 				STATE["selectionCopy"]["top"] = selectionTop + dy;
-			} else if ((CursorXY_In_Selection(cursorXY, selection) &&
-				STATE["altKeyDown"] === true)) {
+			} else
+			if ((CursorXY_In_Selection(cursorXY, selection) &&
+				STATE["altKeyDown"] === true))
+			{
 				Set_Cursor("move");
 			}
 		}
@@ -233,7 +239,8 @@ function Add_EventHandlers_To_Canvas_Cells() {
 					Alert_User("<i>Alt</i> to copy");
 				STATE["selection"]["totalCount"] += 1;
 			}
-		} else if (STATE["activeTool"] === "selection" &&
+		} else
+		if (STATE["activeTool"] === "selection" &&
 			STATE["selection"]["isLocked"] === true) {
 			let selection = document.getElementById("selection");
 			let selectionWidth = selection.style.width;
@@ -249,30 +256,21 @@ function Add_EventHandlers_To_Canvas_Cells() {
 		}
 	}
 
-	function Tool_Action_On_Canvas_Cell(e) {
+	function Tool_Action_On_Canvas_Cell(e)
+	{
 		let cursor = Get_Cursor();
 		let cell = e.target;
 		let x = cell.offsetLeft / CELL_WIDTH_PX;
 		let y = cell.offsetTop / CELL_WIDTH_PX;
 
+		let actionCallback = Get_Tool_Action_Callback();
+
 		if (previousCursorX !== null && previousCursorY !== null) {
-			Bresenham_Line_Algorithm(previousCursorX, previousCursorY, x, y, function (intermediateCell) {
-				if (cursor.includes("eraser.png")) {
-					intermediateCell.style.backgroundColor = CANVAS_INIT_COLOR;
-				} else if (cursor.includes("pencil.png")) {
-					intermediateCell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-				}
-			});
+			Bresenham_Line_Algorithm(previousCursorX, previousCursorY, x, y, actionCallback);
 		}
 
-		if (cursor.includes("eraser.png")) {
-			cell.style.backgroundColor = CANVAS_INIT_COLOR;
-		} else if (cursor.includes("colorpicker.png")) {
-			STATE[ACTIVE_COLOR_SELECT] = cell.style.backgroundColor;
-			Update_Active_Color_Preview();
-			Update_Active_Color_Label();
-		} else if (cursor.includes("pencil.png")) {
-			cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+		if (actionCallback) {
+			actionCallback(cell);
 		}
 
 		previousCursorX = x;
@@ -318,7 +316,8 @@ function Add_EventHandlers_To_Canvas_Cells() {
 	});
 }
 
-function Add_EventHandlers_To_Toolbar_Buttons() {
+function Add_EventHandlers_To_Toolbar_Buttons()
+{
 	let toolBtn;
 
 	toolBtn = document.getElementById("undo-button");
@@ -356,7 +355,8 @@ function Add_EventHandlers_To_Toolbar_Buttons() {
 	toolBtn.addEventListener("click", Toggle_Grid);
 }
 
-function Add_EventHandlers_To_Save_Button() {
+function Add_EventHandlers_To_Save_Button()
+{
 	function Save_To_PNG() {
 		let temporaryCanvas = document.createElement("canvas");
 		let width = CELLS_PER_ROW;
@@ -391,20 +391,19 @@ function Add_EventHandlers_To_Save_Button() {
 	saveButton.addEventListener("click", Save_To_PNG);
 }
 
-function Remove_EventListeners_From_Selection() {
-	let selection = document.getElementById("selection");
-}
-
-function Exit_Drawing_Mode() {
+function Exit_Drawing_Mode()
+{
 	STATE["brushDown"] = false;
 }
 
-function Reset_Previous_Cursor_Position() {
+function Reset_Previous_Cursor_Position()
+{
 	previousCursorX = null;
 	previousCursorY = null;
 }
 
-function Add_EventHandlers_To_Document() {
+function Add_EventHandlers_To_Document()
+{
 	document.addEventListener("mouseup", function (e) {
 		Exit_Drawing_Mode();
 		Reset_Previous_Cursor_Position();
@@ -471,7 +470,8 @@ function Add_EventHandlers_To_Document() {
 	})
 }
 
-function Add_EventHandlers() {
+function Add_EventHandlers()
+{
 	Add_EventHandlers_To_Canvas_Cells();
 	Add_EventHandlers_To_Canvas_Div();
 	Add_EventHandlers_To_Document();
