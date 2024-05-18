@@ -1,5 +1,6 @@
 let previousCursorX = null;
 let previousCursorY = null;
+let isDrawingOutside = false;
 
 function Add_EventHandlers_To_Canvas_Div() {
 	function Update_Cursor_Coordinates_On_Screen(e) {
@@ -20,6 +21,7 @@ function Add_EventHandlers_To_Canvas_Div() {
 	const canvasDiv = document.getElementById("canvas-div");
 	canvasDiv.addEventListener("mousedown", function () {
 		STATE["brushDown"] = true;
+		isDrawingOutside = false;
 	});
 
 	canvasDiv.addEventListener("mousemove", Update_Cursor_Coordinates_On_Screen);
@@ -27,7 +29,37 @@ function Add_EventHandlers_To_Canvas_Div() {
 		STATE["brushDown"] = false;
 		previousCursorX = null;
 		previousCursorY = null;
-		Save_Canvas_State(); // save the state after drawing is completed
+		Save_Canvas_State();
+	});
+
+	canvasDiv.addEventListener("mouseleave", function (e) {
+		if (STATE["brushDown"]) {
+			const canvasRect = canvasDiv.getBoundingClientRect();
+			const x = Math.max(0, Math.min(e.clientX - canvasRect.left, canvasRect.width - 1));
+			const y = Math.max(0, Math.min(e.clientY - canvasRect.top, canvasRect.height - 1));
+			const targetCell = document.elementFromPoint(x + canvasRect.left, y + canvasRect.top);
+
+			if (previousCursorX !== null && previousCursorY !== null && targetCell && targetCell.classList.contains('canvasCell')) {
+				const targetX = targetCell.offsetLeft / CELL_WIDTH_PX;
+				const targetY = targetCell.offsetTop / CELL_WIDTH_PX;
+
+				Bresenham_Line_Algorithm(previousCursorX, previousCursorY, targetX, targetY, function (intermediateCell) {
+					if (STATE["activeTool"] === "eraser") {
+						intermediateCell.style.backgroundColor = CANVAS_INIT_COLOR;
+					} else if (STATE["activeTool"] === "pencil") {
+						intermediateCell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+					}
+				});
+			}
+		}
+		isDrawingOutside = true;
+	});
+
+	canvasDiv.addEventListener("mouseenter", function () {
+		if (isDrawingOutside) {
+			previousCursorX = null;
+			previousCursorY = null;
+		}
 	});
 }
 
@@ -138,9 +170,7 @@ function Add_EventHandlers_To_Canvas_Cells() {
 			(STATE["selection"]["isLocked"] === true)) {
 			let cursorXY = Canvas_Cursor_XY(e);
 			if (STATE["selection"]["floatingCopy"] === true) {
-				Set_Cursor("move");
-
-				// drag copied selection
+				Set_Cursor("move"); // drag copied selection
 				let dx = (cursorXY[0] / CELL_WIDTH_PX) - STATE["selectionCopy"]["initCursorX"];
 				let dy = (cursorXY[1] / CELL_WIDTH_PX) - STATE["selectionCopy"]["initCursorY"];
 				let selectionLeft = Px_To_Int(selection.style.left) / CELL_WIDTH_PX;
@@ -249,11 +279,6 @@ function Add_EventHandlers_To_Canvas_Cells() {
 		previousCursorY = y;
 	}
 
-	function Reset_Previous_Cursor_Position() {
-		previousCursorX = null;
-		previousCursorY = null;
-	}
-
 	const canvasCells = document.querySelectorAll(".canvasCell");
 	for (let i = 0; i < CELLS_PER_ROW * CELLS_PER_ROW; i += 1) {
 		canvasCells[i].addEventListener("mousedown", function (e) {
@@ -300,9 +325,7 @@ function Add_EventHandlers_To_Toolbar_Buttons() {
 	toolBtn.addEventListener("click", Undo);
 
 	toolBtn = document.getElementById("redo-button");
-	toolBtn.addEventListener("click", function () {
-		Redo();
-	});
+	toolBtn.addEventListener("click", Redo);
 
 	toolBtn = document.getElementById("pencil-button");
 	toolBtn.addEventListener("click", function (e) {
@@ -372,11 +395,16 @@ function Remove_EventListeners_From_Selection() {
 	let selection = document.getElementById("selection");
 }
 
-function Add_EventHandlers_To_Document() {
-	function Exit_Drawing_Mode() {
-		STATE["brushDown"] = false;
-	}
+function Exit_Drawing_Mode() {
+	STATE["brushDown"] = false;
+}
 
+function Reset_Previous_Cursor_Position() {
+	previousCursorX = null;
+	previousCursorY = null;
+}
+
+function Add_EventHandlers_To_Document() {
 	document.addEventListener("mouseup", function (e) {
 		Exit_Drawing_Mode();
 		Reset_Previous_Cursor_Position();
@@ -394,10 +422,10 @@ function Add_EventHandlers_To_Document() {
 				STATE["selection"]["isLocked"] === true) {
 				Set_Cursor("move");
 			}
-
 		}
 		if (e.code === "Delete" || e.code === "Backspace") {
 			Delete_Selected();
+			Save_Canvas_State();
 		}
 		if (e.code === "Escape") {
 			Remove_Selection();
@@ -418,6 +446,7 @@ function Add_EventHandlers_To_Document() {
 		for (label in Tools) {
 			if (e.code === Tools[label]["hotkey"]) {
 				Activate_Tool(label);
+				Reset_Previous_Cursor_Position();
 			}
 		}
 
