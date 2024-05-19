@@ -25,7 +25,6 @@ function Add_EventHandlers_To_Canvas_Div()
 		STATE["brushDown"] = true;
 		isDrawingOutside = false;
 	});
-
 	canvasDiv.addEventListener("mousemove", Update_Cursor_Coordinates_On_Screen);
 	canvasDiv.addEventListener("mouseup", function () {
 		STATE["brushDown"] = false;
@@ -33,7 +32,6 @@ function Add_EventHandlers_To_Canvas_Div()
 		previousCursorY = null;
 		Save_Canvas_State();
 	});
-
 	canvasDiv.addEventListener("mouseleave", function (e) {
 		if (STATE["brushDown"]) {
 			const canvasRect = canvasDiv.getBoundingClientRect();
@@ -55,15 +53,9 @@ function Add_EventHandlers_To_Canvas_Div()
 		}
 		isDrawingOutside = true;
 	});
-
 	canvasDiv.addEventListener("mouseenter", function (e) {
 		if (STATE["brushDown"] && isDrawingOutside) {
 			isDrawingOutside = false;
-
-			const canvasRect = canvasDiv.getBoundingClientRect();
-			let x = Math.max(0, Math.min(e.clientX - canvasRect.left, canvasRect.width - 1));
-			let y = Math.max(0, Math.min(e.clientY - canvasRect.top, canvasRect.height - 1));
-
 			const targetCell = document.elementFromPoint(e.clientX, e.clientY);
 
 			if (targetCell && targetCell.classList.contains('canvasCell')) {
@@ -71,26 +63,18 @@ function Add_EventHandlers_To_Canvas_Div()
 				const targetY = targetCell.offsetTop / CELL_WIDTH_PX;
 
 				let entryPointX, entryPointY;
-
 				const deltaX = targetX - lastOutsideX;
 				const deltaY = targetY - lastOutsideY;
 
 				if (Math.abs(deltaX) > Math.abs(deltaY)) {
-					if (deltaX > 0) {
-						entryPointX = 0;
-					} else {
-						entryPointX = CELLS_PER_ROW - 1;
-					}
+					if (deltaX > 0) { entryPointX = 0; }
+					else { entryPointX = CELLS_PER_ROW - 1; }
 					entryPointY = Math.floor(lastOutsideY);
 				} else {
-					if (deltaY > 0) {
-						entryPointY = 0;
-					} else {
-						entryPointY = CELLS_PER_ROW - 1;
-					}
+					if (deltaY > 0) { entryPointY = 0; }
+					else { entryPointY = CELLS_PER_ROW - 1; }
 					entryPointX = Math.floor(lastOutsideX);
 				}
-
 				// console.log(`Entry Point: (${entryPointX}, ${entryPointY}) Target: (${targetX}, ${targetY})`);
 				Bresenham_Line_Algorithm(entryPointX, entryPointY, targetX, targetY, Get_Tool_Action_Callback());
 
