@@ -19,7 +19,7 @@ class History_States {
 		}
 	}
 	pushToPtr(item) {
-		if (this._canPush(item)) {
+		if (this._Can_Push(item)) {
 			this.ptr++;
 			this.array.splice(this.ptr, 0, item);
 		}
@@ -29,11 +29,11 @@ class History_States {
 
 		this._manageSize();
 	}
-	_canPush(item) {
+	_Can_Push(item) {
 		if (this.ptr === 0) {
 			return true;
 		}
-		return !_arraysAreEqual(this.array[this.ptr], item);
+		return !_Arrays_Are_Equal(this.array[this.ptr], item);
 	}
 
 	_manageSize() {
@@ -50,7 +50,7 @@ class History_States {
 	}
 }
 
-function _arraysAreEqual(a, b)
+function _Arrays_Are_Equal(a, b)
 {
 	if (a === b) {
 		return true;

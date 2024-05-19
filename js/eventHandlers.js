@@ -1,11 +1,11 @@
 let previousCursorX = null;
 let previousCursorY = null;
 let isDrawingOutside = false;
-let entryPointX = null;
-let entryPointY = null;
 
-function Add_EventHandlers_To_Canvas_Div() {
-	function Update_Cursor_Coordinates_On_Screen(e) {
+function Add_EventHandlers_To_Canvas_Div()
+{
+	function Update_Cursor_Coordinates_On_Screen(e)
+	{
 		const coords = Canvas_Cursor_XY(e);
 		let cursorX = coords[0];
 		let cursorY = coords[1];
@@ -51,44 +51,63 @@ function Add_EventHandlers_To_Canvas_Div() {
 				previousCursorX = null;
 				previousCursorY = null;
 			}
+			document.addEventListener("mousemove", Track_Mouse_Outside);
 		}
 		isDrawingOutside = true;
 	});
 
 	canvasDiv.addEventListener("mouseenter", function (e) {
-		if (STATE["brushDown"]) {
+		if (STATE["brushDown"] && isDrawingOutside) {
+			isDrawingOutside = false;
+
 			const canvasRect = canvasDiv.getBoundingClientRect();
-			const offsetX = e.clientX - canvasRect.left;
-			const offsetY = e.clientY - canvasRect.top;
-			let x = Math.max(0, Math.min(offsetX, canvasRect.width - 1));
-			let y = Math.max(0, Math.min(offsetY, canvasRect.height - 1));
+			let x = Math.max(0, Math.min(e.clientX - canvasRect.left, canvasRect.width - 1));
+			let y = Math.max(0, Math.min(e.clientY - canvasRect.top, canvasRect.height - 1));
 
-			if (offsetX < 0) x = 0;
-			if (offsetX > canvasRect.width) x = canvasRect.width - 1;
-			if (offsetY < 0) y = 0;
-			if (offsetY > canvasRect.height) y = canvasRect.height - 1;
-
-			const targetCell = document.elementFromPoint(x + canvasRect.left, y + canvasRect.top);
+			const targetCell = document.elementFromPoint(e.clientX, e.clientY);
 
 			if (targetCell && targetCell.classList.contains('canvasCell')) {
 				const targetX = targetCell.offsetLeft / CELL_WIDTH_PX;
 				const targetY = targetCell.offsetTop / CELL_WIDTH_PX;
 
-				if (entryPointX === null && entryPointY === null) {
-					entryPointX = targetX;
-					entryPointY = targetY;
+				let entryPointX, entryPointY;
+
+				const deltaX = targetX - lastOutsideX;
+				const deltaY = targetY - lastOutsideY;
+
+				if (Math.abs(deltaX) > Math.abs(deltaY)) {
+					if (deltaX > 0) {
+						entryPointX = 0;
+					} else {
+						entryPointX = CELLS_PER_ROW - 1;
+					}
+					entryPointY = Math.floor(lastOutsideY);
+				} else {
+					if (deltaY > 0) {
+						entryPointY = 0;
+					} else {
+						entryPointY = CELLS_PER_ROW - 1;
+					}
+					entryPointX = Math.floor(lastOutsideX);
 				}
 
+				// console.log(`Entry Point: (${entryPointX}, ${entryPointY}) Target: (${targetX}, ${targetY})`);
 				Bresenham_Line_Algorithm(entryPointX, entryPointY, targetX, targetY, Get_Tool_Action_Callback());
 
 				previousCursorX = targetX;
 				previousCursorY = targetY;
-				entryPointX = null;
-				entryPointY = null;
+
+				document.removeEventListener("mousemove", Track_Mouse_Outside);
 			}
 		}
-		isDrawingOutside = false;
 	});
+
+	function Track_Mouse_Outside(e)
+	{
+		const canvasRect = canvasDiv.getBoundingClientRect();
+		lastOutsideX = (e.clientX - canvasRect.left) / CELL_WIDTH_PX;
+		lastOutsideY = (e.clientY - canvasRect.top) / CELL_WIDTH_PX;
+	}
 }
 
 function Add_EventHandlers_To_Palette_Cells()
