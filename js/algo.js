@@ -65,6 +65,7 @@ function Flood_Fill_Algorithm(cell_id, target_color, replacement_color) {
  */
 function Bresenham_Line_Algorithm(startX, startY, endX, endY, callback)
 {
+	if (typeof callback !== 'function') { console.error("Invalid callback function"); return; }
 	let deltaX = Math.abs(endX - startX);
 	let deltaY = Math.abs(endY - startY);
 	let stepX = (startX < endX) ? 1 : -1;

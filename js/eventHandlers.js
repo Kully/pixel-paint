@@ -1,25 +1,21 @@
 let previousCursorX = null;
 let previousCursorY = null;
-let isDrawingOutside = false;
-let lastOutsideX = null;
-let lastOutsideY = null;
-
 function Add_EventHandlers_To_Canvas_Div()
 {
+	let isDrawingOutside = false;
+	let lastOutsideX = null;
+	let lastOutsideY = null;
+
 	function Update_Cursor_Coordinates_On_Screen(e)
 	{
-		const coords = Canvas_Cursor_XY(e);
-		let cursorX = coords[0];
-		let cursorY = coords[1];
-
-		let cellX = cursorX / CELL_WIDTH_PX;
-		let cellY = cursorY / CELL_WIDTH_PX;
+		const cursorXY = Canvas_Cursor_XY(e);
+		let cellX = Math.floor(cursorXY[0] / CELL_WIDTH_PX);
+		let cellY = Math.floor(cursorXY[1] / CELL_WIDTH_PX);
 
 		cellX = Pad_Start_Int(cellX, 2);
 		cellY = Pad_Start_Int(cellY, 2);
 
-		const coordsDisplay = document.getElementById("cursor-coords-display");
-		coordsDisplay.innerHTML = "(" + cellX + ", " + cellY + ")";
+		document.getElementById("cursor-coords-display").innerHTML = "(" + cellX + ", " + cellY + ")";
 	}
 
 	const canvasDiv = document.getElementById("canvas-div");
@@ -30,8 +26,7 @@ function Add_EventHandlers_To_Canvas_Div()
 	canvasDiv.addEventListener("mousemove", Update_Cursor_Coordinates_On_Screen);
 	canvasDiv.addEventListener("mouseup", function () {
 		STATE["brushDown"] = false;
-		previousCursorX = null;
-		previousCursorY = null;
+		previousCursorX = previousCursorY = null;
 		Save_Canvas_State();
 	});
 	canvasDiv.addEventListener("mouseleave", function (e) {
@@ -44,12 +39,11 @@ function Add_EventHandlers_To_Canvas_Div()
 			if (targetCell && targetCell.classList.contains('canvasCell')) {
 				const targetX = targetCell.offsetLeft / CELL_WIDTH_PX;
 				const targetY = targetCell.offsetTop / CELL_WIDTH_PX;
-				console.log(`Previous Cursor: (${previousCursorX}, ${previousCursorY}) Exit Target: (${targetX}, ${targetY})`);
+				// console.log(`Previous Cursor: (${previousCursorX}, ${previousCursorY}) Exit Target: (${targetX}, ${targetY})`);
 				if (previousCursorX !== null && previousCursorY !== null) {
 					Bresenham_Line_Algorithm(previousCursorX, previousCursorY, targetX, targetY, Get_Tool_Action_Callback());
 				}
-				previousCursorX = null;
-				previousCursorY = null;
+				previousCursorX = previousCursorY = null;
 			}
 			document.addEventListener("mousemove", Track_Mouse_Outside);
 		}
@@ -77,7 +71,6 @@ function Add_EventHandlers_To_Canvas_Div()
 					else { entryPointY = CELLS_PER_ROW - 1; }
 					entryPointX = Math.floor(lastOutsideX);
 				}
-
 				entryPointX = Math.max(0, Math.min(entryPointX, CELLS_PER_ROW - 1));
 				entryPointY = Math.max(0, Math.min(entryPointY, CELLS_PER_ROW - 1));
 
@@ -86,13 +79,11 @@ function Add_EventHandlers_To_Canvas_Div()
 				} else if (entryPointY === 0 || entryPointY === CELLS_PER_ROW - 1) {
 					entryPointX = Math.floor(lastOutsideX);
 				}
-
-				console.log(`Entry Point: (${entryPointX}, ${entryPointY}) Target: (${targetX}, ${targetY})`);
+				// console.log(`Entry Point: (${entryPointX}, ${entryPointY}) Target: (${targetX}, ${targetY})`);
 				Bresenham_Line_Algorithm(entryPointX, entryPointY, targetX, targetY, Get_Tool_Action_Callback());
 
 				previousCursorX = targetX;
 				previousCursorY = targetY;
-
 				document.removeEventListener("mousemove", Track_Mouse_Outside);
 			}
 		}
@@ -175,7 +166,6 @@ function Add_EventHandlers_To_Canvas_Cells()
 
 	function Selection_Mousemove(e)
 	{
-		let cursor = Get_Cursor();
 		const selection = document.getElementById("selection");
 
 		if ((STATE["activeTool"] === "selection") &&
@@ -267,9 +257,8 @@ function Add_EventHandlers_To_Canvas_Cells()
 		}
 	}
 
-	function Selection_Mouseup(e) {
-		let cursor = Get_Cursor();
-
+	function Selection_Mouseup(e)
+	{
 		if (STATE["activeTool"] === "selection" &&
 			STATE["selection"]["isLocked"] === false) {
 			let selection = document.getElementById("selection");
@@ -291,8 +280,6 @@ function Add_EventHandlers_To_Canvas_Cells()
 		if (STATE["activeTool"] === "selection" &&
 			STATE["selection"]["isLocked"] === true) {
 			let selection = document.getElementById("selection");
-			let selectionWidth = selection.style.width;
-			let selectionHeight = selection.style.height;
 
 			selection.style.left = STATE["selectionCopy"]["left"] * CELL_WIDTH_PX + "px";
 			selection.style.top = STATE["selectionCopy"]["top"] * CELL_WIDTH_PX + "px";
@@ -306,17 +293,21 @@ function Add_EventHandlers_To_Canvas_Cells()
 
 	function Tool_Action_On_Canvas_Cell(e)
 	{
-		let cursor = Get_Cursor();
-		let cell = e.target;
-		let x = cell.offsetLeft / CELL_WIDTH_PX;
-		let y = cell.offsetTop / CELL_WIDTH_PX;
+		const cell = e.target;
+		const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
+		const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
+		const callback = Get_Tool_Action_Callback();
 
-		if (previousCursorX !== null && previousCursorY !== null) {
-			Bresenham_Line_Algorithm(previousCursorX, previousCursorY, x, y, Get_Tool_Action_Callback());
+		if (typeof callback === 'function') {
+			if (previousCursorX !== null && previousCursorY !== null) {
+				Bresenham_Line_Algorithm(previousCursorX, previousCursorY, x, y, callback, true);
+			} else {
+				Save_Canvas_State();
+			}
+			previousCursorX = x;
+			previousCursorY = y;
+			callback(cell);
 		}
-
-		previousCursorX = x;
-		previousCursorY = y;
 	}
 
 	const canvasCells = document.querySelectorAll(".canvasCell");
@@ -347,6 +338,17 @@ function Add_EventHandlers_To_Canvas_Cells()
 			}
 			Reset_Previous_Cursor_Position();
 		});
+
+		canvasCells[i].addEventListener("click", function (e) {
+			let cursor = Get_Cursor();
+			if (cursor.includes("colorpicker.png")) {
+				const cell = e.target;
+				const pickedColor = cell.style.backgroundColor;
+				STATE[ACTIVE_COLOR_SELECT] = pickedColor;
+				Update_Active_Color_Preview();
+				Update_Active_Color_Label();
+			}
+		});
 	}
 
 	document.addEventListener("mouseup", function (e) {
@@ -360,41 +362,35 @@ function Add_EventHandlers_To_Canvas_Cells()
 
 function Add_EventHandlers_To_Toolbar_Buttons()
 {
-	let toolBtn;
-
-	toolBtn = document.getElementById("undo-button");
-	toolBtn.addEventListener("click", Undo);
-
-	toolBtn = document.getElementById("redo-button");
-	toolBtn.addEventListener("click", Redo);
-
-	toolBtn = document.getElementById("pencil-button");
-	toolBtn.addEventListener("click", function (e) {
-		Activate_Tool("pencil");
-	})
-
-	toolBtn = document.getElementById("fill-button");
-	toolBtn.addEventListener("click", function (e) {
-		Activate_Tool("fill");
-	})
-
-	toolBtn = document.getElementById("eraser-button");
-	toolBtn.addEventListener("click", function (e) {
-		Activate_Tool("eraser");
-	})
-
-	toolBtn = document.getElementById("selection-button");
-	toolBtn.addEventListener("click", function (e) {
-		Activate_Tool("selection");
-	})
-
-	toolBtn = document.getElementById("colorpicker-button");
-	toolBtn.addEventListener("click", function (e) {
-		Activate_Tool("colorpicker");
-	})
-
-	toolBtn = document.getElementById("grid-button");
-	toolBtn.addEventListener("click", Toggle_Grid);
+	const toolbarButtons = document.querySelectorAll(".toolbarButton");
+	toolbarButtons.forEach(button => {
+		switch (button.id) {
+			case "undo-button":
+				button.addEventListener("click", Undo);
+				break;
+			case "redo-button":
+				button.addEventListener("click", Redo);
+				break;
+			case "pencil-button":
+				button.addEventListener("click", () => Activate_Tool("pencil"));
+				break;
+			case "fill-button":
+				button.addEventListener("click", () => Activate_Tool("fill"));
+				break;
+			case "eraser-button":
+				button.addEventListener("click", () => Activate_Tool("eraser"));
+				break;
+			case "selection-button":
+				button.addEventListener("click", () => Activate_Tool("selection"));
+				break;
+			case "colorpicker-button":
+				button.addEventListener("click", () => Activate_Tool("colorpicker"));
+				break;
+			case "grid-button":
+				button.addEventListener("click", Toggle_Grid);
+				break;
+		}
+	});
 }
 
 function Add_EventHandlers_To_Save_Button()
@@ -446,15 +442,7 @@ function Reset_Previous_Cursor_Position()
 
 function Add_EventHandlers_To_Document()
 {
-	document.addEventListener("mouseup", function (e) {
-		Exit_Drawing_Mode();
-		Reset_Previous_Cursor_Position();
-		if (e.target.id !== "undo-button" && e.target.id !== "redo-button") {
-			Save_Canvas_State();
-		}
-	});
-	document.addEventListener("mouseup", Exit_Drawing_Mode);
-	document.addEventListener("keydown", function (e) {
+	const keyDownHandler = function (e) {
 		if (e.code === "AltLeft" || e.code === "AltRight") {
 			STATE["altKeyDown"] = true;
 
@@ -484,19 +472,19 @@ function Add_EventHandlers_To_Document()
 			Swap_Active_Color();
 		}
 
-		for (label in Tools) {
-			if (e.code === Tools[label]["hotkey"]) {
-				Activate_Tool(label);
-				Reset_Previous_Cursor_Position();
-			}
-		}
-
 		if (e.code === STATE["grid"]["hotkey"]) {
 			STATE["grid"]["KeyG_Counter"] += 1;
 		}
-	})
 
-	document.addEventListener("keyup", function (e) {
+		for (const [toolLabel, toolConfig] of Object.entries(Tools)) {
+			if (e.code === toolConfig["hotkey"]) {
+				Activate_Tool(toolLabel);
+				Reset_Previous_Cursor_Position();
+				break;
+			}
+		}
+	};
+	const keyUpHandler = function (e) {
 		if (e.code === "AltLeft" || e.code === "AltRight") {
 			STATE["altKeyDown"] = false;
 
@@ -505,11 +493,13 @@ function Add_EventHandlers_To_Document()
 				Set_Cursor(Tools["selection"]["cursor"]);
 			}
 		}
-		if (e.code == STATE["grid"]["hotkey"]) {
+		if (e.code === STATE["grid"]["hotkey"]) {
 			STATE["grid"]["KeyG_Counter"] = 0;
 			Toggle_Grid();
 		}
-	})
+	};
+	document.addEventListener("keydown", keyDownHandler);
+	document.addEventListener("keyup", keyUpHandler);
 }
 
 function Add_EventHandlers()

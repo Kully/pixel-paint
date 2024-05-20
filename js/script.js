@@ -42,6 +42,8 @@ const PALETTE_DISPLAY = {
     radioGameboy: document.getElementById("radioGB")
 }
 
+const HISTORY_STATES = new History_States(MAX_UNDOS);
+Save_Canvas_State();
 
 function Canvas_Cursor_XY(e)
 {
@@ -50,7 +52,7 @@ function Canvas_Cursor_XY(e)
     let y = parentCell.offsetTop;
     return [x, y];
 }
-    
+
 function Canvas_Cursor_XY_Rounded_To_Neareset_Cell_Corner(e)
 {
     let parentCell = e.target.closest("div.canvasCell");
@@ -125,17 +127,17 @@ function Swap_Active_Color()
     let activeColorDiv_1 = document.getElementById("active-color-preview-1");
     let activeColorDiv_2 = document.getElementById("active-color-preview-2");
     if(ACTIVE_COLOR_SELECT === "firstColor")
-     {
+    {
        ACTIVE_COLOR_SELECT = "secondColor";
        activeColorDiv_2.classList.add("active_indicator");
        activeColorDiv_1.classList.remove("active_indicator");
-     }
+    }
     else
-     {
+    {
        ACTIVE_COLOR_SELECT = "firstColor";
        activeColorDiv_1.classList.add("active_indicator");
        activeColorDiv_2.classList.remove("active_indicator");
-     }
+    }
     Update_Active_Color_Label();
 }
 
@@ -144,8 +146,8 @@ function Update_Active_Color_Label()
     activeColorLabel = document.getElementById("active-color-label");
 
     STATE[ACTIVE_COLOR_SELECT] = Rgb_To_Hex(STATE[ACTIVE_COLOR_SELECT]);
-    activeColorLabel.innerHTML = STATE[ACTIVE_COLOR_SELECT];    // label
-    activeColorLabel.style.color = STATE[ACTIVE_COLOR_SELECT];  // text color
+    activeColorLabel.innerHTML = STATE[ACTIVE_COLOR_SELECT]; // label
+    activeColorLabel.style.color = STATE[ACTIVE_COLOR_SELECT]; // text color
 }
 
 function Canvas_Pixels_From_Selection(selection)
@@ -311,8 +313,4 @@ Add_Ids_To_Palette_Cells();
 Update_Tooltip_Text();
 Activate_Tool("pencil");
 Select_Palette();
-
 Add_EventHandlers();
-
-const HISTORY_STATES = new History_States(MAX_UNDOS);
-Save_Canvas_State();
