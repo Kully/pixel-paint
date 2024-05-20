@@ -1,6 +1,8 @@
 let previousCursorX = null;
 let previousCursorY = null;
 let isDrawingOutside = false;
+let lastOutsideX = null;
+let lastOutsideY = null;
 
 function Add_EventHandlers_To_Canvas_Div()
 {
@@ -42,7 +44,7 @@ function Add_EventHandlers_To_Canvas_Div()
 			if (targetCell && targetCell.classList.contains('canvasCell')) {
 				const targetX = targetCell.offsetLeft / CELL_WIDTH_PX;
 				const targetY = targetCell.offsetTop / CELL_WIDTH_PX;
-
+				console.log(`Previous Cursor: (${previousCursorX}, ${previousCursorY}) Exit Target: (${targetX}, ${targetY})`);
 				if (previousCursorX !== null && previousCursorY !== null) {
 					Bresenham_Line_Algorithm(previousCursorX, previousCursorY, targetX, targetY, Get_Tool_Action_Callback());
 				}
@@ -67,15 +69,29 @@ function Add_EventHandlers_To_Canvas_Div()
 				const deltaY = targetY - lastOutsideY;
 
 				if (Math.abs(deltaX) > Math.abs(deltaY)) {
-					if (deltaX > 0) { entryPointX = 0; }
-					else { entryPointX = CELLS_PER_ROW - 1; }
-					entryPointY = Math.floor(lastOutsideY);
+					if (deltaX > 0) {
+						entryPointX = 0;
+					} else {
+						entryPointX = CELLS_PER_ROW - 1;
+					}
+					entryPointY = Math.max(0, Math.min(Math.floor(lastOutsideY), CELLS_PER_ROW - 1));
 				} else {
-					if (deltaY > 0) { entryPointY = 0; }
-					else { entryPointY = CELLS_PER_ROW - 1; }
+					if (deltaY > 0) {
+						entryPointY = 0;
+					} else {
+						entryPointY = CELLS_PER_ROW - 1;
+					}
+					entryPointX = Math.max(0, Math.min(Math.floor(lastOutsideX), CELLS_PER_ROW - 1));
+				}
+
+				if (entryPointX !== 0 && entryPointX !== CELLS_PER_ROW - 1) {
 					entryPointX = Math.floor(lastOutsideX);
 				}
-				// console.log(`Entry Point: (${entryPointX}, ${entryPointY}) Target: (${targetX}, ${targetY})`);
+				if (entryPointY !== 0 && entryPointY !== CELLS_PER_ROW - 1) {
+					entryPointY = Math.floor(lastOutsideY);
+				}
+
+				console.log(`Entry Point: (${entryPointX}, ${entryPointY}) Target: (${targetX}, ${targetY})`);
 				Bresenham_Line_Algorithm(entryPointX, entryPointY, targetX, targetY, Get_Tool_Action_Callback());
 
 				previousCursorX = targetX;
@@ -91,6 +107,7 @@ function Add_EventHandlers_To_Canvas_Div()
 		const canvasRect = canvasDiv.getBoundingClientRect();
 		lastOutsideX = (e.clientX - canvasRect.left) / CELL_WIDTH_PX;
 		lastOutsideY = (e.clientY - canvasRect.top) / CELL_WIDTH_PX;
+		// console.log(`Mouse Outside Position: (${lastOutsideX}, ${lastOutsideY})`);
 	}
 }
 
