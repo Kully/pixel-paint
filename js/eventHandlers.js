@@ -69,26 +69,22 @@ function Add_EventHandlers_To_Canvas_Div()
 				const deltaY = targetY - lastOutsideY;
 
 				if (Math.abs(deltaX) > Math.abs(deltaY)) {
-					if (deltaX > 0) {
-						entryPointX = 0;
-					} else {
-						entryPointX = CELLS_PER_ROW - 1;
-					}
-					entryPointY = Math.max(0, Math.min(Math.floor(lastOutsideY), CELLS_PER_ROW - 1));
+					if (deltaX > 0) { entryPointX = 0; }
+					else { entryPointX = CELLS_PER_ROW - 1; }
+					entryPointY = Math.floor(lastOutsideY);
 				} else {
-					if (deltaY > 0) {
-						entryPointY = 0;
-					} else {
-						entryPointY = CELLS_PER_ROW - 1;
-					}
-					entryPointX = Math.max(0, Math.min(Math.floor(lastOutsideX), CELLS_PER_ROW - 1));
-				}
-
-				if (entryPointX !== 0 && entryPointX !== CELLS_PER_ROW - 1) {
+					if (deltaY > 0) { entryPointY = 0; }
+					else { entryPointY = CELLS_PER_ROW - 1; }
 					entryPointX = Math.floor(lastOutsideX);
 				}
-				if (entryPointY !== 0 && entryPointY !== CELLS_PER_ROW - 1) {
+
+				entryPointX = Math.max(0, Math.min(entryPointX, CELLS_PER_ROW - 1));
+				entryPointY = Math.max(0, Math.min(entryPointY, CELLS_PER_ROW - 1));
+
+				if (entryPointX === 0 || entryPointX === CELLS_PER_ROW - 1) {
 					entryPointY = Math.floor(lastOutsideY);
+				} else if (entryPointY === 0 || entryPointY === CELLS_PER_ROW - 1) {
+					entryPointX = Math.floor(lastOutsideX);
 				}
 
 				console.log(`Entry Point: (${entryPointX}, ${entryPointY}) Target: (${targetX}, ${targetY})`);
