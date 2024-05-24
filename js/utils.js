@@ -1,5 +1,8 @@
 function Get_Array_From_Rgb(rgb)
 {
+    if (rgb === "transparent") {
+        return [0, 0, 0, 0];
+    }
     rgb = rgb.replace(" ", "");
     rgb = rgb.slice(4,rgb.length-1);
 
