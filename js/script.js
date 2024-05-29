@@ -7,7 +7,7 @@ const BUTTON_UP_COLOR = "#a0a0a0";
 const BUTTON_UP_OUTLINE = "";
 const BUTTON_DOWN_COLOR = "#f0f0f0";
 const BUTTON_DOWN_OUTLINE = "1px solid blue";
-const CANVAS_INIT_COLOR = palette_color_array[0];
+const CANVAS_INIT_COLOR = "transparent";
 let ACTIVE_COLOR_SELECT = "firstColor";
 const STATE = {
     "firstColor": palette_color_array[palette_color_array.length - 1],

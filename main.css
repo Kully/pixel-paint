@@ -26,11 +26,11 @@
 
 .no-select {
   -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Old versions of Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Chrome, Opera and Firefox */
+	-webkit-user-select: none; /* Safari */
+	 -khtml-user-select: none; /* Konqueror HTML */
+	   -moz-user-select: none; /* Old versions of Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+			user-select: none; /* Chrome, Opera and Firefox */
 }
 
 body {
@@ -292,7 +292,7 @@ body {
 	left: calc(var(--toolbar-width) + var(--palette-width) - var(--color-preview-width));
 }
 .active_indicator {
-  border: 2px solid #eef !important;
+	border: 2px solid #eef !important;
 }
 
 #canvas-div {
@@ -301,6 +301,12 @@ body {
 	height: var(--canvas-width);
 	margin-right: var(--palette-margin-right);
 	float: left;
+	background: 
+		linear-gradient(45deg, #c0c0c0 25%, transparent 25%, transparent 75%, #c0c0c0 75%, #c0c0c0),
+		linear-gradient(45deg, #c0c0c0 25%, transparent 25%, transparent 75%, #c0c0c0 75%, #c0c0c0);
+	background-position: 0 0, 64px 64px;
+	background-size: 128px 128px;
+	background-color: #808080;
 }
 
 #palette-div {

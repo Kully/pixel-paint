@@ -412,9 +412,9 @@ function Add_EventHandlers_To_Save_Button()
 			imageData.data[pixelIndex] = rgbArray[0];
 			imageData.data[pixelIndex + 1] = rgbArray[1];
 			imageData.data[pixelIndex + 2] = rgbArray[2];
-			imageData.data[pixelIndex + 3] = 255;
+			imageData.data[pixelIndex + 3] = rgbArray[3] !== undefined ? rgbArray[3] : (pixel === "transparent" ? 0 : 255);
 			pixelIndex += 4;
-		})
+		});
 		context.putImageData(imageData, 0, 0);
 
 		let download = document.createElement('a');
