@@ -163,3 +163,11 @@ function Get_Canvas_Pixels()
     })
     return canvasPixels;
 }
+
+function Clear_Paint_From_Canvas()
+{
+    let canvasCells = document.querySelectorAll(".canvasCell");
+    canvasCells.forEach(function(cell){
+        cell.style.backgroundColor = CANVAS_INIT_COLOR;
+    })
+}

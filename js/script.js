@@ -796,6 +796,9 @@ function Add_EventHandlers_To_Document()
         {
             Delete_Selected();
         }
+        if(e.code === "KeyK"){
+            Clear_Paint_From_Canvas()
+        }
         if(e.code === "Escape")
         {
             Remove_Selection();
