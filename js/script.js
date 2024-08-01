@@ -146,8 +146,20 @@ function Update_Active_Color_Label()
     activeColorLabel = document.getElementById("active-color-label");
 
     STATE[ACTIVE_COLOR_SELECT] = Rgb_To_Hex(STATE[ACTIVE_COLOR_SELECT]);
-    activeColorLabel.innerHTML = STATE[ACTIVE_COLOR_SELECT]; // label
-    activeColorLabel.style.color = STATE[ACTIVE_COLOR_SELECT]; // text color
+    activeColorLabel.innerHTML = STATE[ACTIVE_COLOR_SELECT];    // label
+}
+
+function Add_EventHandlers_To_Palette_Cells()
+{
+    const allPaletteCells = document.querySelectorAll(".paletteCell");
+    allPaletteCells.forEach(function(cell){
+        // click palette to change color
+        cell.addEventListener("click", function(e){
+            STATE[ACTIVE_COLOR_SELECT] = e.target.style.backgroundColor;
+            Update_Active_Color_Preview();
+            Update_Active_Color_Label();
+        })
+    })
 }
 
 function Canvas_Pixels_From_Selection(selection)

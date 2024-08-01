@@ -274,6 +274,7 @@ body {
 	line-height: var(--line-height-toolbar-text);
 	margin-right: var(--palette-margin-right);
 	font-family: Menlo;
+	color: var(--blanket-background-color);
 }
 
 #active-color-preview-1, #active-color-preview-2{
