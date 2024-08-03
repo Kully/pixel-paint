@@ -22,6 +22,10 @@
   --toolbar-background-color: #777;
 
   --shadow: 2px 2px 8px #224;
+
+  --checkerboard_color_light: #FFFFFF;
+  --checkerboard_color_dark: #CBCBCB;
+  --checkerboard_square_width: 8px;
 }
 
 .no-select {
@@ -301,12 +305,12 @@ body {
 	height: var(--canvas-width);
 	margin-right: var(--palette-margin-right);
 	float: left;
-	background: 
-		linear-gradient(45deg, #c0c0c0 25%, transparent 25%, transparent 75%, #c0c0c0 75%, #c0c0c0),
-		linear-gradient(45deg, #c0c0c0 25%, transparent 25%, transparent 75%, #c0c0c0 75%, #c0c0c0);
-	background-position: 0 0, 64px 64px;
-	background-size: 128px 128px;
-	background-color: #808080;
+	background:
+		linear-gradient(45deg, var(--checkerboard_color_light) 25%, transparent 25%, transparent 75%, var(--checkerboard_color_light) 75%, var(--checkerboard_color_light)),
+		linear-gradient(45deg, var(--checkerboard_color_light) 25%, transparent 25%, transparent 75%, var(--checkerboard_color_light) 75%, var(--checkerboard_color_light));
+	background-position: 0 0, var(--checkerboard_square_width) var(--checkerboard_square_width);
+	background-size: calc(2 * var(--checkerboard_square_width)) calc(2 * var(--checkerboard_square_width));
+	background-color: var(--checkerboard_color_dark);
 }
 
 #palette-div {
