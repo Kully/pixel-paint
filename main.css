@@ -382,3 +382,16 @@ body {
 input[type="radio"] {
 	margin: 0;
 }
+
+#info-section{
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+
+	margin-top: 10px;
+}
+
+#keyboard-shortcuts{
+	border: 1px solid;
+	width: 350px;
+}
