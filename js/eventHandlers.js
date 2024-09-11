@@ -429,6 +429,37 @@ function Add_EventHandlers_To_Save_Button()
 	saveButton.addEventListener("click", Save_To_PNG);
 }
 
+function Add_EventHandlers_To_Clipboard_Copy_Button()
+{
+	function Copy_To_Clipboard() {
+		let output = "sprite: [\r    ";
+		let counter = 0;
+		Get_Canvas_Pixels().forEach(function (pixel) {
+			let colorPointer;
+			if(pixel === "transparent")
+				colorPointer = 0;
+			else
+			{
+				hexPixel = Rgb_To_Hex(pixel);
+				hexPixel = hexPixel.toUpperCase();
+				hexPixel += "FF";
+				colorPointer = palette_color_array.indexOf(hexPixel);
+				colorPointer += 1;
+			}
+			output += `${colorPointer},`
+			if( (counter+1) % 16 === 0)
+				output += "\r    "
+			counter++
+		});
+		output += "],"
+		navigator.clipboard.writeText(output);
+
+		Alert_User("Copied!");
+	}
+	let copyButton = document.getElementById("copy-button");
+	copyButton.addEventListener("click", Copy_To_Clipboard);
+}
+
 function Exit_Drawing_Mode()
 {
 	STATE["brushDown"] = false;
@@ -510,5 +541,6 @@ function Add_EventHandlers()
 	Add_EventHandlers_To_Palette_Cells();
 	Add_EventHandlers_To_Color_Preview();
 	Add_EventHandlers_To_Save_Button();
+	Add_EventHandlers_To_Clipboard_Copy_Button();
 	Add_EventHandlers_To_Toolbar_Buttons();
 }

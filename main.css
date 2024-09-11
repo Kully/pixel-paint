@@ -251,6 +251,11 @@ body {
 	background-position: center;
 	background-repeat: no-repeat;
 }
+.copyImg {
+	background-image: url(img/copy.png);
+	background-position: center;
+	background-repeat: no-repeat;
+}
 
 #active-color-label {
 	position: relative;
