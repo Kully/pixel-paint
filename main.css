@@ -8,8 +8,9 @@
   --toolbar-height: 32px;
   --line-height-toolbar-text: 30px;
 
-  --palette-width: 80px;
-  --color-preview-width: 35px;
+  --color-preview-width: 16px;
+  --color-preview-offset: 4px;
+
   --palette-cell-width: 35px;
   --palette-cell-height: 35px;
   --palette-margin-right: 10px;
@@ -58,9 +59,9 @@ body {
 #blanket-around-body {
 	position: relative;
 	background-color: var(--blanket-background-color);
-	width: 606px;
-	height: 554px;
-	padding-right: 20px;
+	height: inherit;
+	padding-right: var(--palette-margin-right);
+	padding-right: var(--palette-margin-right);
 	padding-bottom: 20px;
 }
 
@@ -264,20 +265,20 @@ body {
 #active-color-preview-1, #active-color-preview-2{
 	position: absolute;
 	width: var(--color-preview-width);
-	height: var(--toolbar-height);
-	border: 1px solid #eef;
+	height: var(--color-preview-width);
+	outline: 1px solid #eef;
+	border: 1px solid #333;
 	border-radius: var(--border-radius);
 	margin-left: var(--palette-margin-right);
 	transform: translate(-2px, -1px);
 }
 #active-color-preview-1 {
-	left: var(--toolbar-width);
+	left: calc( var(--color-preview-offset) + var(--toolbar-width) );
+	top: var(--color-preview-offset);
 }
 #active-color-preview-2 {
-	left: calc(var(--toolbar-width) + var(--palette-width) - var(--color-preview-width));
-}
-.active_indicator {
-	border: 2px solid #eef !important;
+	left: calc( var(--toolbar-width) + var(--color-preview-width) - var(--color-preview-offset) );
+	top: calc( var(--color-preview-width) - var(--color-preview-offset) );
 }
 
 #canvas-div {
@@ -296,7 +297,6 @@ body {
 
 #palette-div {
 	position: relative;
-	width: var(--palette-width);
 	float: left;
 	cursor: default;
 	display: block;
@@ -329,6 +329,14 @@ body {
 	height: var(--canvas-cell-width);
 	pointer-events: auto;
 	float: left;
+}
+
+.cursor-coords-display {
+	font-family: Menlo;
+	font-size: 11px;
+	transform: translate(0, 4px);
+	pointer-events: none;
+
 }
 
 #selection {

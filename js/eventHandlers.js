@@ -15,7 +15,7 @@ function Add_EventHandlers_To_Canvas_Div()
 		cellX = Pad_Start_Int(cellX, 2);
 		cellY = Pad_Start_Int(cellY, 2);
 
-		document.getElementById("cursor-coords-display").innerHTML = "(" + cellX + ", " + cellY + ")";
+		document.getElementById("cursor-coords-display").innerHTML = cellX + "," + cellY;
 	}
 
 	const canvasDiv = document.getElementById("canvas-div");
