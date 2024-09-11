@@ -10,8 +10,8 @@
 
   --palette-width: 80px;
   --color-preview-width: 35px;
-  --palette-cell-width: 20px;
-  --palette-cell-height: 20px;
+  --palette-cell-width: 35px;
+  --palette-cell-height: 35px;
   --palette-margin-right: 10px;
   
   --tooltiptext-background-color: #ffffc9;
@@ -251,26 +251,6 @@ body {
 	background-repeat: no-repeat;
 }
 
-#add-color-button {
-	position: relative;
-	outline: 1px solid black;
-	cursor: pointer;
-	margin-bottom: 4px;
-	background-color: #d1d1d2;
-	height: var(--palette-cell-height);
-	width: var(--palette-cell-height);
-}
-
-#add-color-button:hover
-{
-	box-shadow: 0px 0px 10px aqua;
-}
-
-#add-color-button:active
-{
-	box-shadow: none;
-}
-
 #active-color-label {
 	position: relative;
 	float: right;
@@ -319,6 +299,7 @@ body {
 	width: var(--palette-width);
 	float: left;
 	cursor: default;
+	display: block;
 }
 
 #secret-info {
@@ -329,7 +310,6 @@ body {
 
 .paletteCell {
 	position: relative;
-	float: left;
 	height: var(--palette-cell-height);
 	width: var(--palette-cell-width);
 	cursor: pointer;
