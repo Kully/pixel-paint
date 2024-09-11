@@ -281,6 +281,10 @@ body {
 	top: calc( var(--color-preview-width) - var(--color-preview-offset) );
 }
 
+.active_indicator {
+	z-index: 9999 !important;
+}
+
 #canvas-div {
 	position: relative;
 	width: var(--canvas-width);
