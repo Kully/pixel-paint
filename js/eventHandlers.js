@@ -432,8 +432,9 @@ function Add_EventHandlers_To_Save_Button()
 function Add_EventHandlers_To_Clipboard_Copy_Button()
 {
 	function Copy_To_Clipboard() {
-		let output = "sprite: [\r    ";
+		let output = "";
 		let counter = 0;
+		let exportWidth = 32
 		Get_Canvas_Pixels().forEach(function (pixel) {
 			let colorPointer;
 			if(pixel === "transparent")
@@ -447,11 +448,10 @@ function Add_EventHandlers_To_Clipboard_Copy_Button()
 				colorPointer += 1;
 			}
 			output += `${colorPointer},`
-			if( (counter+1) % 16 === 0)
-				output += "\r    "
+			if( (counter+1) % exportWidth === 0)
+				output += "\r"
 			counter++
 		});
-		output += "],"
 		navigator.clipboard.writeText(output);
 
 		Alert_User("Copied!");
