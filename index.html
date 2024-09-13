@@ -45,6 +45,10 @@
 					<span class="tooltipText">save</span>
 				</div>
 
+				<div class="no-select copyImg toolbarButton" id="copy-button">
+					<span class="tooltipText">copy</span>
+				</div>
+
 				<div id="popup-message" class="fadeOutAnimation"></div>
 
 				<div class="active_indicator active-color-preview" id="active-color-preview-1"></div>
@@ -54,24 +58,11 @@
 			</div>
 
 			<div id="canvas-div"></div>
-			<div id="palette-select">
-				<label class="container">
-					<span class="checkmark"></span>
-					<input type="radio" onclick="Select_Palette()" name="radio" class="radio" id="radioNES" checked>
-					NES
-			  	</label><br>
-			  	<label class="container">
-					<span class="checkmark"></span>
-					<input type="radio" onclick="Select_Palette()" name="radio" class="radio" id="radioGB">
-					Gameboy
-			  	</label>
-			</div>
 			<div class="palette" id="palette-div"></div>
-			<div class="palette" id="gameboy-palette-div"></div>
 			<label id="selection-explanation-text">
 				How to Copy <img class="imgInSelectionExplanation" src="img/selectionBright.png"></img> Selection: <b>hold down</b> <span>alt</span> and <b>drag</b> the selected area.
 			</label>
-			<div id="cursor-coords-display"></div>
+			<div id="cursor-coords-display" class="cursor-coords-display"></div>
 		</div>
 	</body>
 	<script type="text/javascript" src="js/tools.js"></script>

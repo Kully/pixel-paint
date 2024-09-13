@@ -109,19 +109,6 @@ function Populate_Palette_With_Cells()
     }
 }
 
-function Populate_GBPalette_With_Cells()
-{
-    const gameboyPaletteDiv = document.getElementById("gameboy-palette-div");
-
-    for(let i=0; i<gb_palette_color_array.length; i += 1)
-    {
-        let cell = document.createElement("div");
-        cell.className = "paletteCell";
-        cell.style.backgroundColor = gb_palette_color_array[i];
-        gameboyPaletteDiv.appendChild(cell);
-    }
-}
-
 function Update_Tooltip_Text()
 {
     for(label in Tools)
