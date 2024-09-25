@@ -80,11 +80,10 @@ How to Contribute:
     git push origin <branch-name>
     ```
 9. Create your Pull Request:
-    - Go to https://github.com/Kully/pixel-paint.git
-    - Select the "Pull Requests" tab
-    - Press "New Pull Requests"
-    - Change the "compare" dropdown to your branch
-    - Create your Pull Reqeust by selecting "Creat pull request"
+    - In your forked repo, click the green button labeled "Compare & pull request"
+    - Create a clear title with detailed descriptions of your changes
+    - Click the green button "Create pull request" to create the PR
+    - Congratuations your PR has been created!
 10. Wait until feedback comes and for it to get reviewed!
 
 Have fun and be creative! :art:
