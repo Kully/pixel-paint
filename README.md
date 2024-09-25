@@ -57,7 +57,7 @@ How to Contribute:
     ``` bash
     git clone https://github.com/<username>/pixel-paint
     ```
-4. Naviate inside the cloned repo:
+4. Navigate inside the cloned repo:
     ```bash
     cd pixel-paint
     ```
@@ -83,7 +83,7 @@ How to Contribute:
     - In your forked repo, click the green button labeled "Compare & pull request"
     - Create a clear title with detailed descriptions of your changes
     - Click the green button "Create pull request" to create the PR
-    - Congratuations your PR has been created!
+    - Congratulations your PR has been created!
 10. Wait until feedback comes and for it to get reviewed!
 
 Have fun and be creative! :art:
