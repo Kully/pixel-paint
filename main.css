@@ -383,15 +383,26 @@ input[type="radio"] {
 	margin: 0;
 }
 
-#info-section{
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-
-	margin-top: 10px;
+#info-section {
+	position: fixed;
+	top: 80%;
+	right: 1%;
+	z-index: 1000;
+	opacity: 0;
+	background-color: none;
+	transition: background-color .2s ease;
 }
 
-#keyboard-shortcuts{
+#keyboard-shortcut-hover {
+	position: fixed;
+	right: 0%;
+	top: 99%;
+	padding-right: 20px;
+}
+
+#keyboard-shortcuts {
 	border: 1px solid;
 	width: 350px;
+	transition: opacity .2s ease;
 }
+  

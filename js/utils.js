@@ -166,3 +166,15 @@ function Get_Canvas_Pixels()
     })
     return canvasPixels;
 }
+
+function Display_Keyboard_Shortcuts()
+{
+  document.getElementById("info-section").style.opacity = "1";
+  document.getElementById("info-section").style.backgroundColor = "#2a2a2a";
+}
+
+function Hide_Keyboard_Shortcuts()
+{
+  document.getElementById("info-section").style.opacity = "0";
+  document.getElementById("info-section").style.backgroundColor = "none";
+}
