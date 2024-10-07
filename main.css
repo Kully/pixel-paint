@@ -397,7 +397,12 @@ input[type="radio"] {
 	position: fixed;
 	right: 0%;
 	top: 99%;
-	padding-right: 20px;
+	
+  	background-color: #e9e9a2;
+  	padding: 0 4px;
+  	border-radius: 2px 0 0 0;
+  	color: #0d0c09;
+  	user-select: none;
 }
 
 #keyboard-shortcuts {
