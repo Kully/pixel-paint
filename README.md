@@ -2,7 +2,7 @@
 
 Make intuitve pixel art in this simple drawing tool written in _vanilla javascript_ :cake:
 
-![Image](gif/selectionCopy.gif)
+![Image](gif/speedDrawing.gif)
 
 ## Features
 - [x] 100% vanilla javascript!
