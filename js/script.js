@@ -45,6 +45,9 @@ const PALETTE_DISPLAY = {
 const HISTORY_STATES = new History_States(MAX_UNDOS);
 Save_Canvas_State();
 
+const dropShadowPreview = document.getElementById("drop-shadow-preview");
+const canvasDiv = document.getElementById("canvas-div");
+
 function Canvas_Cursor_XY(e)
 {
     let parentCell = e.target.closest("div.canvasCell");
@@ -316,6 +319,35 @@ function Select_Palette() {
     }
 }
 
+function Show_Drop_Shadow(e) {
+    const rect = canvasDiv.getBoundingClientRect();
+    const paddingLeft = parseFloat(window.getComputedStyle(canvasDiv).paddingLeft); 
+    const paddingTop = parseFloat(window.getComputedStyle(canvasDiv).paddingTop); 
+
+    const mouseX = e.clientX - rect.left - paddingLeft; 
+    const mouseY = e.clientY - rect.top - paddingTop;
+
+    const cellX = Math.floor(mouseX / CELL_WIDTH_PX) * CELL_WIDTH_PX;
+    const cellY = Math.floor(mouseY / CELL_WIDTH_PX) * CELL_WIDTH_PX;
+
+    dropShadowPreview.style.display = "block";
+
+    if (STATE["activeTool"] === "pencil" || STATE["activeTool"] === "fill") {
+        if (STATE[ACTIVE_COLOR_SELECT].startsWith("#aN")) {
+            dropShadowPreview.style.display = "none";
+        } else {
+            dropShadowPreview.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+        }
+    }
+    else if (STATE["activeTool"] === "eraser") {
+        dropShadowPreview.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+    } else {
+        dropShadowPreview.style.display = "none"; 
+    }
+    dropShadowPreview.style.left = `${cellX}px`;
+    dropShadowPreview.style.top = `${cellY + 2.3 * CELL_WIDTH_PX}px`;
+}
+
 Color_All_Toolbar_Buttons();
 Update_Active_Color_Preview();
 Populate_Canvas_With_Cells();
@@ -326,3 +358,4 @@ Update_Tooltip_Text();
 Activate_Tool("pencil");
 Select_Palette();
 Add_EventHandlers();
+canvasDiv.addEventListener("mousemove", Show_Drop_Shadow);
