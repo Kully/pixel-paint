@@ -345,7 +345,7 @@ function Show_Drop_Shadow(e) {
         dropShadowPreview.style.display = "none"; 
     }
     dropShadowPreview.style.left = `${cellX}px`;
-    dropShadowPreview.style.top = `${cellY + 2.3 * CELL_WIDTH_PX}px`;
+    dropShadowPreview.style.top = `${cellY + 2.38 * CELL_WIDTH_PX}px`;
 }
 
 Color_All_Toolbar_Buttons();

@@ -415,7 +415,6 @@ input[type="radio"] {
 #drop-shadow-preview {
     position: absolute;
     pointer-events: none;
-    border: 1px solid rgba(0, 0, 0, 0.5); 
     display: none;
     width: var(--canvas-cell-width); 
     height: var(--canvas-cell-width);
