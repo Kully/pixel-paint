@@ -348,6 +348,10 @@ function Show_Drop_Shadow(e) {
     dropShadowPreview.style.top = `${cellY + 2.38 * CELL_WIDTH_PX}px`;
 }
 
+function Hide_Drop_Shadow() {
+    dropShadowPreview.style.display = "none";
+}
+
 Color_All_Toolbar_Buttons();
 Update_Active_Color_Preview();
 Populate_Canvas_With_Cells();
@@ -359,3 +363,4 @@ Activate_Tool("pencil");
 Select_Palette();
 Add_EventHandlers();
 canvasDiv.addEventListener("mousemove", Show_Drop_Shadow);
+canvasDiv.addEventListener("mouseleave", Hide_Drop_Shadow);
