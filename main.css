@@ -412,3 +412,11 @@ input[type="radio"] {
 	transition: opacity .2s ease;
 }
   
+#drop-shadow-preview {
+    position: absolute;
+    pointer-events: none;
+    display: none;
+    width: var(--canvas-cell-width); 
+    height: var(--canvas-cell-width);
+    opacity: 0.5; 
+}
