@@ -139,23 +139,39 @@ function Add_EventHandlers_To_Canvas_Cells()
 		canvasDiv.appendChild(selection);
 	}
 
-	function Selection_Mousedown(e)
+	function Selection_Mousedown(e) 
 	{
 		if (STATE["activeTool"] === "selection") {
 			let selection = document.getElementById("selection");
 			let cursorXY = Canvas_Cursor_XY(e);
 
-			if ((STATE["altKeyDown"] === true) &&
-				(STATE["selection"]["isLocked"] === true) &&
-				(selection) &&  // selection in DOM
+			if ((STATE["selection"]["isLocked"] === true) &&
+				(selection) &&
 				CursorXY_In_Selection(cursorXY, selection)) {
-				STATE["selection"]["floatingCopy"] = true;
+				if (STATE["altKeyDown"] === true) {
+					STATE["selection"]["floatingCopy"] = true;
 
-				let colorArray = Canvas_Pixels_From_Selection();
-				STATE["selectionCopy"]["colorArray"] = colorArray;
+					let colorArray = Canvas_Pixels_From_Selection();
+					STATE["selectionCopy"]["colorArray"] = colorArray;
 
-				STATE["selectionCopy"]["initCursorX"] = cursorXY[0] / CELL_WIDTH_PX;
-				STATE["selectionCopy"]["initCursorY"] = cursorXY[1] / CELL_WIDTH_PX;
+					STATE["selectionCopy"]["initCursorX"] = cursorXY[0] / CELL_WIDTH_PX;
+					STATE["selectionCopy"]["initCursorY"] = cursorXY[1] / CELL_WIDTH_PX;
+				} else {
+
+					let colorArray = Canvas_Pixels_From_Selection();
+					STATE["selectionCopy"]["colorArray"] = colorArray;
+
+					let origLeft = Px_To_Int(selection.style.left) / CELL_WIDTH_PX;
+					let origTop = Px_To_Int(selection.style.top) / CELL_WIDTH_PX;
+
+					STATE["selection"]["isMoving"] = true;
+					STATE["selectionMove"] = {
+						initCursorX: cursorXY[0] / CELL_WIDTH_PX,
+						initCursorY: cursorXY[1] / CELL_WIDTH_PX,
+						initLeft: origLeft,
+						initTop: origTop
+					};
+				}
 			} else {
 				Remove_Selection();
 				Unlock_Selection();
@@ -164,7 +180,7 @@ function Add_EventHandlers_To_Canvas_Cells()
 		}
 	}
 
-	function Selection_Mousemove(e)
+	function Selection_Mousemove(e) 
 	{
 		const selection = document.getElementById("selection");
 
@@ -206,9 +222,9 @@ function Add_EventHandlers_To_Canvas_Cells()
 			selection.style.height = (height - 1) + "px";
 
 			return;
-		} else
+		} else 
 		if ((STATE["activeTool"] === "selection") &&
-			(STATE["selection"]["isLocked"] === true))
+			(STATE["selection"]["isLocked"] === true)) 
 		{
 			let cursorXY = Canvas_Cursor_XY(e);
 			if (STATE["selection"]["floatingCopy"] === true) {
@@ -235,29 +251,78 @@ function Add_EventHandlers_To_Canvas_Cells()
 					cell.style.backgroundColor = HISTORY_STATES.getCurrentState()[i];
 				}
 
-				let cell0 = Get_CellInt_From_CellXY(selectionLeft + dx,
-					selectionTop + dy);
+				let cell0 = Get_CellInt_From_CellXY(selectionLeft + dx, selectionTop + dy);
 				for (let y = 0; y < selectionHeight; y += 1)
 					for (let x = 0; x < selectionWidth; x += 1) {
 						let id = Pad_Start_Int(cell0 + y * CELLS_PER_ROW + x);
 						let cell = document.getElementById(id);
 						let idx = x + y * selectionWidth;
 						let color = STATE["selectionCopy"]["colorArray"][idx];
-						cell.style.backgroundColor = color;
+						if (color && color !== "transparent") {
+							cell.style.backgroundColor = color;
+						}
 					}
 
 				STATE["selectionCopy"]["left"] = selectionLeft + dx;
 				STATE["selectionCopy"]["top"] = selectionTop + dy;
-			} else
-			if ((CursorXY_In_Selection(cursorXY, selection) &&
-				STATE["altKeyDown"] === true))
-			{
+			} else if (STATE["selection"]["isMoving"] === true) {
+				Set_Cursor("move");
+				let dx = (cursorXY[0] / CELL_WIDTH_PX) - STATE["selectionMove"]["initCursorX"];
+				let dy = (cursorXY[1] / CELL_WIDTH_PX) - STATE["selectionMove"]["initCursorY"];
+			  
+				let newLeft = STATE["selectionMove"]["initLeft"] + dx;
+				let newTop = STATE["selectionMove"]["initTop"] + dy;
+			  
+				let selectionWidth = (Px_To_Int(selection.style.width) + 1) / CELL_WIDTH_PX;
+				let selectionHeight = (Px_To_Int(selection.style.height) + 1) / CELL_WIDTH_PX;
+			  
+				if (
+				  newLeft < 0 || newTop < 0 ||
+				  (newLeft + selectionWidth) > CELLS_PER_ROW ||
+				  (newTop + selectionHeight) > CELLS_PER_ROW
+				) {
+				  return;
+				}
+			  
+				if (!STATE["selection"]["originalCleared"]) {
+				  for (let y = 0; y < selectionHeight; y++) {
+					for (let x = 0; x < selectionWidth; x++) {
+					  let index = (STATE["selectionMove"]["initTop"] + y) * CELLS_PER_ROW +
+								  (STATE["selectionMove"]["initLeft"] + x);
+					  HISTORY_STATES.getCurrentState()[index] = "transparent";
+					}
+				  }
+				  STATE["selection"]["originalCleared"] = true;
+				}
+			  
+				for (let i = 0; i < CELLS_PER_ROW * CELLS_PER_ROW; i++) {
+				  let cell = document.getElementById(Pad_Start_Int(i, 4));
+				  cell.style.backgroundColor = HISTORY_STATES.getCurrentState()[i];
+				}
+			  
+				let cell0 = Get_CellInt_From_CellXY(newLeft, newTop);
+				for (let y = 0; y < selectionHeight; y++) {
+				  for (let x = 0; x < selectionWidth; x++) {
+					let id = Pad_Start_Int(cell0 + y * CELLS_PER_ROW + x);
+					let cell = document.getElementById(id);
+					let idx = x + y * selectionWidth;
+					let color = STATE["selectionCopy"]["colorArray"][idx];
+					if (color && color !== "transparent") {
+					  cell.style.backgroundColor = color;
+					}
+				  }
+				}
+			  
+				selection.style.left = newLeft * CELL_WIDTH_PX + "px";
+				selection.style.top = newTop * CELL_WIDTH_PX + "px";
+			  } else 
+			if (CursorXY_In_Selection(cursorXY, selection) && STATE["altKeyDown"] === true) {
 				Set_Cursor("move");
 			}
 		}
 	}
 
-	function Selection_Mouseup(e)
+	function Selection_Mouseup(e) 
 	{
 		if (STATE["activeTool"] === "selection" &&
 			STATE["selection"]["isLocked"] === false) {
@@ -276,15 +341,20 @@ function Add_EventHandlers_To_Canvas_Cells()
 					Alert_User("<i>Alt</i> to copy");
 				STATE["selection"]["totalCount"] += 1;
 			}
-		} else
+		} else 
 		if (STATE["activeTool"] === "selection" &&
 			STATE["selection"]["isLocked"] === true) {
 			let selection = document.getElementById("selection");
 
-			selection.style.left = STATE["selectionCopy"]["left"] * CELL_WIDTH_PX + "px";
-			selection.style.top = STATE["selectionCopy"]["top"] * CELL_WIDTH_PX + "px";
-			STATE["selection"]["floatingCopy"] = false;
-
+			if (STATE["selection"]["floatingCopy"] === true) {
+				selection.style.left = STATE["selectionCopy"]["left"] * CELL_WIDTH_PX + "px";
+				selection.style.top = STATE["selectionCopy"]["top"] * CELL_WIDTH_PX + "px";
+				STATE["selection"]["floatingCopy"] = false;
+			}
+			if (STATE["selection"]["isMoving"] === true) {
+				STATE["selection"]["isMoving"] = false;
+				STATE["selection"]["originalCleared"] = false;
+			}
 			if (STATE["altKeyDown"] === false) {
 				Set_Cursor(Tools["selection"]["cursor"]);
 			}
