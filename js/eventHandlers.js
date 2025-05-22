@@ -1,5 +1,93 @@
+const CLIPBOARD = {
+    "hasData": false,
+    "colorArray": [],
+    "width": 0,
+    "height": 0
+};
+
 let previousCursorX = null;
 let previousCursorY = null;
+
+function Copy_Selection() {
+    const selection = document.getElementById("selection");
+    if (STATE["activeTool"] === "selection" && selection && STATE["selection"]["isLocked"]) {
+        let colorArray = Canvas_Pixels_From_Selection();
+        let width = (Px_To_Int(selection.style.width) + 1) / CELL_WIDTH_PX;
+        let height = (Px_To_Int(selection.style.height) + 1) / CELL_WIDTH_PX;
+        
+        CLIPBOARD.colorArray = colorArray;
+        CLIPBOARD.width = width;
+        CLIPBOARD.height = height;
+        CLIPBOARD.hasData = true;
+        
+        Alert_User("Copied selection");
+        return true;
+    }
+    return false;
+}
+
+function Cut_Selection() {
+    if (Copy_Selection()) {
+        Delete_Selected();
+        Save_Canvas_State();
+        Alert_User("Cut selection");
+        return true;
+    }
+    return false;
+}
+
+function Paste_Selection() {
+    if (!CLIPBOARD.hasData) {
+        Alert_User("Nothing to paste");
+        return false;
+    }
+    
+    // Remove existing selection
+    Remove_Selection();
+    Unlock_Selection();
+    
+    // Create new selection at top-left corner
+    const canvasDiv = document.getElementById("canvas-div");
+    let selection = document.createElement("div");
+    selection.id = "selection";
+    
+    // Position at top-left (0, 0)
+    selection.style.left = "0px";
+    selection.style.top = "0px";
+    selection.style.width = (CLIPBOARD.width * CELL_WIDTH_PX - 1) + "px";
+    selection.style.height = (CLIPBOARD.height * CELL_WIDTH_PX - 1) + "px";
+    
+    canvasDiv.appendChild(selection);
+    
+    // Lock the selection and set it as floating copy
+    Selection_Locked_To_Grid();
+    STATE["selection"]["floatingCopy"] = true;
+    STATE["selectionCopy"]["colorArray"] = [...CLIPBOARD.colorArray];
+    STATE["selectionCopy"]["left"] = 0;
+    STATE["selectionCopy"]["top"] = 0;
+    STATE["selectionCopy"]["initCursorX"] = 0;
+    STATE["selectionCopy"]["initCursorY"] = 0;
+    
+    // Render the pasted content
+    let cell0 = Get_CellInt_From_CellXY(0, 0);
+    for (let y = 0; y < CLIPBOARD.height; y += 1) {
+        for (let x = 0; x < CLIPBOARD.width; x += 1) {
+            let id = Pad_Start_Int(cell0 + y * CELLS_PER_ROW + x);
+            let cell = document.getElementById(id);
+            let idx = x + y * CLIPBOARD.width;
+            let color = CLIPBOARD.colorArray[idx];
+            if (color && color !== "transparent") {
+                cell.style.backgroundColor = color;
+            }
+        }
+    }
+    
+    // Activate selection tool
+    Activate_Tool("selection");
+    Alert_User("Pasted selection");
+    return true;
+}
+
 function Add_EventHandlers_To_Canvas_Div()
 {
 	let isDrawingOutside = false;
@@ -513,6 +601,27 @@ function Reset_Previous_Cursor_Position()
 function Add_EventHandlers_To_Document()
 {
 	const keyDownHandler = function (e) {
+		// Handle Ctrl+C (Copy)
+		if ((e.ctrlKey || e.metaKey) && e.code === "KeyC" && !e.shiftKey) {
+			e.preventDefault();
+			Copy_Selection();
+			return;
+		}
+		
+		// Handle Ctrl+X (Cut)
+		if ((e.ctrlKey || e.metaKey) && e.code === "KeyX" && !e.shiftKey) {
+			e.preventDefault();
+			Cut_Selection();
+			return;
+		}
+		
+		// Handle Ctrl+V (Paste)
+		if ((e.ctrlKey || e.metaKey) && e.code === "KeyV" && !e.shiftKey) {
+			e.preventDefault();
+			Paste_Selection();
+			return;
+		}
+		
 		if (e.code === "AltLeft" || e.code === "AltRight") {
 			STATE["altKeyDown"] = true;
 
@@ -532,13 +641,13 @@ function Add_EventHandlers_To_Document()
 			Set_Cursor(Tools[STATE["activeTool"]]["cursor"]);
 			STATE["selection"]["floatingCopy"] = false;
 		}
-		if (e.code === "KeyZ") {
+		if (e.code === "KeyZ" && !(e.ctrlKey || e.metaKey)) {
 			Undo();
 		}
-		if (e.code === "KeyX") {
+		if (e.code === "KeyX" && !(e.ctrlKey || e.metaKey)) {
 			Redo();
 		}
-		if (e.code === "KeyC") {
+		if (e.code === "KeyC" && !(e.ctrlKey || e.metaKey)) {
 			Swap_Active_Color();
 		}
 
