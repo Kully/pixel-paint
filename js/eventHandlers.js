@@ -8,6 +8,9 @@ const CLIPBOARD = {
 let previousCursorX = null;
 let previousCursorY = null;
 
+let lastMouseX = 0;
+let lastMouseY = 0;
+
 function Copy_Selection() {
     const selection = document.getElementById("selection");
     if (STATE["activeTool"] === "selection" && selection && STATE["selection"]["isLocked"]) {
@@ -36,40 +39,62 @@ function Cut_Selection() {
     return false;
 }
 
+function Track_Mouse_Position(e) {
+    const canvasDiv = document.getElementById("canvas-div");
+    const rect = canvasDiv.getBoundingClientRect();
+    
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    lastMouseX = Math.floor(x / CELL_WIDTH_PX);
+    lastMouseY = Math.floor(y / CELL_WIDTH_PX);
+    
+    lastMouseX = Math.max(0, Math.min(lastMouseX, CELLS_PER_ROW - 1));
+    lastMouseY = Math.max(0, Math.min(lastMouseY, CELLS_PER_ROW - 1));
+}
+
 function Paste_Selection() {
     if (!CLIPBOARD.hasData) {
         Alert_User("Nothing to paste");
         return false;
     }
-    
-    // Remove existing selection
     Remove_Selection();
     Unlock_Selection();
     
-    // Create new selection at top-left corner
+    let pasteX = lastMouseX;
+    let pasteY = lastMouseY;
+    
+    if (pasteX + CLIPBOARD.width > CELLS_PER_ROW) {
+        pasteX = CELLS_PER_ROW - CLIPBOARD.width;
+    }
+    if (pasteY + CLIPBOARD.height > CELLS_PER_ROW) {
+        pasteY = CELLS_PER_ROW - CLIPBOARD.height;
+    }
+    
+    pasteX = Math.max(0, pasteX);
+    pasteY = Math.max(0, pasteY);
+    
     const canvasDiv = document.getElementById("canvas-div");
     let selection = document.createElement("div");
     selection.id = "selection";
     
-    // Position at top-left (0, 0)
-    selection.style.left = "0px";
-    selection.style.top = "0px";
+	selection.style.opacity = "0";
+    selection.style.left = (pasteX * CELL_WIDTH_PX) + "px";
+    selection.style.top = (pasteY * CELL_WIDTH_PX) + "px";
     selection.style.width = (CLIPBOARD.width * CELL_WIDTH_PX - 1) + "px";
     selection.style.height = (CLIPBOARD.height * CELL_WIDTH_PX - 1) + "px";
     
     canvasDiv.appendChild(selection);
     
-    // Lock the selection and set it as floating copy
     Selection_Locked_To_Grid();
     STATE["selection"]["floatingCopy"] = true;
     STATE["selectionCopy"]["colorArray"] = [...CLIPBOARD.colorArray];
-    STATE["selectionCopy"]["left"] = 0;
-    STATE["selectionCopy"]["top"] = 0;
-    STATE["selectionCopy"]["initCursorX"] = 0;
-    STATE["selectionCopy"]["initCursorY"] = 0;
+    STATE["selectionCopy"]["left"] = pasteX;
+    STATE["selectionCopy"]["top"] = pasteY;
+    STATE["selectionCopy"]["initCursorX"] = pasteX;
+    STATE["selectionCopy"]["initCursorY"] = pasteY;
     
-    // Render the pasted content
-    let cell0 = Get_CellInt_From_CellXY(0, 0);
+    let cell0 = Get_CellInt_From_CellXY(pasteX, pasteY);
     for (let y = 0; y < CLIPBOARD.height; y += 1) {
         for (let x = 0; x < CLIPBOARD.width; x += 1) {
             let id = Pad_Start_Int(cell0 + y * CELLS_PER_ROW + x);
@@ -82,11 +107,12 @@ function Paste_Selection() {
         }
     }
     
-    // Activate selection tool
     Activate_Tool("selection");
     Alert_User("Pasted selection");
+
     return true;
 }
+
 
 function Add_EventHandlers_To_Canvas_Div()
 {
@@ -112,6 +138,7 @@ function Add_EventHandlers_To_Canvas_Div()
 		isDrawingOutside = false;
 	});
 	canvasDiv.addEventListener("mousemove", Update_Cursor_Coordinates_On_Screen);
+	canvasDiv.addEventListener("mousemove", Track_Mouse_Position);
 	canvasDiv.addEventListener("mouseup", function () {
 		STATE["brushDown"] = false;
 		previousCursorX = previousCursorY = null;
@@ -429,6 +456,11 @@ function Add_EventHandlers_To_Canvas_Cells()
 					Alert_User("<i>Alt</i> to copy");
 				STATE["selection"]["totalCount"] += 1;
 			}
+			if (STATE["selection"]["floatingCopy"] === true) {
+				selection.style.left = STATE["selectionCopy"]["left"] * CELL_WIDTH_PX + "px";
+				selection.style.top = STATE["selectionCopy"]["top"] * CELL_WIDTH_PX + "px";
+				STATE["selection"]["floatingCopy"] = false;
+			}
 		} else 
 		if (STATE["activeTool"] === "selection" &&
 			STATE["selection"]["isLocked"] === true) {
@@ -601,21 +633,18 @@ function Reset_Previous_Cursor_Position()
 function Add_EventHandlers_To_Document()
 {
 	const keyDownHandler = function (e) {
-		// Handle Ctrl+C (Copy)
 		if ((e.ctrlKey || e.metaKey) && e.code === "KeyC" && !e.shiftKey) {
 			e.preventDefault();
 			Copy_Selection();
 			return;
 		}
 		
-		// Handle Ctrl+X (Cut)
 		if ((e.ctrlKey || e.metaKey) && e.code === "KeyX" && !e.shiftKey) {
 			e.preventDefault();
 			Cut_Selection();
 			return;
 		}
 		
-		// Handle Ctrl+V (Paste)
 		if ((e.ctrlKey || e.metaKey) && e.code === "KeyV" && !e.shiftKey) {
 			e.preventDefault();
 			Paste_Selection();
