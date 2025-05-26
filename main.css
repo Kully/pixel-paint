@@ -423,7 +423,7 @@ input[type="radio"] {
 
 /* buy me a coffee support section */
 #coffee-support {
-	background-color: var(--blanket-background-color);
+	background-color: var(--body-background-color);
 	border: 1px solid #555;
 	border-radius: var(--border-radius);
 	padding: 8px 12px;
@@ -431,7 +431,6 @@ input[type="radio"] {
 	font-weight: 100;
 	color: #efefef;
 	text-align: left;
-	box-shadow: var(--shadow);
 	margin-top: 10px;
 }
 
