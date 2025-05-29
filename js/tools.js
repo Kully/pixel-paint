@@ -32,6 +32,11 @@ function Activate_Tool(label)
 	let button = document.getElementById(object["button-id"]);
 	let buttonBkgdColor = button.style.backgroundColor;
 
+	if (STATE["activeTool"] === "selection" && label !== "selection") {
+        Remove_Selection();
+        Unlock_Selection();
+    }
+
 	if(STATE["activeTool"] !== label)
 	{
 		Set_Cursor(object["cursor"]);
