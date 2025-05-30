@@ -59,7 +59,7 @@ body {
 	position: relative;
 	background-color: var(--blanket-background-color);
 	width: 606px;
-	height: 530px;
+	height: 554px;
 	padding-right: 20px;
 	padding-bottom: 20px;
 }
@@ -385,8 +385,8 @@ input[type="radio"] {
 
 #info-section {
 	position: fixed;
-	top: 15%;
-	right: 30%;
+	top: 80%;
+	right: 1%;
 	z-index: 1000;
 	opacity: 0;
 	background-color: none;
@@ -397,7 +397,8 @@ input[type="radio"] {
 #keyboard-shortcut-hover {
 	position: fixed;
 	right: 0%;
-	top: 95%;
+	top: 99%;
+	
   	background-color: #e9e9a2;
   	padding: 0 4px;
   	border-radius: 2px 0 0 0;
@@ -410,7 +411,6 @@ input[type="radio"] {
 	width: 350px;
 	transition: opacity .2s ease;
 }
-
   
 #drop-shadow-preview {
     position: absolute;
@@ -419,4 +419,39 @@ input[type="radio"] {
     width: var(--canvas-cell-width); 
     height: var(--canvas-cell-width);
     opacity: 0.5; 
+}
+
+/* buy me a coffee support section */
+#coffee-support {
+	background-color: var(--body-background-color);
+	border: 1px solid #555;
+	border-radius: var(--border-radius);
+	padding: 8px 12px;
+	font-size: 12px;
+	font-weight: 100;
+	color: #efefef;
+	text-align: left;
+	margin-top: 10px;
+}
+
+#coffee-support a {
+	color: var(--tooltiptext-background-color);
+	text-decoration: none;
+	font-weight: 200;
+	transition: all 0.2s ease;
+}
+
+#coffee-support a:hover {
+	color: #ffffff;
+	text-shadow: 0 0 8px var(--tooltiptext-background-color);
+}
+
+#coffee-support .coffee-emoji {
+	font-size: 14px;
+	margin-left: 2px;
+}
+
+#coffee-support .no-pressure {
+	color: #999;
+	font-size: 10px;
 }
