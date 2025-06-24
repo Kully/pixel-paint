@@ -58,11 +58,36 @@
 			</div>
 
 			<div id="canvas-div"></div>
+			<div id="drop-shadow-preview"></div>
+			<div id="palette-select">
+				<label class="container">
+					<span class="checkmark"></span>
+					<input type="radio" onclick="Select_Palette()" name="radio" class="radio" id="radioNES" checked>
+					NES
+			  	</label><br>
+			  	<label class="container">
+					<span class="checkmark"></span>
+					<input type="radio" onclick="Select_Palette()" name="radio" class="radio" id="radioGB">
+					Gameboy
+			  	</label>
+			</div>
 			<div class="palette" id="palette-div"></div>
 			<label id="selection-explanation-text">
 				How to Copy <img class="imgInSelectionExplanation" src="img/selectionBright.png"></img> Selection: <b>hold down</b> <span>alt</span> and <b>drag</b> the selected area.
 			</label>
 			<div id="cursor-coords-display" class="cursor-coords-display"></div>
+			<div id="keyboard-shortcut-hover" onmouseover="Display_Keyboard_Shortcuts()" onmouseleave="Hide_Keyboard_Shortcuts()">Shortcuts</div>
+		</div>
+		<div id="info-section">
+			<table id="keyboard-shortcuts">
+				<tr><td>Copy Selection</td><td>Alt + Click Drag</td></tr>
+				<tr><td>Delete Selection</td><td>Del or Backspace</td></tr>
+				<tr><td>Remove Selection</td><td>Esc</td></tr>
+			</table>
+		</div>
+		<div id="coffee-support">
+			If you want to send gratitude, you can <a href="https://buymeacoffee.com/kully" target="_blank">buy me an Americano<span class="coffee-emoji">☕️</span></a><br>
+			<span class="no-pressure">(no pressure)</span>
 		</div>
 	</body>
 	<script type="text/javascript" src="js/tools.js"></script>
