@@ -11,6 +11,16 @@ let previousCursorY = null;
 let lastMouseX = 0;
 let lastMouseY = 0;
 
+// Global line preview state so canvas-div and canvas-cell handlers share it
+let linePreview = {
+	active: false,
+	startX: null,
+	startY: null,
+	savedPixels: [], // legacy, kept for compatibility
+	savedSnapshot: null, // copy of canvas pixels at start
+	lastPreviewed: {x: null, y: null}
+};
+
 function Copy_Selection() {
     const selection = document.getElementById("selection");
     if (STATE["activeTool"] === "selection" && selection && STATE["selection"]["isLocked"]) {
@@ -137,11 +147,38 @@ function Add_EventHandlers_To_Canvas_Div()
 		STATE["brushDown"] = true;
 		isDrawingOutside = false;
 	});
+
+
 	canvasDiv.addEventListener("mousemove", Update_Cursor_Coordinates_On_Screen);
 	canvasDiv.addEventListener("mousemove", Track_Mouse_Position);
 	canvasDiv.addEventListener("mouseup", function () {
 		STATE["brushDown"] = false;
 		previousCursorX = previousCursorY = null;
+
+		// If a line preview is active but the mouseup didn't fire on a canvas cell,
+		// commit the line using the last known mouse coordinates.
+		if (STATE["activeTool"] === "line" && linePreview.active) {
+			const endX = Math.max(0, Math.min(lastMouseX, CELLS_PER_ROW - 1));
+			const endY = Math.max(0, Math.min(lastMouseY, CELLS_PER_ROW - 1));
+			// restore saved snapshot then draw final line
+			if (linePreview.savedSnapshot) {
+				const canvasCellsRestore = document.querySelectorAll('.canvasCell');
+				for (let si = 0; si < canvasCellsRestore.length; si++) {
+					canvasCellsRestore[si].style.backgroundColor = linePreview.savedSnapshot[si];
+				}
+			}
+			Bresenham_Line_Algorithm(linePreview.startX, linePreview.startY, endX, endY, function (cell) {
+				cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+			});
+			linePreview.active = false;
+			linePreview.startX = null;
+			linePreview.startY = null;
+			linePreview.savedPixels = [];
+			linePreview.lastPreviewed = {x: null, y: null};
+			Save_Canvas_State();
+			return;
+		}
+
 		Save_Canvas_State();
 	});
 	canvasDiv.addEventListener("mouseleave", function (e) {
@@ -483,6 +520,10 @@ function Add_EventHandlers_To_Canvas_Cells()
 
 	function Tool_Action_On_Canvas_Cell(e)
 	{
+		// If the line tool is active, drawing is handled separately (preview/commit).
+		if (STATE["activeTool"] === "line") {
+			return;
+		}
 		const cell = e.target;
 		const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
 		const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
@@ -505,6 +546,23 @@ function Add_EventHandlers_To_Canvas_Cells()
 		canvasCells[i].addEventListener("mousedown", function (e) {
 			Reset_Previous_Cursor_Position();
 			Selection_Mousedown(e);
+			// Handle line tool mousedown specially: mark start and begin preview
+			if (STATE["activeTool"] === "line") {
+				STATE["brushDown"] = true;
+				const cell = e.target;
+				const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
+				const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
+				linePreview.active = true;
+				linePreview.startX = x;
+				linePreview.startY = y;
+				linePreview.savedPixels = [];
+				linePreview.lastPreviewed = {x: x, y: y};
+				// save current canvas snapshot so preview can be restored cleanly
+				linePreview.savedSnapshot = Get_Canvas_Pixels();
+				// also push current snapshot onto history so undo works after commit
+				HISTORY_STATES.pushToPtr([...linePreview.savedSnapshot]);
+				return;
+			}
 			Tool_Action_On_Canvas_Cell(e);
 		});
 		canvasCells[i].addEventListener("mousemove", Selection_Mousemove);
@@ -512,18 +570,65 @@ function Add_EventHandlers_To_Canvas_Cells()
 		canvasCells[i].addEventListener("mousedown", Tool_Action_On_Canvas_Cell);
 
 		canvasCells[i].addEventListener("mousemove", function (e) {
+			if (STATE["activeTool"] === "line") {
+				// If in line tool and mouse is down and a start exists, preview a line
+				if (linePreview.active && STATE["brushDown"]) {
+					const cell = e.target;
+					const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
+					const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
+					// avoid re-rendering same preview
+					if (linePreview.lastPreviewed.x === x && linePreview.lastPreviewed.y === y) return;
+					// restore previously previewed pixels by applying saved snapshot
+					if (linePreview.savedSnapshot) {
+						const canvasCellsRestore = document.querySelectorAll('.canvasCell');
+						for (let si = 0; si < canvasCellsRestore.length; si++) {
+							canvasCellsRestore[si].style.backgroundColor = linePreview.savedSnapshot[si];
+						}
+					}
+					// draw preview line
+					Bresenham_Line_Algorithm(linePreview.startX, linePreview.startY, x, y, function (cell) {
+						cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+					});
+					linePreview.lastPreviewed = {x: x, y: y};
+				}
+				return;
+			}
 			if (STATE["brushDown"]) {
 				Tool_Action_On_Canvas_Cell(e);
 			}
 		});
 
 		canvasCells[i].addEventListener("mouseup", function (e) {
+			// If line tool was active and previewing, commit the previewed line
+			if (STATE["activeTool"] === "line" && linePreview.active) {
+				const cell = e.target;
+				const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
+				const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
+				// restore saved snapshot then draw final line (so intermediate preview doesn't double-draw)
+				if (linePreview.savedSnapshot) {
+					const canvasCellsRestore = document.querySelectorAll('.canvasCell');
+					for (let si = 0; si < canvasCellsRestore.length; si++) {
+						canvasCellsRestore[si].style.backgroundColor = linePreview.savedSnapshot[si];
+					}
+				}
+				Bresenham_Line_Algorithm(linePreview.startX, linePreview.startY, x, y, function (cell) {
+					cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+				});
+				linePreview.active = false;
+				linePreview.startX = null;
+				linePreview.startY = null;
+				linePreview.savedPixels = [];
+				linePreview.lastPreviewed = {x: null, y: null};
+				Save_Canvas_State();
+				Reset_Previous_Cursor_Position();
+				return;
+			}
 			let cursor = Get_Cursor();
 			if (cursor.includes("fill.png")) {
 				let cell_id = e.target.id;
 				let target_color = e.target.style.backgroundColor;
 				let replacement_color = STATE[ACTIVE_COLOR_SELECT];
-
+				
 				Flood_Fill_Algorithm(cell_id, target_color, replacement_color);
 			}
 			Reset_Previous_Cursor_Position();
@@ -544,6 +649,35 @@ function Add_EventHandlers_To_Canvas_Cells()
 	document.addEventListener("mouseup", function (e) {
 		Exit_Drawing_Mode();
 		Reset_Previous_Cursor_Position();
+
+		// If currently drawing a line and we have a start, commit the line on any mouseup
+		if (STATE["activeTool"] === "line" && linePreview.startX !== null) {
+			let endX, endY;
+			if (e.target && e.target.classList && e.target.classList.contains('canvasCell')) {
+				endX = Math.floor(e.target.offsetLeft / CELL_WIDTH_PX);
+				endY = Math.floor(e.target.offsetTop / CELL_WIDTH_PX);
+			} else {
+				endX = Math.max(0, Math.min(lastMouseX, CELLS_PER_ROW - 1));
+				endY = Math.max(0, Math.min(lastMouseY, CELLS_PER_ROW - 1));
+			}
+			// restore saved snapshot then draw final line
+			if (linePreview.savedSnapshot) {
+				const canvasCellsRestore = document.querySelectorAll('.canvasCell');
+				for (let si = 0; si < canvasCellsRestore.length; si++) {
+					canvasCellsRestore[si].style.backgroundColor = linePreview.savedSnapshot[si];
+				}
+			}
+			Bresenham_Line_Algorithm(linePreview.startX, linePreview.startY, endX, endY, function (cell) {
+				cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+			});
+			linePreview.startX = null;
+			linePreview.startY = null;
+			linePreview.active = false;
+			linePreview.lastPreviewed = {x: null, y: null};
+			Save_Canvas_State();
+			return;
+		}
+
 		if (e.target.id !== "undo-button" && e.target.id !== "redo-button") {
 			Save_Canvas_State();
 		}
@@ -575,6 +709,9 @@ function Add_EventHandlers_To_Toolbar_Buttons()
 				break;
 			case "colorpicker-button":
 				button.addEventListener("click", () => Activate_Tool("colorpicker"));
+				break;
+			case "line-button":
+				button.addEventListener("click", () => Activate_Tool("line"));
 				break;
 			case "grid-button":
 				button.addEventListener("click", Toggle_Grid);
