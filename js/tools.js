@@ -29,6 +29,11 @@ const Tools = {
 		"hotkey": "KeyL",
 		"cursor": "crosshair",
 	},
+	"rectangle": {
+		"button-id": "rectangle-button",
+		"hotkey": "KeyR",
+		"cursor": "crosshair",
+	},
 }
 
 function Activate_Tool(label)

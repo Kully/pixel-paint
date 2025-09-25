@@ -29,6 +29,11 @@ const ShapePreviewManager = {
 		this.savedSnapshot = Get_Canvas_Pixels();
 		// push to history so undo will remove the committed shape
 		HISTORY_STATES.pushToPtr([...this.savedSnapshot]);
+		// provide immediate visual feedback by restoring snapshot and drawing the start cell
+		this.restoreSnapshotToScreen();
+		const startId = Pad_Start_Int(Get_CellInt_From_CellXY(startX, startY));
+		const startCell = document.getElementById(startId);
+		if (startCell) startCell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
 	},
 	restoreSnapshotToScreen() {
 		if (!this.savedSnapshot) return;
@@ -607,8 +612,8 @@ function Add_EventHandlers_To_Canvas_Cells()
 
 	function Tool_Action_On_Canvas_Cell(e)
 	{
-		// If the line tool is active, drawing is handled separately (preview/commit).
-		if (STATE["activeTool"] === "line") {
+		// If a shape tool (line or rectangle) is active, drawing is handled separately (preview/commit).
+		if (STATE["activeTool"] === "line" || STATE["activeTool"] === "rectangle") {
 			return;
 		}
 		const cell = e.target;
@@ -633,13 +638,14 @@ function Add_EventHandlers_To_Canvas_Cells()
 		canvasCells[i].addEventListener("mousedown", function (e) {
 			Reset_Previous_Cursor_Position();
 			Selection_Mousedown(e);
-			// Handle line tool mousedown specially: mark start and begin preview
-			if (STATE["activeTool"] === "line") {
+			// Handle shape tools (line, rectangle) mousedown specially: mark start and begin preview
+			if (STATE["activeTool"] === "line" || STATE["activeTool"] === "rectangle") {
 				STATE["brushDown"] = true;
 				const cell = e.target;
 				const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
 				const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
-				ShapePreviewManager.begin('line', x, y);
+				const shapeType = STATE["activeTool"] === "line" ? 'line' : 'rect';
+				ShapePreviewManager.begin(shapeType, x, y);
 				return;
 			}
 			Tool_Action_On_Canvas_Cell(e);
@@ -649,22 +655,46 @@ function Add_EventHandlers_To_Canvas_Cells()
 		canvasCells[i].addEventListener("mousedown", Tool_Action_On_Canvas_Cell);
 
 		canvasCells[i].addEventListener("mousemove", function (e) {
-			if (STATE["activeTool"] === "line") {
-				// If in line tool and mouse is down and a start exists, preview a line
-				if (ShapePreviewManager.active && STATE["brushDown"]) {
-					const cell = e.target;
-					const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
-					const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
-					// avoid re-rendering same preview
-					if (ShapePreviewManager.lastPreviewed.x === x && ShapePreviewManager.lastPreviewed.y === y) return;
-					// restore previously previewed pixels by applying saved snapshot
-					ShapePreviewManager.restoreSnapshotToScreen();
-					// draw preview line
-					Bresenham_Line_Algorithm(ShapePreviewManager.startX, ShapePreviewManager.startY, x, y, function (cell) {
-						cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-					});
-					ShapePreviewManager.lastPreviewed = {x: x, y: y};
+			// If a shape tool is active (line or rectangle) and brush is down, show preview
+			if ((STATE["activeTool"] === "line" || STATE["activeTool"] === "rectangle") && ShapePreviewManager.active && STATE["brushDown"]) {
+				const cell = e.target;
+				const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
+				const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
+				// avoid re-rendering same preview
+				if (ShapePreviewManager.lastPreviewed.x === x && ShapePreviewManager.lastPreviewed.y === y) return;
+				// restore previously previewed pixels
+				ShapePreviewManager.restoreSnapshotToScreen();
+				// draw preview according to shape type
+				switch (ShapePreviewManager.type) {
+					case 'line':
+						Bresenham_Line_Algorithm(ShapePreviewManager.startX, ShapePreviewManager.startY, x, y, function (cell) {
+							cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						});
+						break;
+					case 'rect':
+						let rx0 = Math.min(ShapePreviewManager.startX, x);
+						let rx1 = Math.max(ShapePreviewManager.startX, x);
+						let ry0 = Math.min(ShapePreviewManager.startY, y);
+						let ry1 = Math.max(ShapePreviewManager.startY, y);
+						for (let xi = rx0; xi <= rx1; xi++) {
+							let idTop = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry0));
+							let cellTop = document.getElementById(idTop);
+							cellTop.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+							let idBottom = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry1));
+							let cellBottom = document.getElementById(idBottom);
+							cellBottom.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						}
+						for (let yi = ry0; yi <= ry1; yi++) {
+							let idLeft = Pad_Start_Int(Get_CellInt_From_CellXY(rx0, yi));
+							let cellLeft = document.getElementById(idLeft);
+							cellLeft.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+							let idRight = Pad_Start_Int(Get_CellInt_From_CellXY(rx1, yi));
+							let cellRight = document.getElementById(idRight);
+							cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						}
+						break;
 				}
+				ShapePreviewManager.lastPreviewed = {x: x, y: y};
 				return;
 			}
 			if (STATE["brushDown"]) {
@@ -821,6 +851,9 @@ function Add_EventHandlers_To_Toolbar_Buttons()
 				break;
 			case "line-button":
 				button.addEventListener("click", () => Activate_Tool("line"));
+				break;
+			case "rectangle-button":
+				button.addEventListener("click", () => Activate_Tool("rectangle"));
 				break;
 			case "grid-button":
 				button.addEventListener("click", Toggle_Grid);
