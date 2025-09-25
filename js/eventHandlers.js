@@ -12,13 +12,39 @@ let lastMouseX = 0;
 let lastMouseY = 0;
 
 // Global line preview state so canvas-div and canvas-cell handlers share it
-let linePreview = {
+// Generic preview manager for shapes (line, rectangle, etc.)
+const ShapePreviewManager = {
 	active: false,
+	type: null, // 'line' | 'rect' | etc.
 	startX: null,
 	startY: null,
-	savedPixels: [], // legacy, kept for compatibility
-	savedSnapshot: null, // copy of canvas pixels at start
-	lastPreviewed: {x: null, y: null}
+	savedSnapshot: null,
+	lastPreviewed: {x: null, y: null},
+	begin(type, startX, startY) {
+		this.active = true;
+		this.type = type;
+		this.startX = startX;
+		this.startY = startY;
+		this.lastPreviewed = {x: startX, y: startY};
+		this.savedSnapshot = Get_Canvas_Pixels();
+		// push to history so undo will remove the committed shape
+		HISTORY_STATES.pushToPtr([...this.savedSnapshot]);
+	},
+	restoreSnapshotToScreen() {
+		if (!this.savedSnapshot) return;
+		const canvasCellsRestore = document.querySelectorAll('.canvasCell');
+		for (let si = 0; si < canvasCellsRestore.length; si++) {
+			canvasCellsRestore[si].style.backgroundColor = this.savedSnapshot[si];
+		}
+	},
+	clear() {
+		this.active = false;
+		this.type = null;
+		this.startX = null;
+		this.startY = null;
+		this.savedSnapshot = null;
+		this.lastPreviewed = {x: null, y: null};
+	}
 };
 
 function Copy_Selection() {
@@ -155,26 +181,49 @@ function Add_EventHandlers_To_Canvas_Div()
 		STATE["brushDown"] = false;
 		previousCursorX = previousCursorY = null;
 
-		// If a line preview is active but the mouseup didn't fire on a canvas cell,
-		// commit the line using the last known mouse coordinates.
-		if (STATE["activeTool"] === "line" && linePreview.active) {
+		// If a shape preview is active but the mouseup didn't fire on a canvas cell,
+		// commit the shape using the last known mouse coordinates.
+		if (ShapePreviewManager.active) {
 			const endX = Math.max(0, Math.min(lastMouseX, CELLS_PER_ROW - 1));
 			const endY = Math.max(0, Math.min(lastMouseY, CELLS_PER_ROW - 1));
-			// restore saved snapshot then draw final line
-			if (linePreview.savedSnapshot) {
+			// restore saved snapshot then draw final shape
+			if (ShapePreviewManager.savedSnapshot) {
 				const canvasCellsRestore = document.querySelectorAll('.canvasCell');
 				for (let si = 0; si < canvasCellsRestore.length; si++) {
-					canvasCellsRestore[si].style.backgroundColor = linePreview.savedSnapshot[si];
+					canvasCellsRestore[si].style.backgroundColor = ShapePreviewManager.savedSnapshot[si];
 				}
 			}
-			Bresenham_Line_Algorithm(linePreview.startX, linePreview.startY, endX, endY, function (cell) {
-				cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-			});
-			linePreview.active = false;
-			linePreview.startX = null;
-			linePreview.startY = null;
-			linePreview.savedPixels = [];
-			linePreview.lastPreviewed = {x: null, y: null};
+			switch (ShapePreviewManager.type) {
+				case 'line':
+					Bresenham_Line_Algorithm(ShapePreviewManager.startX, ShapePreviewManager.startY, endX, endY, function (cell) {
+						cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+					});
+					break;
+				case 'rect':
+					// draw rectangle border between start and (endX,endY)
+					let rx0 = Math.min(ShapePreviewManager.startX, endX);
+					let rx1 = Math.max(ShapePreviewManager.startX, endX);
+					let ry0 = Math.min(ShapePreviewManager.startY, endY);
+					let ry1 = Math.max(ShapePreviewManager.startY, endY);
+					for (let xi = rx0; xi <= rx1; xi++) {
+						let idTop = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry0));
+						let cellTop = document.getElementById(idTop);
+						cellTop.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						let idBottom = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry1));
+						let cellBottom = document.getElementById(idBottom);
+						cellBottom.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+					}
+					for (let yi = ry0; yi <= ry1; yi++) {
+						let idLeft = Pad_Start_Int(Get_CellInt_From_CellXY(rx0, yi));
+						let cellLeft = document.getElementById(idLeft);
+						cellLeft.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						let idRight = Pad_Start_Int(Get_CellInt_From_CellXY(rx1, yi));
+						let cellRight = document.getElementById(idRight);
+						cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+					}
+					break;
+			}
+			ShapePreviewManager.clear();
 			Save_Canvas_State();
 			return;
 		}
@@ -293,43 +342,81 @@ function Add_EventHandlers_To_Canvas_Cells()
 
 	function Selection_Mousedown(e) 
 	{
-		if (STATE["activeTool"] === "selection") {
-			let selection = document.getElementById("selection");
-			let cursorXY = Canvas_Cursor_XY(e);
-
-			if ((STATE["selection"]["isLocked"] === true) &&
-				(selection) &&
-				CursorXY_In_Selection(cursorXY, selection)) {
-				if (STATE["altKeyDown"] === true) {
-					STATE["selection"]["floatingCopy"] = true;
-
-					let colorArray = Canvas_Pixels_From_Selection();
-					STATE["selectionCopy"]["colorArray"] = colorArray;
-
-					STATE["selectionCopy"]["initCursorX"] = cursorXY[0] / CELL_WIDTH_PX;
-					STATE["selectionCopy"]["initCursorY"] = cursorXY[1] / CELL_WIDTH_PX;
-				} else {
-
-					let colorArray = Canvas_Pixels_From_Selection();
-					STATE["selectionCopy"]["colorArray"] = colorArray;
-
-					let origLeft = Px_To_Int(selection.style.left) / CELL_WIDTH_PX;
-					let origTop = Px_To_Int(selection.style.top) / CELL_WIDTH_PX;
-
-					STATE["selection"]["isMoving"] = true;
-					STATE["selectionMove"] = {
-						initCursorX: cursorXY[0] / CELL_WIDTH_PX,
-						initCursorY: cursorXY[1] / CELL_WIDTH_PX,
-						initLeft: origLeft,
-						initTop: origTop
-					};
-				}
-			} else {
-				Remove_Selection();
-				Unlock_Selection();
-				Create_Selection_Div(e);
+		// If a shape preview is active and the brush is down, handle preview update here.
+		if (ShapePreviewManager.active && STATE["brushDown"]) {
+			const cell = e.target;
+			const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
+			const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
+			// avoid re-rendering same preview
+			if (ShapePreviewManager.lastPreviewed.x === x && ShapePreviewManager.lastPreviewed.y === y) return;
+			// restore snapshot
+			ShapePreviewManager.restoreSnapshotToScreen();
+			// draw according to active shape type
+			switch (ShapePreviewManager.type) {
+				case 'line':
+					Bresenham_Line_Algorithm(ShapePreviewManager.startX, ShapePreviewManager.startY, x, y, function (cell) {
+						cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+					});
+					break;
+				case 'rect':
+					// draw rectangle border between start and (x,y)
+					let x0 = Math.min(ShapePreviewManager.startX, x);
+					let x1 = Math.max(ShapePreviewManager.startX, x);
+					let y0 = Math.min(ShapePreviewManager.startY, y);
+					let y1 = Math.max(ShapePreviewManager.startY, y);
+					// top and bottom
+					for (let xi = x0; xi <= x1; xi++) {
+						let idTop = Pad_Start_Int(Get_CellInt_From_CellXY(xi, y0));
+						let cellTop = document.getElementById(idTop);
+						cellTop.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						let idBottom = Pad_Start_Int(Get_CellInt_From_CellXY(xi, y1));
+						let cellBottom = document.getElementById(idBottom);
+						cellBottom.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+					}
+					// left and right
+					for (let yi = y0; yi <= y1; yi++) {
+						let idLeft = Pad_Start_Int(Get_CellInt_From_CellXY(x0, yi));
+						let cellLeft = document.getElementById(idLeft);
+						cellLeft.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						let idRight = Pad_Start_Int(Get_CellInt_From_CellXY(x1, yi));
+						let cellRight = document.getElementById(idRight);
+						cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+					}
+					break;
 			}
+			ShapePreviewManager.lastPreviewed = {x: x, y: y};
+			return;
 		}
+
+		// Minimal selection handling: if selection tool is active, either start moving existing
+		// selection or create a new selection region.
+		if (STATE["activeTool"] !== "selection") {
+			return;
+		}
+
+		const selection = document.getElementById("selection");
+		const cursorXY = Canvas_Cursor_XY(e);
+		if (!selection) {
+			Create_Selection_Div(e);
+			return;
+		}
+
+		// If clicked inside the existing selection, begin moving it.
+		if (CursorXY_In_Selection(cursorXY, selection)) {
+			STATE["selection"]["isMoving"] = true;
+			STATE["selectionMove"] = {
+				initCursorX: cursorXY[0] / CELL_WIDTH_PX,
+				initCursorY: cursorXY[1] / CELL_WIDTH_PX,
+				initLeft: Px_To_Int(selection.style.left) / CELL_WIDTH_PX,
+				initTop: Px_To_Int(selection.style.top) / CELL_WIDTH_PX
+			};
+			return;
+		}
+
+		// Otherwise start a new selection
+		Remove_Selection();
+		Unlock_Selection();
+		Create_Selection_Div(e);
 	}
 
 	function Selection_Mousemove(e) 
@@ -552,15 +639,7 @@ function Add_EventHandlers_To_Canvas_Cells()
 				const cell = e.target;
 				const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
 				const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
-				linePreview.active = true;
-				linePreview.startX = x;
-				linePreview.startY = y;
-				linePreview.savedPixels = [];
-				linePreview.lastPreviewed = {x: x, y: y};
-				// save current canvas snapshot so preview can be restored cleanly
-				linePreview.savedSnapshot = Get_Canvas_Pixels();
-				// also push current snapshot onto history so undo works after commit
-				HISTORY_STATES.pushToPtr([...linePreview.savedSnapshot]);
+				ShapePreviewManager.begin('line', x, y);
 				return;
 			}
 			Tool_Action_On_Canvas_Cell(e);
@@ -572,24 +651,19 @@ function Add_EventHandlers_To_Canvas_Cells()
 		canvasCells[i].addEventListener("mousemove", function (e) {
 			if (STATE["activeTool"] === "line") {
 				// If in line tool and mouse is down and a start exists, preview a line
-				if (linePreview.active && STATE["brushDown"]) {
+				if (ShapePreviewManager.active && STATE["brushDown"]) {
 					const cell = e.target;
 					const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
 					const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
 					// avoid re-rendering same preview
-					if (linePreview.lastPreviewed.x === x && linePreview.lastPreviewed.y === y) return;
+					if (ShapePreviewManager.lastPreviewed.x === x && ShapePreviewManager.lastPreviewed.y === y) return;
 					// restore previously previewed pixels by applying saved snapshot
-					if (linePreview.savedSnapshot) {
-						const canvasCellsRestore = document.querySelectorAll('.canvasCell');
-						for (let si = 0; si < canvasCellsRestore.length; si++) {
-							canvasCellsRestore[si].style.backgroundColor = linePreview.savedSnapshot[si];
-						}
-					}
+					ShapePreviewManager.restoreSnapshotToScreen();
 					// draw preview line
-					Bresenham_Line_Algorithm(linePreview.startX, linePreview.startY, x, y, function (cell) {
+					Bresenham_Line_Algorithm(ShapePreviewManager.startX, ShapePreviewManager.startY, x, y, function (cell) {
 						cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
 					});
-					linePreview.lastPreviewed = {x: x, y: y};
+					ShapePreviewManager.lastPreviewed = {x: x, y: y};
 				}
 				return;
 			}
@@ -599,26 +673,43 @@ function Add_EventHandlers_To_Canvas_Cells()
 		});
 
 		canvasCells[i].addEventListener("mouseup", function (e) {
-			// If line tool was active and previewing, commit the previewed line
-			if (STATE["activeTool"] === "line" && linePreview.active) {
+			// If a shape preview was active, commit the previewed shape
+			if (ShapePreviewManager.active) {
 				const cell = e.target;
 				const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
 				const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
-				// restore saved snapshot then draw final line (so intermediate preview doesn't double-draw)
-				if (linePreview.savedSnapshot) {
-					const canvasCellsRestore = document.querySelectorAll('.canvasCell');
-					for (let si = 0; si < canvasCellsRestore.length; si++) {
-						canvasCellsRestore[si].style.backgroundColor = linePreview.savedSnapshot[si];
-					}
+				// restore saved snapshot then draw final shape
+				ShapePreviewManager.restoreSnapshotToScreen();
+				switch (ShapePreviewManager.type) {
+					case 'line':
+						Bresenham_Line_Algorithm(ShapePreviewManager.startX, ShapePreviewManager.startY, x, y, function (cell) {
+							cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						});
+						break;
+					case 'rect':
+						let rx0 = Math.min(ShapePreviewManager.startX, x);
+						let rx1 = Math.max(ShapePreviewManager.startX, x);
+						let ry0 = Math.min(ShapePreviewManager.startY, y);
+						let ry1 = Math.max(ShapePreviewManager.startY, y);
+						for (let xi = rx0; xi <= rx1; xi++) {
+							let idTop = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry0));
+							let cellTop = document.getElementById(idTop);
+							cellTop.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+							let idBottom = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry1));
+							let cellBottom = document.getElementById(idBottom);
+							cellBottom.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						}
+						for (let yi = ry0; yi <= ry1; yi++) {
+							let idLeft = Pad_Start_Int(Get_CellInt_From_CellXY(rx0, yi));
+							let cellLeft = document.getElementById(idLeft);
+							cellLeft.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+							let idRight = Pad_Start_Int(Get_CellInt_From_CellXY(rx1, yi));
+							let cellRight = document.getElementById(idRight);
+							cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						}
+						break;
 				}
-				Bresenham_Line_Algorithm(linePreview.startX, linePreview.startY, x, y, function (cell) {
-					cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-				});
-				linePreview.active = false;
-				linePreview.startX = null;
-				linePreview.startY = null;
-				linePreview.savedPixels = [];
-				linePreview.lastPreviewed = {x: null, y: null};
+				ShapePreviewManager.clear();
 				Save_Canvas_State();
 				Reset_Previous_Cursor_Position();
 				return;
@@ -650,8 +741,8 @@ function Add_EventHandlers_To_Canvas_Cells()
 		Exit_Drawing_Mode();
 		Reset_Previous_Cursor_Position();
 
-		// If currently drawing a line and we have a start, commit the line on any mouseup
-		if (STATE["activeTool"] === "line" && linePreview.startX !== null) {
+		// If a shape preview is active, commit it on any mouseup
+		if (ShapePreviewManager.active) {
 			let endX, endY;
 			if (e.target && e.target.classList && e.target.classList.contains('canvasCell')) {
 				endX = Math.floor(e.target.offsetLeft / CELL_WIDTH_PX);
@@ -660,20 +751,38 @@ function Add_EventHandlers_To_Canvas_Cells()
 				endX = Math.max(0, Math.min(lastMouseX, CELLS_PER_ROW - 1));
 				endY = Math.max(0, Math.min(lastMouseY, CELLS_PER_ROW - 1));
 			}
-			// restore saved snapshot then draw final line
-			if (linePreview.savedSnapshot) {
-				const canvasCellsRestore = document.querySelectorAll('.canvasCell');
-				for (let si = 0; si < canvasCellsRestore.length; si++) {
-					canvasCellsRestore[si].style.backgroundColor = linePreview.savedSnapshot[si];
-				}
+			// restore saved snapshot then draw final shape
+			ShapePreviewManager.restoreSnapshotToScreen();
+			switch (ShapePreviewManager.type) {
+				case 'line':
+					Bresenham_Line_Algorithm(ShapePreviewManager.startX, ShapePreviewManager.startY, endX, endY, function (cell) {
+						cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+					});
+					break;
+				case 'rect':
+					let rx0 = Math.min(ShapePreviewManager.startX, endX);
+					let rx1 = Math.max(ShapePreviewManager.startX, endX);
+					let ry0 = Math.min(ShapePreviewManager.startY, endY);
+					let ry1 = Math.max(ShapePreviewManager.startY, endY);
+					for (let xi = rx0; xi <= rx1; xi++) {
+						let idTop = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry0));
+						let cellTop = document.getElementById(idTop);
+						cellTop.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						let idBottom = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry1));
+						let cellBottom = document.getElementById(idBottom);
+						cellBottom.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+					}
+					for (let yi = ry0; yi <= ry1; yi++) {
+						let idLeft = Pad_Start_Int(Get_CellInt_From_CellXY(rx0, yi));
+						let cellLeft = document.getElementById(idLeft);
+						cellLeft.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						let idRight = Pad_Start_Int(Get_CellInt_From_CellXY(rx1, yi));
+						let cellRight = document.getElementById(idRight);
+						cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+					}
+					break;
 			}
-			Bresenham_Line_Algorithm(linePreview.startX, linePreview.startY, endX, endY, function (cell) {
-				cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-			});
-			linePreview.startX = null;
-			linePreview.startY = null;
-			linePreview.active = false;
-			linePreview.lastPreviewed = {x: null, y: null};
+			ShapePreviewManager.clear();
 			Save_Canvas_State();
 			return;
 		}
