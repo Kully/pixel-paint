@@ -1,3 +1,23 @@
+// Rotates the canvas pixels 90 degrees clockwise
+function Rotate_Canvas_90deg() {
+	const size = CELLS_PER_ROW;
+	const pixels = Get_Canvas_Pixels();
+	const rotated = new Array(size * size);
+	for (let y = 0; y < size; y++) {
+		for (let x = 0; x < size; x++) {
+			// (x, y) maps to (y, size - 1 - x)
+			rotated[y * size + x] = pixels[x * size + (size - 1 - y)];
+		}
+	}
+	// Update canvas cells
+	for (let i = 0; i < size * size; i++) {
+		const cell = document.getElementById(Pad_Start_Int(i, 4));
+		cell.style.backgroundColor = rotated[i];
+	}
+	// Save new state
+	HISTORY_STATES.pushToPtr([...rotated]);
+}
+
 // Shared shape preview helpers
 function Draw_Line_Preview(startX, startY, endX, endY) {
 	Bresenham_Line_Algorithm(startX, startY, endX, endY, cell => {
@@ -822,6 +842,9 @@ function Add_EventHandlers_To_Toolbar_Buttons()
 				break;
 			case "ellipse-button":
 				button.addEventListener("click", () => Activate_Tool("ellipse"));
+				break;
+			case "rotate-button":
+				button.addEventListener("click", Rotate_Canvas_90deg);
 				break;
 			case "grid-button":
 				button.addEventListener("click", Toggle_Grid);
