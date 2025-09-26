@@ -403,17 +403,21 @@ function Add_EventHandlers_To_Canvas_Div()
 	canvasDiv.addEventListener("mouseleave", function (e) {
 		if (STATE["brushDown"]) {
 			const canvasRect = canvasDiv.getBoundingClientRect();
-			const x = Math.max(0, Math.min(e.clientX - canvasRect.left, canvasRect.width - 1));
-			const y = Math.max(0, Math.min(e.clientY - canvasRect.top, canvasRect.height - 1));
-			const targetCell = document.elementFromPoint(x + canvasRect.left, y + canvasRect.top);
+			// Clamp mouse position to canvas bounds
+			let x = Math.max(0, Math.min(e.clientX - canvasRect.left, canvasRect.width - 1));
+			let y = Math.max(0, Math.min(e.clientY - canvasRect.top, canvasRect.height - 1));
+			// Convert to cell coordinates
+			let cellX = Math.floor(x / CELL_WIDTH_PX);
+			let cellY = Math.floor(y / CELL_WIDTH_PX);
+			cellX = Math.max(0, Math.min(cellX, CELLS_PER_ROW - 1));
+			cellY = Math.max(0, Math.min(cellY, CELLS_PER_ROW - 1));
 
-			if (targetCell && targetCell.classList.contains('canvasCell')) {
-				const targetX = targetCell.offsetLeft / CELL_WIDTH_PX;
-				const targetY = targetCell.offsetTop / CELL_WIDTH_PX;
-				// console.log(`Previous Cursor: (${previousCursorX}, ${previousCursorY}) Exit Target: (${targetX}, ${targetY})`);
-				if (previousCursorX !== null && previousCursorY !== null) {
-					Bresenham_Line_Algorithm(previousCursorX, previousCursorY, targetX, targetY, Get_Tool_Action_Callback());
-				}
+			// If drawing a shape, just update the preview at clamped position (do NOT commit)
+			if (ShapePreviewManager.active) {
+				Restore_And_Draw_Shape(ShapePreviewManager.type, ShapePreviewManager.startX, ShapePreviewManager.startY, cellX, cellY);
+				ShapePreviewManager.lastPreviewed = {x: cellX, y: cellY};
+			} else if (previousCursorX !== null && previousCursorY !== null) {
+				Bresenham_Line_Algorithm(previousCursorX, previousCursorY, cellX, cellY, Get_Tool_Action_Callback());
 				previousCursorX = previousCursorY = null;
 			}
 			document.addEventListener("mousemove", Track_Mouse_Outside);
