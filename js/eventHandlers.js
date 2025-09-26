@@ -1,3 +1,11 @@
+// Track shift key state
+let shiftKeyDown = false;
+document.addEventListener('keydown', function(e) {
+	if (e.key === 'Shift') shiftKeyDown = true;
+});
+document.addEventListener('keyup', function(e) {
+	if (e.key === 'Shift') shiftKeyDown = false;
+});
 // Flip canvas along X axis (across Y axis, horizontal flip)
 function Flip_Along_X_Axis() {
 	const size = CELLS_PER_ROW;
@@ -53,12 +61,50 @@ function Rotate_Canvas_90deg() {
 
 // Shared shape preview helpers
 function Draw_Line_Preview(startX, startY, endX, endY) {
+	// If shift is held, snap to axis or diagonal
+	if (shiftKeyDown) {
+		let dx = endX - startX;
+		let dy = endY - startY;
+		let absDx = Math.abs(dx);
+		let absDy = Math.abs(dy);
+		// Snap to diagonal if close enough
+		if (Math.abs(absDx - absDy) <= Math.min(absDx, absDy)) {
+			// Diagonal: use sign of drag and max length
+			let length = Math.max(absDx, absDy);
+			let signX = dx < 0 ? -1 : 1;
+			let signY = dy < 0 ? -1 : 1;
+			endX = startX + signX * length;
+			endY = startY + signY * length;
+		} else if (absDx > absDy) {
+			// Horizontal
+			let signX = dx < 0 ? -1 : 1;
+			endX = startX + signX * absDx;
+			endY = startY;
+		} else {
+			// Vertical
+			let signY = dy < 0 ? -1 : 1;
+			endX = startX;
+			endY = startY + signY * absDy;
+		}
+	}
 	Bresenham_Line_Algorithm(startX, startY, endX, endY, cell => {
 		cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
 	});
 }
 
 function Draw_Rect_Preview(startX, startY, endX, endY) {
+	let dx = endX - startX;
+	let dy = endY - startY;
+	let absDx = Math.abs(dx);
+	let absDy = Math.abs(dy);
+	// If shift is held, snap to square
+	if (shiftKeyDown) {
+		let size = Math.max(absDx, absDy);
+		let signX = dx < 0 ? -1 : 1;
+		let signY = dy < 0 ? -1 : 1;
+		endX = startX + signX * size;
+		endY = startY + signY * size;
+	}
 	const rx0 = Math.min(startX, endX), rx1 = Math.max(startX, endX);
 	const ry0 = Math.min(startY, endY), ry1 = Math.max(startY, endY);
 	for (let xi = rx0; xi <= rx1; xi++) {
@@ -80,6 +126,18 @@ function Draw_Rect_Preview(startX, startY, endX, endY) {
 }
 
 function Draw_Ellipse_Preview(startX, startY, endX, endY) {
+	let dx = endX - startX;
+	let dy = endY - startY;
+	let absDx = Math.abs(dx);
+	let absDy = Math.abs(dy);
+	// If shift is held, snap to circle
+	if (shiftKeyDown) {
+		let size = Math.max(absDx, absDy);
+		let signX = dx < 0 ? -1 : 1;
+		let signY = dy < 0 ? -1 : 1;
+		endX = startX + signX * size;
+		endY = startY + signY * size;
+	}
 	const ex0 = Math.min(startX, endX), ex1 = Math.max(startX, endX);
 	const ey0 = Math.min(startY, endY), ey1 = Math.max(startY, endY);
 	const a = (ex1 - ex0) / 2.0, b = (ey1 - ey0) / 2.0;
