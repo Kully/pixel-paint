@@ -439,6 +439,7 @@ input[type="radio"] {
 }
 
 #info-section {
+	font-size: 0.75rem;
 	position: fixed;
 	top: 15%;
 	right: 30%;
