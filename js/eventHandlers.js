@@ -512,81 +512,43 @@ function Add_EventHandlers_To_Canvas_Cells()
 
 	function Selection_Mousedown(e) 
 	{
-		// If a shape preview is active and the brush is down, handle preview update here.
-		if (ShapePreviewManager.active && STATE["brushDown"]) {
-			const cell = e.target;
-			const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
-			const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
-			// avoid re-rendering same preview
-			if (ShapePreviewManager.lastPreviewed.x === x && ShapePreviewManager.lastPreviewed.y === y) return;
-			// restore snapshot
-			ShapePreviewManager.restoreSnapshotToScreen();
-			// draw according to active shape type
-			switch (ShapePreviewManager.type) {
-				case 'line':
-					Bresenham_Line_Algorithm(ShapePreviewManager.startX, ShapePreviewManager.startY, x, y, function (cell) {
-						cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-					});
-					break;
-				case 'rect':
-					// draw rectangle border between start and (x,y)
-					let x0 = Math.min(ShapePreviewManager.startX, x);
-					let x1 = Math.max(ShapePreviewManager.startX, x);
-					let y0 = Math.min(ShapePreviewManager.startY, y);
-					let y1 = Math.max(ShapePreviewManager.startY, y);
-					// top and bottom
-					for (let xi = x0; xi <= x1; xi++) {
-						let idTop = Pad_Start_Int(Get_CellInt_From_CellXY(xi, y0));
-						let cellTop = document.getElementById(idTop);
-						cellTop.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-						let idBottom = Pad_Start_Int(Get_CellInt_From_CellXY(xi, y1));
-						let cellBottom = document.getElementById(idBottom);
-						cellBottom.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-					}
-					// left and right
-					for (let yi = y0; yi <= y1; yi++) {
-						let idLeft = Pad_Start_Int(Get_CellInt_From_CellXY(x0, yi));
-						let cellLeft = document.getElementById(idLeft);
-						cellLeft.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-						let idRight = Pad_Start_Int(Get_CellInt_From_CellXY(x1, yi));
-						let cellRight = document.getElementById(idRight);
-						cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-					}
-					break;
+		if (STATE["activeTool"] === "selection") {
+			let selection = document.getElementById("selection");
+			let cursorXY = Canvas_Cursor_XY(e);
+
+			if ((STATE["selection"]["isLocked"] === true) &&
+				(selection) &&
+				CursorXY_In_Selection(cursorXY, selection)) {
+				if (STATE["altKeyDown"] === true) {
+					STATE["selection"]["floatingCopy"] = true;
+
+					let colorArray = Canvas_Pixels_From_Selection();
+					STATE["selectionCopy"]["colorArray"] = colorArray;
+
+					STATE["selectionCopy"]["initCursorX"] = cursorXY[0] / CELL_WIDTH_PX;
+					STATE["selectionCopy"]["initCursorY"] = cursorXY[1] / CELL_WIDTH_PX;
+				} else {
+
+					let colorArray = Canvas_Pixels_From_Selection();
+					STATE["selectionCopy"]["colorArray"] = colorArray;
+
+					let origLeft = Px_To_Int(selection.style.left) / CELL_WIDTH_PX;
+					let origTop = Px_To_Int(selection.style.top) / CELL_WIDTH_PX;
+
+					STATE["selection"]["isMoving"] = true;
+					STATE["selectionMove"] = {
+						initCursorX: cursorXY[0] / CELL_WIDTH_PX,
+						initCursorY: cursorXY[1] / CELL_WIDTH_PX,
+						initLeft: origLeft,
+						initTop: origTop
+					};
+				}
+			} else {
+				Remove_Selection();
+				Unlock_Selection();
+				Create_Selection_Div(e);
 			}
-			ShapePreviewManager.lastPreviewed = {x: x, y: y};
-			return;
 		}
-
-		// Minimal selection handling: if selection tool is active, either start moving existing
-		// selection or create a new selection region.
-		if (STATE["activeTool"] !== "selection") {
-			return;
-		}
-
-		const selection = document.getElementById("selection");
-		const cursorXY = Canvas_Cursor_XY(e);
-		if (!selection) {
-			Create_Selection_Div(e);
-			return;
-		}
-
-		// If clicked inside the existing selection, begin moving it.
-		if (CursorXY_In_Selection(cursorXY, selection)) {
-			STATE["selection"]["isMoving"] = true;
-			STATE["selectionMove"] = {
-				initCursorX: cursorXY[0] / CELL_WIDTH_PX,
-				initCursorY: cursorXY[1] / CELL_WIDTH_PX,
-				initLeft: Px_To_Int(selection.style.left) / CELL_WIDTH_PX,
-				initTop: Px_To_Int(selection.style.top) / CELL_WIDTH_PX
-			};
-			return;
-		}
-
-		// Otherwise start a new selection
-		Remove_Selection();
-		Unlock_Selection();
-		Create_Selection_Div(e);
 	}
 
 	function Selection_Mousemove(e) 
@@ -678,53 +640,53 @@ function Add_EventHandlers_To_Canvas_Cells()
 				Set_Cursor("move");
 				let dx = (cursorXY[0] / CELL_WIDTH_PX) - STATE["selectionMove"]["initCursorX"];
 				let dy = (cursorXY[1] / CELL_WIDTH_PX) - STATE["selectionMove"]["initCursorY"];
-			  
+
 				let newLeft = STATE["selectionMove"]["initLeft"] + dx;
 				let newTop = STATE["selectionMove"]["initTop"] + dy;
-			  
+
 				let selectionWidth = (Px_To_Int(selection.style.width) + 1) / CELL_WIDTH_PX;
 				let selectionHeight = (Px_To_Int(selection.style.height) + 1) / CELL_WIDTH_PX;
-			  
+
 				if (
-				  newLeft < 0 || newTop < 0 ||
-				  (newLeft + selectionWidth) > CELLS_PER_ROW ||
-				  (newTop + selectionHeight) > CELLS_PER_ROW
+					newLeft < 0 || newTop < 0 ||
+					(newLeft + selectionWidth) > CELLS_PER_ROW ||
+					(newTop + selectionHeight) > CELLS_PER_ROW
 				) {
-				  return;
+					return;
 				}
-			  
+
 				if (!STATE["selection"]["originalCleared"]) {
-				  for (let y = 0; y < selectionHeight; y++) {
-					for (let x = 0; x < selectionWidth; x++) {
-					  let index = (STATE["selectionMove"]["initTop"] + y) * CELLS_PER_ROW +
-								  (STATE["selectionMove"]["initLeft"] + x);
-					  HISTORY_STATES.getCurrentState()[index] = "transparent";
+					for (let y = 0; y < selectionHeight; y++) {
+						for (let x = 0; x < selectionWidth; x++) {
+							let index = (STATE["selectionMove"]["initTop"] + y) * CELLS_PER_ROW +
+										(STATE["selectionMove"]["initLeft"] + x);
+							HISTORY_STATES.getCurrentState()[index] = "transparent";
+						}
 					}
-				  }
-				  STATE["selection"]["originalCleared"] = true;
+					STATE["selection"]["originalCleared"] = true;
 				}
-			  
+
 				for (let i = 0; i < CELLS_PER_ROW * CELLS_PER_ROW; i++) {
-				  let cell = document.getElementById(Pad_Start_Int(i, 4));
-				  cell.style.backgroundColor = HISTORY_STATES.getCurrentState()[i];
+					let cell = document.getElementById(Pad_Start_Int(i, 4));
+					cell.style.backgroundColor = HISTORY_STATES.getCurrentState()[i];
 				}
-			  
+
 				let cell0 = Get_CellInt_From_CellXY(newLeft, newTop);
 				for (let y = 0; y < selectionHeight; y++) {
-				  for (let x = 0; x < selectionWidth; x++) {
-					let id = Pad_Start_Int(cell0 + y * CELLS_PER_ROW + x);
-					let cell = document.getElementById(id);
-					let idx = x + y * selectionWidth;
-					let color = STATE["selectionCopy"]["colorArray"][idx];
-					if (color && color !== "transparent") {
-					  cell.style.backgroundColor = color;
+					for (let x = 0; x < selectionWidth; x++) {
+						let id = Pad_Start_Int(cell0 + y * CELLS_PER_ROW + x);
+						let cell = document.getElementById(id);
+						let idx = x + y * selectionWidth;
+						let color = STATE["selectionCopy"]["colorArray"][idx];
+						if (color && color !== "transparent") {
+							cell.style.backgroundColor = color;
+						}
 					}
-				  }
 				}
-			  
+
 				selection.style.left = newLeft * CELL_WIDTH_PX + "px";
 				selection.style.top = newTop * CELL_WIDTH_PX + "px";
-			  } else 
+			} else 
 			if (CursorXY_In_Selection(cursorXY, selection) && STATE["altKeyDown"] === true) {
 				Set_Cursor("move");
 			}
