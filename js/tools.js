@@ -39,11 +39,6 @@ const Tools = {
 		"hotkey": "KeyO",
 		"cursor": "crosshair",
 	},
-	"rotate": {
-		"button-id": "rotate-button",
-		"hotkey": "KeyT",
-		"cursor": "pointer",
-	},
 }
 
 function Activate_Tool(label)

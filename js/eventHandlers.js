@@ -1,3 +1,36 @@
+// Flip canvas along X axis (across Y axis, horizontal flip)
+function Flip_Along_X_Axis() {
+	const size = CELLS_PER_ROW;
+	const pixels = Get_Canvas_Pixels();
+	const flipped = new Array(size * size);
+	for (let y = 0; y < size; y++) {
+		for (let x = 0; x < size; x++) {
+			flipped[y * size + x] = pixels[y * size + (size - 1 - x)];
+		}
+	}
+	for (let i = 0; i < size * size; i++) {
+		const cell = document.getElementById(Pad_Start_Int(i, 4));
+		cell.style.backgroundColor = flipped[i];
+	}
+	HISTORY_STATES.pushToPtr([...flipped]);
+}
+
+// Flip canvas along Y axis (across X axis, vertical flip)
+function Flip_Along_Y_Axis() {
+	const size = CELLS_PER_ROW;
+	const pixels = Get_Canvas_Pixels();
+	const flipped = new Array(size * size);
+	for (let y = 0; y < size; y++) {
+		for (let x = 0; x < size; x++) {
+			flipped[y * size + x] = pixels[(size - 1 - y) * size + x];
+		}
+	}
+	for (let i = 0; i < size * size; i++) {
+		const cell = document.getElementById(Pad_Start_Int(i, 4));
+		cell.style.backgroundColor = flipped[i];
+	}
+	HISTORY_STATES.pushToPtr([...flipped]);
+}
 // Rotates the canvas pixels 90 degrees clockwise
 function Rotate_Canvas_90deg() {
 	const size = CELLS_PER_ROW;
@@ -845,6 +878,12 @@ function Add_EventHandlers_To_Toolbar_Buttons()
 				break;
 			case "rotate-button":
 				button.addEventListener("click", Rotate_Canvas_90deg);
+				break;
+			case "flip-x-button":
+				button.addEventListener("click", Flip_Along_X_Axis);
+				break;
+			case "flip-y-button":
+				button.addEventListener("click", Flip_Along_Y_Axis);
 				break;
 			case "grid-button":
 				button.addEventListener("click", Toggle_Grid);
