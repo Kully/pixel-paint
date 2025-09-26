@@ -193,15 +193,33 @@ body {
 	visibility: visible;
 }
 
+/* Toolbar with two rows */
 #toolbar {
 	position: relative;
 	width: var(--toolbar-width);
-	height: var(--toolbar-height);
+	height: calc(2 * var(--toolbar-height) + 4px);
 	margin-bottom: 4px;
 	cursor: default;
 	border: 1px solid white;
 	border-radius: var(--border-radius);
 	background-color: var(--toolbar-background-color);
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: flex-start;
+	padding: 2px 0;
+}
+
+.toolbar-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-bottom: 2px;
+	width: 100%;
+}
+
+.toolbar-row:last-child {
+	margin-bottom: 0;
 }
 
 /* for toolbar icons */
