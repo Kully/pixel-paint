@@ -222,7 +222,6 @@ body {
 	margin-bottom: 0;
 }
 
-/* for toolbar icons */
 .undoImg {
 	background-image: url(img/undo.png);
 	background-position: center;
@@ -257,6 +256,38 @@ body {
 	background-image: url(img/colorpicker.png);
 	background-position: center;
 	background-repeat: no-repeat;
+}
+
+/* new toolbar icons */
+.lineImg {
+    background-image: url(img/line.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.rectangleImg {
+    background-image: url(img/rectangle.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.ellipseImg {
+    background-image: url(img/ellipse.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.rotateImg {
+    background-image: url(img/rotate.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.flipXImg {
+    background-image: url(img/flipX.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.flipYImg {
+    background-image: url(img/flipY.png);
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 /* other toolbar buttons */
