@@ -1,3 +1,49 @@
+// Shared shape preview helpers
+function Draw_Line_Preview(startX, startY, endX, endY) {
+	Bresenham_Line_Algorithm(startX, startY, endX, endY, cell => {
+		cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+	});
+}
+
+function Draw_Rect_Preview(startX, startY, endX, endY) {
+	const rx0 = Math.min(startX, endX), rx1 = Math.max(startX, endX);
+	const ry0 = Math.min(startY, endY), ry1 = Math.max(startY, endY);
+	for (let xi = rx0; xi <= rx1; xi++) {
+		const idTop = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry0));
+		const cellTop = document.getElementById(idTop);
+		cellTop.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+		const idBottom = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry1));
+		const cellBottom = document.getElementById(idBottom);
+		cellBottom.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+	}
+	for (let yi = ry0; yi <= ry1; yi++) {
+		const idLeft = Pad_Start_Int(Get_CellInt_From_CellXY(rx0, yi));
+		const cellLeft = document.getElementById(idLeft);
+		cellLeft.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+		const idRight = Pad_Start_Int(Get_CellInt_From_CellXY(rx1, yi));
+		const cellRight = document.getElementById(idRight);
+		cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+	}
+}
+
+function Draw_Ellipse_Preview(startX, startY, endX, endY) {
+	const ex0 = Math.min(startX, endX), ex1 = Math.max(startX, endX);
+	const ey0 = Math.min(startY, endY), ey1 = Math.max(startY, endY);
+	const a = (ex1 - ex0) / 2.0, b = (ey1 - ey0) / 2.0;
+	const cx = ex0 + a, cy = ey0 + b;
+	Draw_Ellipse_Outline(cx, cy, a, b, cell => {
+		cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+	});
+}
+
+function Restore_And_Draw_Shape(type, startX, startY, endX, endY) {
+	ShapePreviewManager.restoreSnapshotToScreen();
+	switch (type) {
+		case 'line': Draw_Line_Preview(startX, startY, endX, endY); break;
+		case 'rect': Draw_Rect_Preview(startX, startY, endX, endY); break;
+		case 'ellipse': Draw_Ellipse_Preview(startX, startY, endX, endY); break;
+	}
+}
 const CLIPBOARD = {
     "hasData": false,
     "colorArray": [],
@@ -235,60 +281,7 @@ function Add_EventHandlers_To_Canvas_Div()
 		if (ShapePreviewManager.active) {
 			const endX = Math.max(0, Math.min(lastMouseX, CELLS_PER_ROW - 1));
 			const endY = Math.max(0, Math.min(lastMouseY, CELLS_PER_ROW - 1));
-			// restore saved snapshot then draw final shape
-			if (ShapePreviewManager.savedSnapshot) {
-				const canvasCellsRestore = document.querySelectorAll('.canvasCell');
-				for (let si = 0; si < canvasCellsRestore.length; si++) {
-					canvasCellsRestore[si].style.backgroundColor = ShapePreviewManager.savedSnapshot[si];
-				}
-			}
-			switch (ShapePreviewManager.type) {
-				case 'line':
-					Bresenham_Line_Algorithm(ShapePreviewManager.startX, ShapePreviewManager.startY, endX, endY, function (cell) {
-						cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-					});
-					break;
-				case 'rect':
-					// draw rectangle border between start and (endX,endY)
-					let rx0 = Math.min(ShapePreviewManager.startX, endX);
-					let rx1 = Math.max(ShapePreviewManager.startX, endX);
-					let ry0 = Math.min(ShapePreviewManager.startY, endY);
-					let ry1 = Math.max(ShapePreviewManager.startY, endY);
-					for (let xi = rx0; xi <= rx1; xi++) {
-						let idTop = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry0));
-						let cellTop = document.getElementById(idTop);
-						cellTop.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-						let idBottom = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry1));
-						let cellBottom = document.getElementById(idBottom);
-						cellBottom.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-					}
-					for (let yi = ry0; yi <= ry1; yi++) {
-						let idLeft = Pad_Start_Int(Get_CellInt_From_CellXY(rx0, yi));
-						let cellLeft = document.getElementById(idLeft);
-						cellLeft.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-						let idRight = Pad_Start_Int(Get_CellInt_From_CellXY(rx1, yi));
-						let cellRight = document.getElementById(idRight);
-						cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-					}
-					break;
-				case 'ellipse':
-					{
-						// use endX/endY (the mouseup coords for canvasDiv mouseup)
-						let ex0 = Math.min(ShapePreviewManager.startX, endX);
-						let ex1 = Math.max(ShapePreviewManager.startX, endX);
-						let ey0 = Math.min(ShapePreviewManager.startY, endY);
-						let ey1 = Math.max(ShapePreviewManager.startY, endY);
-						let a = (ex1 - ex0) / 2.0;
-						let b = (ey1 - ey0) / 2.0;
-						let cx = ex0 + a;
-						let cy = ey0 + b;
-						Draw_Ellipse_Outline(cx, cy, a, b, function (cell) {
-							cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-						});
-					}
-					break;
-
-			}
+			Restore_And_Draw_Shape(ShapePreviewManager.type, ShapePreviewManager.startX, ShapePreviewManager.startY, endX, endY);
 			ShapePreviewManager.clear();
 			Save_Canvas_State();
 			return;
@@ -724,56 +717,9 @@ function Add_EventHandlers_To_Canvas_Cells()
 				const cell = e.target;
 				const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
 				const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
-				// avoid re-rendering same preview
 				if (ShapePreviewManager.lastPreviewed.x === x && ShapePreviewManager.lastPreviewed.y === y) return;
-				// restore previously previewed pixels
-				ShapePreviewManager.restoreSnapshotToScreen();
-				// draw preview according to shape type
-				switch (ShapePreviewManager.type) {
-					case 'line':
-						Bresenham_Line_Algorithm(ShapePreviewManager.startX, ShapePreviewManager.startY, x, y, function (cell) {
-							cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-						});
-						break;
-					case 'rect':
-						let rx0 = Math.min(ShapePreviewManager.startX, x);
-						let rx1 = Math.max(ShapePreviewManager.startX, x);
-						let ry0 = Math.min(ShapePreviewManager.startY, y);
-						let ry1 = Math.max(ShapePreviewManager.startY, y);
-						for (let xi = rx0; xi <= rx1; xi++) {
-							let idTop = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry0));
-							let cellTop = document.getElementById(idTop);
-							cellTop.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-							let idBottom = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry1));
-							let cellBottom = document.getElementById(idBottom);
-							cellBottom.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-						}
-						for (let yi = ry0; yi <= ry1; yi++) {
-							let idLeft = Pad_Start_Int(Get_CellInt_From_CellXY(rx0, yi));
-							let cellLeft = document.getElementById(idLeft);
-							cellLeft.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-							let idRight = Pad_Start_Int(Get_CellInt_From_CellXY(rx1, yi));
-							let cellRight = document.getElementById(idRight);
-							cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-						}
-						break;
-					case 'ellipse':
-						{
-							let ex0 = Math.min(ShapePreviewManager.startX, x);
-							let ex1 = Math.max(ShapePreviewManager.startX, x);
-							let ey0 = Math.min(ShapePreviewManager.startY, y);
-							let ey1 = Math.max(ShapePreviewManager.startY, y);
-							let a = (ex1 - ex0) / 2.0;
-							let b = (ey1 - ey0) / 2.0;
-							let cx = ex0 + a;
-							let cy = ey0 + b;
-							Draw_Ellipse_Outline(cx, cy, a, b, function (cell) {
-								cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-							});
-						}
-						break;
-				}
-				ShapePreviewManager.lastPreviewed = {x: x, y: y};
+				Restore_And_Draw_Shape(ShapePreviewManager.type, ShapePreviewManager.startX, ShapePreviewManager.startY, x, y);
+				ShapePreviewManager.lastPreviewed = {x, y};
 				return;
 			}
 			if (STATE["brushDown"]) {
@@ -787,52 +733,7 @@ function Add_EventHandlers_To_Canvas_Cells()
 				const cell = e.target;
 				const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
 				const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
-				// restore saved snapshot then draw final shape
-				ShapePreviewManager.restoreSnapshotToScreen();
-				switch (ShapePreviewManager.type) {
-					case 'line':
-						Bresenham_Line_Algorithm(ShapePreviewManager.startX, ShapePreviewManager.startY, x, y, function (cell) {
-							cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-						});
-						break;
-					case 'rect':
-						let rx0 = Math.min(ShapePreviewManager.startX, x);
-						let rx1 = Math.max(ShapePreviewManager.startX, x);
-						let ry0 = Math.min(ShapePreviewManager.startY, y);
-						let ry1 = Math.max(ShapePreviewManager.startY, y);
-						for (let xi = rx0; xi <= rx1; xi++) {
-							let idTop = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry0));
-							let cellTop = document.getElementById(idTop);
-							cellTop.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-							let idBottom = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry1));
-							let cellBottom = document.getElementById(idBottom);
-							cellBottom.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-						}
-						for (let yi = ry0; yi <= ry1; yi++) {
-							let idLeft = Pad_Start_Int(Get_CellInt_From_CellXY(rx0, yi));
-							let cellLeft = document.getElementById(idLeft);
-							cellLeft.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-							let idRight = Pad_Start_Int(Get_CellInt_From_CellXY(rx1, yi));
-							let cellRight = document.getElementById(idRight);
-							cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-						}
-						break;
-					case 'ellipse':
-						{
-							let ex0 = Math.min(ShapePreviewManager.startX, x);
-							let ex1 = Math.max(ShapePreviewManager.startX, x);
-							let ey0 = Math.min(ShapePreviewManager.startY, y);
-							let ey1 = Math.max(ShapePreviewManager.startY, y);
-							let a = (ex1 - ex0) / 2.0;
-							let b = (ey1 - ey0) / 2.0;
-							let cx = ex0 + a;
-							let cy = ey0 + b;
-							Draw_Ellipse_Outline(cx, cy, a, b, function (cell) {
-								cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-							});
-						}
-						break;
-				}
+				Restore_And_Draw_Shape(ShapePreviewManager.type, ShapePreviewManager.startX, ShapePreviewManager.startY, x, y);
 				ShapePreviewManager.clear();
 				Save_Canvas_State();
 				Reset_Previous_Cursor_Position();
@@ -875,52 +776,7 @@ function Add_EventHandlers_To_Canvas_Cells()
 				endX = Math.max(0, Math.min(lastMouseX, CELLS_PER_ROW - 1));
 				endY = Math.max(0, Math.min(lastMouseY, CELLS_PER_ROW - 1));
 			}
-			// restore saved snapshot then draw final shape
-			ShapePreviewManager.restoreSnapshotToScreen();
-			switch (ShapePreviewManager.type) {
-				case 'line':
-					Bresenham_Line_Algorithm(ShapePreviewManager.startX, ShapePreviewManager.startY, endX, endY, function (cell) {
-						cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-					});
-					break;
-				case 'rect':
-					let rx0 = Math.min(ShapePreviewManager.startX, endX);
-					let rx1 = Math.max(ShapePreviewManager.startX, endX);
-					let ry0 = Math.min(ShapePreviewManager.startY, endY);
-					let ry1 = Math.max(ShapePreviewManager.startY, endY);
-					for (let xi = rx0; xi <= rx1; xi++) {
-						let idTop = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry0));
-						let cellTop = document.getElementById(idTop);
-						cellTop.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-						let idBottom = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry1));
-						let cellBottom = document.getElementById(idBottom);
-						cellBottom.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-					}
-					for (let yi = ry0; yi <= ry1; yi++) {
-						let idLeft = Pad_Start_Int(Get_CellInt_From_CellXY(rx0, yi));
-						let cellLeft = document.getElementById(idLeft);
-						cellLeft.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-						let idRight = Pad_Start_Int(Get_CellInt_From_CellXY(rx1, yi));
-						let cellRight = document.getElementById(idRight);
-						cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-					}
-					break;
-				case 'ellipse':
-					{
-						let ex0 = Math.min(ShapePreviewManager.startX, endX);
-						let ex1 = Math.max(ShapePreviewManager.startX, endX);
-						let ey0 = Math.min(ShapePreviewManager.startY, endY);
-						let ey1 = Math.max(ShapePreviewManager.startY, endY);
-						let a = (ex1 - ex0) / 2.0;
-						let b = (ey1 - ey0) / 2.0;
-						let cx = ex0 + a;
-						let cy = ey0 + b;
-						Draw_Ellipse_Outline(cx, cy, a, b, function (cell) {
-							cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
-						});
-					}
-					break;
-			}
+			Restore_And_Draw_Shape(ShapePreviewManager.type, ShapePreviewManager.startX, ShapePreviewManager.startY, endX, endY);
 			ShapePreviewManager.clear();
 			Save_Canvas_State();
 			return;
