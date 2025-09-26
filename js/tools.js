@@ -34,6 +34,11 @@ const Tools = {
 		"hotkey": "KeyR",
 		"cursor": "crosshair",
 	},
+	"ellipse": {
+		"button-id": "ellipse-button",
+		"hotkey": "KeyO",
+		"cursor": "crosshair",
+	},
 }
 
 function Activate_Tool(label)

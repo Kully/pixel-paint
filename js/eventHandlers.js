@@ -52,6 +52,50 @@ const ShapePreviewManager = {
 	}
 };
 
+// Draw an ellipse outline by sampling parametric points and connecting them
+// with Bresenham lines. cx,cy are center in cell coordinates; a,b are radii
+// in cells. drawCallback(cell) will be called for each cell on the outline.
+function Draw_Ellipse_Outline(cx, cy, a, b, drawCallback) {
+	// If both radii are effectively zero, draw single pixel
+	if ((!a || a <= 0) && (!b || b <= 0)) {
+		const id = Pad_Start_Int(Get_CellInt_From_CellXY(Math.round(cx), Math.round(cy)));
+		const cell = document.getElementById(id);
+		if (cell) drawCallback(cell);
+		return;
+	}
+
+	// Choose number of samples proportional to ellipse size (keeps it smooth)
+	const maxRadius = Math.max(Math.abs(a), Math.abs(b));
+	let samples = Math.ceil(8 * maxRadius);
+	samples = Math.max(12, Math.min(samples, 512));
+
+	let prevX = null, prevY = null;
+	let firstX = null, firstY = null;
+
+	for (let i = 0; i <= samples; i++) {
+		const t = (i / samples) * 2 * Math.PI;
+		const fx = cx + a * Math.cos(t);
+		const fy = cy + b * Math.sin(t);
+		const ix = Math.round(fx);
+		const iy = Math.round(fy);
+
+		if (prevX === null) {
+			prevX = ix; prevY = iy;
+			firstX = ix; firstY = iy;
+			continue;
+		}
+
+		// Connect previous sample to current with Bresenham for continuity
+		Bresenham_Line_Algorithm(prevX, prevY, ix, iy, drawCallback);
+		prevX = ix; prevY = iy;
+	}
+
+	// Close loop (last -> first)
+	if (firstX !== null && (prevX !== firstX || prevY !== firstY)) {
+		Bresenham_Line_Algorithm(prevX, prevY, firstX, firstY, drawCallback);
+	}
+}
+
 function Copy_Selection() {
     const selection = document.getElementById("selection");
     if (STATE["activeTool"] === "selection" && selection && STATE["selection"]["isLocked"]) {
@@ -227,6 +271,23 @@ function Add_EventHandlers_To_Canvas_Div()
 						cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
 					}
 					break;
+				case 'ellipse':
+					{
+						// use endX/endY (the mouseup coords for canvasDiv mouseup)
+						let ex0 = Math.min(ShapePreviewManager.startX, endX);
+						let ex1 = Math.max(ShapePreviewManager.startX, endX);
+						let ey0 = Math.min(ShapePreviewManager.startY, endY);
+						let ey1 = Math.max(ShapePreviewManager.startY, endY);
+						let a = (ex1 - ex0) / 2.0;
+						let b = (ey1 - ey0) / 2.0;
+						let cx = ex0 + a;
+						let cy = ey0 + b;
+						Draw_Ellipse_Outline(cx, cy, a, b, function (cell) {
+							cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						});
+					}
+					break;
+
 			}
 			ShapePreviewManager.clear();
 			Save_Canvas_State();
@@ -612,8 +673,8 @@ function Add_EventHandlers_To_Canvas_Cells()
 
 	function Tool_Action_On_Canvas_Cell(e)
 	{
-		// If a shape tool (line or rectangle) is active, drawing is handled separately (preview/commit).
-		if (STATE["activeTool"] === "line" || STATE["activeTool"] === "rectangle") {
+		// If a shape tool (line, rectangle or ellipse) is active, drawing is handled separately (preview/commit).
+		if (STATE["activeTool"] === "line" || STATE["activeTool"] === "rectangle" || STATE["activeTool"] === "ellipse") {
 			return;
 		}
 		const cell = e.target;
@@ -638,13 +699,16 @@ function Add_EventHandlers_To_Canvas_Cells()
 		canvasCells[i].addEventListener("mousedown", function (e) {
 			Reset_Previous_Cursor_Position();
 			Selection_Mousedown(e);
-			// Handle shape tools (line, rectangle) mousedown specially: mark start and begin preview
-			if (STATE["activeTool"] === "line" || STATE["activeTool"] === "rectangle") {
+			// Handle shape tools (line, rectangle, ellipse) mousedown specially: mark start and begin preview
+			if (STATE["activeTool"] === "line" || STATE["activeTool"] === "rectangle" || STATE["activeTool"] === "ellipse") {
 				STATE["brushDown"] = true;
 				const cell = e.target;
 				const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
 				const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
-				const shapeType = STATE["activeTool"] === "line" ? 'line' : 'rect';
+				let shapeType = 'line';
+				if (STATE["activeTool"] === "line") shapeType = 'line';
+				else if (STATE["activeTool"] === "rectangle") shapeType = 'rect';
+				else if (STATE["activeTool"] === "ellipse") shapeType = 'ellipse';
 				ShapePreviewManager.begin(shapeType, x, y);
 				return;
 			}
@@ -655,8 +719,8 @@ function Add_EventHandlers_To_Canvas_Cells()
 		canvasCells[i].addEventListener("mousedown", Tool_Action_On_Canvas_Cell);
 
 		canvasCells[i].addEventListener("mousemove", function (e) {
-			// If a shape tool is active (line or rectangle) and brush is down, show preview
-			if ((STATE["activeTool"] === "line" || STATE["activeTool"] === "rectangle") && ShapePreviewManager.active && STATE["brushDown"]) {
+			// If a shape tool is active (line, rectangle or ellipse) and brush is down, show preview
+			if ((STATE["activeTool"] === "line" || STATE["activeTool"] === "rectangle" || STATE["activeTool"] === "ellipse") && ShapePreviewManager.active && STATE["brushDown"]) {
 				const cell = e.target;
 				const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
 				const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
@@ -691,6 +755,21 @@ function Add_EventHandlers_To_Canvas_Cells()
 							let idRight = Pad_Start_Int(Get_CellInt_From_CellXY(rx1, yi));
 							let cellRight = document.getElementById(idRight);
 							cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						}
+						break;
+					case 'ellipse':
+						{
+							let ex0 = Math.min(ShapePreviewManager.startX, x);
+							let ex1 = Math.max(ShapePreviewManager.startX, x);
+							let ey0 = Math.min(ShapePreviewManager.startY, y);
+							let ey1 = Math.max(ShapePreviewManager.startY, y);
+							let a = (ex1 - ex0) / 2.0;
+							let b = (ey1 - ey0) / 2.0;
+							let cx = ex0 + a;
+							let cy = ey0 + b;
+							Draw_Ellipse_Outline(cx, cy, a, b, function (cell) {
+								cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+							});
 						}
 						break;
 				}
@@ -736,6 +815,21 @@ function Add_EventHandlers_To_Canvas_Cells()
 							let idRight = Pad_Start_Int(Get_CellInt_From_CellXY(rx1, yi));
 							let cellRight = document.getElementById(idRight);
 							cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						}
+						break;
+					case 'ellipse':
+						{
+							let ex0 = Math.min(ShapePreviewManager.startX, x);
+							let ex1 = Math.max(ShapePreviewManager.startX, x);
+							let ey0 = Math.min(ShapePreviewManager.startY, y);
+							let ey1 = Math.max(ShapePreviewManager.startY, y);
+							let a = (ex1 - ex0) / 2.0;
+							let b = (ey1 - ey0) / 2.0;
+							let cx = ex0 + a;
+							let cy = ey0 + b;
+							Draw_Ellipse_Outline(cx, cy, a, b, function (cell) {
+								cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+							});
 						}
 						break;
 				}
@@ -811,6 +905,21 @@ function Add_EventHandlers_To_Canvas_Cells()
 						cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
 					}
 					break;
+				case 'ellipse':
+					{
+						let ex0 = Math.min(ShapePreviewManager.startX, endX);
+						let ex1 = Math.max(ShapePreviewManager.startX, endX);
+						let ey0 = Math.min(ShapePreviewManager.startY, endY);
+						let ey1 = Math.max(ShapePreviewManager.startY, endY);
+						let a = (ex1 - ex0) / 2.0;
+						let b = (ey1 - ey0) / 2.0;
+						let cx = ex0 + a;
+						let cy = ey0 + b;
+						Draw_Ellipse_Outline(cx, cy, a, b, function (cell) {
+							cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+						});
+					}
+					break;
 			}
 			ShapePreviewManager.clear();
 			Save_Canvas_State();
@@ -854,6 +963,9 @@ function Add_EventHandlers_To_Toolbar_Buttons()
 				break;
 			case "rectangle-button":
 				button.addEventListener("click", () => Activate_Tool("rectangle"));
+				break;
+			case "ellipse-button":
+				button.addEventListener("click", () => Activate_Tool("ellipse"));
 				break;
 			case "grid-button":
 				button.addEventListener("click", Toggle_Grid);
