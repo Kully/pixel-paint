@@ -61,7 +61,7 @@ body {
 	position: relative;
 	background-color: var(--blanket-background-color);
 	width: 606px;
-	height: 530px;
+	height: 570px;
 	padding-right: 20px;
 	padding-bottom: 20px;
 }
@@ -193,18 +193,35 @@ body {
 	visibility: visible;
 }
 
+/* Toolbar with two rows */
 #toolbar {
 	position: relative;
 	width: var(--toolbar-width);
-	height: var(--toolbar-height);
+	height: calc(2 * var(--toolbar-height) + 4px);
 	margin-bottom: 4px;
 	cursor: default;
 	border: 1px solid white;
 	border-radius: var(--border-radius);
 	background-color: var(--toolbar-background-color);
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: flex-start;
+	padding: 2px 0;
 }
 
-/* for toolbar icons */
+.toolbar-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-bottom: 2px;
+	width: 100%;
+}
+
+.toolbar-row:last-child {
+	margin-bottom: 0;
+}
+
 .undoImg {
 	background-image: url(img/undo.png);
 	background-position: center;
@@ -239,6 +256,38 @@ body {
 	background-image: url(img/colorpicker.png);
 	background-position: center;
 	background-repeat: no-repeat;
+}
+
+/* new toolbar icons */
+.lineImg {
+    background-image: url(img/line.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.rectangleImg {
+    background-image: url(img/rectangle.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.ellipseImg {
+    background-image: url(img/ellipse.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.rotateImg {
+    background-image: url(img/rotate.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.flipXImg {
+    background-image: url(img/flipX.png);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.flipYImg {
+    background-image: url(img/flipY.png);
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 /* other toolbar buttons */
@@ -390,6 +439,7 @@ input[type="radio"] {
 }
 
 #info-section {
+	font-size: 0.75rem;
 	position: fixed;
 	top: 15%;
 	right: 30%;
@@ -401,9 +451,9 @@ input[type="radio"] {
 }
 
 #keyboard-shortcut-hover {
-	position: fixed;
+	position: absolute;
 	right: 0%;
-	top: 95%;
+	bottom: 0%;
 	
   	background-color: #e9e9a2;
   	padding: 0 4px;

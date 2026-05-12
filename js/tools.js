@@ -24,6 +24,21 @@ const Tools = {
 		"hotkey": "KeyS",
 		"cursor": "crosshair",
 	},
+	"line": {
+		"button-id": "line-button",
+		"hotkey": "KeyL",
+		"cursor": "crosshair",
+	},
+	"rectangle": {
+		"button-id": "rectangle-button",
+		"hotkey": "KeyR",
+		"cursor": "crosshair",
+	},
+	"ellipse": {
+		"button-id": "ellipse-button",
+		"hotkey": "KeyO",
+		"cursor": "crosshair",
+	},
 }
 
 function Activate_Tool(label)
@@ -57,6 +72,12 @@ function Activate_Tool(label)
 function Get_Tool_Action_Callback()
 {
 	const cursor = Get_Cursor();
+	// If the active tool is explicitly set to line, prefer that behavior
+	if (STATE["activeTool"] === "line") {
+		return function (cell) {
+			cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+		};
+	}
 	if (cursor.includes("eraser.png")) {
 		return function (cell) {
 			cell.style.backgroundColor = CANVAS_INIT_COLOR;

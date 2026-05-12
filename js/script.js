@@ -332,7 +332,7 @@ function Show_Drop_Shadow(e) {
 
     dropShadowPreview.style.display = "block";
 
-    if (STATE["activeTool"] === "pencil" || STATE["activeTool"] === "fill") {
+    if (STATE["activeTool"] === "pencil" || STATE["activeTool"] === "fill" || STATE["activeTool"] === "line" || STATE["activeTool"] === "rectangle" || STATE["activeTool"] === "ellipse") {
         if (STATE[ACTIVE_COLOR_SELECT].startsWith("#aN")) {
             dropShadowPreview.style.display = "none";
         } else {
@@ -345,7 +345,7 @@ function Show_Drop_Shadow(e) {
         dropShadowPreview.style.display = "none"; 
     }
     dropShadowPreview.style.left = `${cellX}px`;
-    dropShadowPreview.style.top = `${cellY + 2.38 * CELL_WIDTH_PX}px`;
+    dropShadowPreview.style.top = `${cellY}px`;
 }
 
 function Hide_Drop_Shadow() {

@@ -1,3 +1,160 @@
+// Track shift key state
+let shiftKeyDown = false;
+document.addEventListener('keydown', function(e) {
+	if (e.key === 'Shift') shiftKeyDown = true;
+});
+document.addEventListener('keyup', function(e) {
+	if (e.key === 'Shift') shiftKeyDown = false;
+});
+// Flip canvas along X axis (across Y axis, horizontal flip)
+function Flip_Along_X_Axis() {
+	const size = CELLS_PER_ROW;
+	const pixels = Get_Canvas_Pixels();
+	const flipped = new Array(size * size);
+	for (let y = 0; y < size; y++) {
+		for (let x = 0; x < size; x++) {
+			flipped[y * size + x] = pixels[y * size + (size - 1 - x)];
+		}
+	}
+	for (let i = 0; i < size * size; i++) {
+		const cell = document.getElementById(Pad_Start_Int(i, 4));
+		cell.style.backgroundColor = flipped[i];
+	}
+	HISTORY_STATES.pushToPtr([...flipped]);
+}
+
+// Flip canvas along Y axis (across X axis, vertical flip)
+function Flip_Along_Y_Axis() {
+	const size = CELLS_PER_ROW;
+	const pixels = Get_Canvas_Pixels();
+	const flipped = new Array(size * size);
+	for (let y = 0; y < size; y++) {
+		for (let x = 0; x < size; x++) {
+			flipped[y * size + x] = pixels[(size - 1 - y) * size + x];
+		}
+	}
+	for (let i = 0; i < size * size; i++) {
+		const cell = document.getElementById(Pad_Start_Int(i, 4));
+		cell.style.backgroundColor = flipped[i];
+	}
+	HISTORY_STATES.pushToPtr([...flipped]);
+}
+// Rotates the canvas pixels 90 degrees clockwise
+function Rotate_Canvas_90deg() {
+	const size = CELLS_PER_ROW;
+	const pixels = Get_Canvas_Pixels();
+	const rotated = new Array(size * size);
+	for (let y = 0; y < size; y++) {
+		for (let x = 0; x < size; x++) {
+			// (x, y) maps to (y, size - 1 - x)
+			rotated[y * size + x] = pixels[x * size + (size - 1 - y)];
+		}
+	}
+	// Update canvas cells
+	for (let i = 0; i < size * size; i++) {
+		const cell = document.getElementById(Pad_Start_Int(i, 4));
+		cell.style.backgroundColor = rotated[i];
+	}
+	// Save new state
+	HISTORY_STATES.pushToPtr([...rotated]);
+}
+
+// Shared shape preview helpers
+function Draw_Line_Preview(startX, startY, endX, endY) {
+	// If shift is held, snap to axis or diagonal
+	if (shiftKeyDown) {
+		let dx = endX - startX;
+		let dy = endY - startY;
+		let absDx = Math.abs(dx);
+		let absDy = Math.abs(dy);
+		// Snap to diagonal if close enough
+		if (Math.abs(absDx - absDy) <= Math.min(absDx, absDy)) {
+			// Diagonal: use sign of drag and max length
+			let length = Math.max(absDx, absDy);
+			let signX = dx < 0 ? -1 : 1;
+			let signY = dy < 0 ? -1 : 1;
+			endX = startX + signX * length;
+			endY = startY + signY * length;
+		} else if (absDx > absDy) {
+			// Horizontal
+			let signX = dx < 0 ? -1 : 1;
+			endX = startX + signX * absDx;
+			endY = startY;
+		} else {
+			// Vertical
+			let signY = dy < 0 ? -1 : 1;
+			endX = startX;
+			endY = startY + signY * absDy;
+		}
+	}
+	Bresenham_Line_Algorithm(startX, startY, endX, endY, cell => {
+		cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+	});
+}
+
+function Draw_Rect_Preview(startX, startY, endX, endY) {
+	let dx = endX - startX;
+	let dy = endY - startY;
+	let absDx = Math.abs(dx);
+	let absDy = Math.abs(dy);
+	// If shift is held, snap to square
+	if (shiftKeyDown) {
+		let size = Math.max(absDx, absDy);
+		let signX = dx < 0 ? -1 : 1;
+		let signY = dy < 0 ? -1 : 1;
+		endX = startX + signX * size;
+		endY = startY + signY * size;
+	}
+	const rx0 = Math.min(startX, endX), rx1 = Math.max(startX, endX);
+	const ry0 = Math.min(startY, endY), ry1 = Math.max(startY, endY);
+	for (let xi = rx0; xi <= rx1; xi++) {
+		const idTop = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry0));
+		const cellTop = document.getElementById(idTop);
+		cellTop.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+		const idBottom = Pad_Start_Int(Get_CellInt_From_CellXY(xi, ry1));
+		const cellBottom = document.getElementById(idBottom);
+		cellBottom.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+	}
+	for (let yi = ry0; yi <= ry1; yi++) {
+		const idLeft = Pad_Start_Int(Get_CellInt_From_CellXY(rx0, yi));
+		const cellLeft = document.getElementById(idLeft);
+		cellLeft.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+		const idRight = Pad_Start_Int(Get_CellInt_From_CellXY(rx1, yi));
+		const cellRight = document.getElementById(idRight);
+		cellRight.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+	}
+}
+
+function Draw_Ellipse_Preview(startX, startY, endX, endY) {
+	let dx = endX - startX;
+	let dy = endY - startY;
+	let absDx = Math.abs(dx);
+	let absDy = Math.abs(dy);
+	// If shift is held, snap to circle
+	if (shiftKeyDown) {
+		let size = Math.max(absDx, absDy);
+		let signX = dx < 0 ? -1 : 1;
+		let signY = dy < 0 ? -1 : 1;
+		endX = startX + signX * size;
+		endY = startY + signY * size;
+	}
+	const ex0 = Math.min(startX, endX), ex1 = Math.max(startX, endX);
+	const ey0 = Math.min(startY, endY), ey1 = Math.max(startY, endY);
+	const a = (ex1 - ex0) / 2.0, b = (ey1 - ey0) / 2.0;
+	const cx = ex0 + a, cy = ey0 + b;
+	Draw_Ellipse_Outline(cx, cy, a, b, cell => {
+		cell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+	});
+}
+
+function Restore_And_Draw_Shape(type, startX, startY, endX, endY) {
+	ShapePreviewManager.restoreSnapshotToScreen();
+	switch (type) {
+		case 'line': Draw_Line_Preview(startX, startY, endX, endY); break;
+		case 'rect': Draw_Rect_Preview(startX, startY, endX, endY); break;
+		case 'ellipse': Draw_Ellipse_Preview(startX, startY, endX, endY); break;
+	}
+}
 const CLIPBOARD = {
     "hasData": false,
     "colorArray": [],
@@ -10,6 +167,91 @@ let previousCursorY = null;
 
 let lastMouseX = 0;
 let lastMouseY = 0;
+
+// Global line preview state so canvas-div and canvas-cell handlers share it
+// Generic preview manager for shapes (line, rectangle, etc.)
+const ShapePreviewManager = {
+	active: false,
+	type: null, // 'line' | 'rect' | etc.
+	startX: null,
+	startY: null,
+	savedSnapshot: null,
+	lastPreviewed: {x: null, y: null},
+	begin(type, startX, startY) {
+		this.active = true;
+		this.type = type;
+		this.startX = startX;
+		this.startY = startY;
+		this.lastPreviewed = {x: startX, y: startY};
+		this.savedSnapshot = Get_Canvas_Pixels();
+		// push to history so undo will remove the committed shape
+		HISTORY_STATES.pushToPtr([...this.savedSnapshot]);
+		// provide immediate visual feedback by restoring snapshot and drawing the start cell
+		this.restoreSnapshotToScreen();
+		const startId = Pad_Start_Int(Get_CellInt_From_CellXY(startX, startY));
+		const startCell = document.getElementById(startId);
+		if (startCell) startCell.style.backgroundColor = STATE[ACTIVE_COLOR_SELECT];
+	},
+	restoreSnapshotToScreen() {
+		if (!this.savedSnapshot) return;
+		const canvasCellsRestore = document.querySelectorAll('.canvasCell');
+		for (let si = 0; si < canvasCellsRestore.length; si++) {
+			canvasCellsRestore[si].style.backgroundColor = this.savedSnapshot[si];
+		}
+	},
+	clear() {
+		this.active = false;
+		this.type = null;
+		this.startX = null;
+		this.startY = null;
+		this.savedSnapshot = null;
+		this.lastPreviewed = {x: null, y: null};
+	}
+};
+
+// Draw an ellipse outline by sampling parametric points and connecting them
+// with Bresenham lines. cx,cy are center in cell coordinates; a,b are radii
+// in cells. drawCallback(cell) will be called for each cell on the outline.
+function Draw_Ellipse_Outline(cx, cy, a, b, drawCallback) {
+	// If both radii are effectively zero, draw single pixel
+	if ((!a || a <= 0) && (!b || b <= 0)) {
+		const id = Pad_Start_Int(Get_CellInt_From_CellXY(Math.round(cx), Math.round(cy)));
+		const cell = document.getElementById(id);
+		if (cell) drawCallback(cell);
+		return;
+	}
+
+	// Choose number of samples proportional to ellipse size (keeps it smooth)
+	const maxRadius = Math.max(Math.abs(a), Math.abs(b));
+	let samples = Math.ceil(8 * maxRadius);
+	samples = Math.max(12, Math.min(samples, 512));
+
+	let prevX = null, prevY = null;
+	let firstX = null, firstY = null;
+
+	for (let i = 0; i <= samples; i++) {
+		const t = (i / samples) * 2 * Math.PI;
+		const fx = cx + a * Math.cos(t);
+		const fy = cy + b * Math.sin(t);
+		const ix = Math.round(fx);
+		const iy = Math.round(fy);
+
+		if (prevX === null) {
+			prevX = ix; prevY = iy;
+			firstX = ix; firstY = iy;
+			continue;
+		}
+
+		// Connect previous sample to current with Bresenham for continuity
+		Bresenham_Line_Algorithm(prevX, prevY, ix, iy, drawCallback);
+		prevX = ix; prevY = iy;
+	}
+
+	// Close loop (last -> first)
+	if (firstX !== null && (prevX !== firstX || prevY !== firstY)) {
+		Bresenham_Line_Algorithm(prevX, prevY, firstX, firstY, drawCallback);
+	}
+}
 
 function Copy_Selection() {
     const selection = document.getElementById("selection");
@@ -137,27 +379,45 @@ function Add_EventHandlers_To_Canvas_Div()
 		STATE["brushDown"] = true;
 		isDrawingOutside = false;
 	});
+
+
 	canvasDiv.addEventListener("mousemove", Update_Cursor_Coordinates_On_Screen);
 	canvasDiv.addEventListener("mousemove", Track_Mouse_Position);
 	canvasDiv.addEventListener("mouseup", function () {
 		STATE["brushDown"] = false;
 		previousCursorX = previousCursorY = null;
+
+		// If a shape preview is active but the mouseup didn't fire on a canvas cell,
+		// commit the shape using the last known mouse coordinates.
+		if (ShapePreviewManager.active) {
+			const endX = Math.max(0, Math.min(lastMouseX, CELLS_PER_ROW - 1));
+			const endY = Math.max(0, Math.min(lastMouseY, CELLS_PER_ROW - 1));
+			Restore_And_Draw_Shape(ShapePreviewManager.type, ShapePreviewManager.startX, ShapePreviewManager.startY, endX, endY);
+			ShapePreviewManager.clear();
+			Save_Canvas_State();
+			return;
+		}
+
 		Save_Canvas_State();
 	});
 	canvasDiv.addEventListener("mouseleave", function (e) {
 		if (STATE["brushDown"]) {
 			const canvasRect = canvasDiv.getBoundingClientRect();
-			const x = Math.max(0, Math.min(e.clientX - canvasRect.left, canvasRect.width - 1));
-			const y = Math.max(0, Math.min(e.clientY - canvasRect.top, canvasRect.height - 1));
-			const targetCell = document.elementFromPoint(x + canvasRect.left, y + canvasRect.top);
+			// Clamp mouse position to canvas bounds
+			let x = Math.max(0, Math.min(e.clientX - canvasRect.left, canvasRect.width - 1));
+			let y = Math.max(0, Math.min(e.clientY - canvasRect.top, canvasRect.height - 1));
+			// Convert to cell coordinates
+			let cellX = Math.floor(x / CELL_WIDTH_PX);
+			let cellY = Math.floor(y / CELL_WIDTH_PX);
+			cellX = Math.max(0, Math.min(cellX, CELLS_PER_ROW - 1));
+			cellY = Math.max(0, Math.min(cellY, CELLS_PER_ROW - 1));
 
-			if (targetCell && targetCell.classList.contains('canvasCell')) {
-				const targetX = targetCell.offsetLeft / CELL_WIDTH_PX;
-				const targetY = targetCell.offsetTop / CELL_WIDTH_PX;
-				// console.log(`Previous Cursor: (${previousCursorX}, ${previousCursorY}) Exit Target: (${targetX}, ${targetY})`);
-				if (previousCursorX !== null && previousCursorY !== null) {
-					Bresenham_Line_Algorithm(previousCursorX, previousCursorY, targetX, targetY, Get_Tool_Action_Callback());
-				}
+			// If drawing a shape, just update the preview at clamped position (do NOT commit)
+			if (ShapePreviewManager.active) {
+				Restore_And_Draw_Shape(ShapePreviewManager.type, ShapePreviewManager.startX, ShapePreviewManager.startY, cellX, cellY);
+				ShapePreviewManager.lastPreviewed = {x: cellX, y: cellY};
+			} else if (previousCursorX !== null && previousCursorY !== null) {
+				Bresenham_Line_Algorithm(previousCursorX, previousCursorY, cellX, cellY, Get_Tool_Action_Callback());
 				previousCursorX = previousCursorY = null;
 			}
 			document.addEventListener("mousemove", Track_Mouse_Outside);
@@ -384,53 +644,53 @@ function Add_EventHandlers_To_Canvas_Cells()
 				Set_Cursor("move");
 				let dx = (cursorXY[0] / CELL_WIDTH_PX) - STATE["selectionMove"]["initCursorX"];
 				let dy = (cursorXY[1] / CELL_WIDTH_PX) - STATE["selectionMove"]["initCursorY"];
-			  
+
 				let newLeft = STATE["selectionMove"]["initLeft"] + dx;
 				let newTop = STATE["selectionMove"]["initTop"] + dy;
-			  
+
 				let selectionWidth = (Px_To_Int(selection.style.width) + 1) / CELL_WIDTH_PX;
 				let selectionHeight = (Px_To_Int(selection.style.height) + 1) / CELL_WIDTH_PX;
-			  
+
 				if (
-				  newLeft < 0 || newTop < 0 ||
-				  (newLeft + selectionWidth) > CELLS_PER_ROW ||
-				  (newTop + selectionHeight) > CELLS_PER_ROW
+					newLeft < 0 || newTop < 0 ||
+					(newLeft + selectionWidth) > CELLS_PER_ROW ||
+					(newTop + selectionHeight) > CELLS_PER_ROW
 				) {
-				  return;
+					return;
 				}
-			  
+
 				if (!STATE["selection"]["originalCleared"]) {
-				  for (let y = 0; y < selectionHeight; y++) {
-					for (let x = 0; x < selectionWidth; x++) {
-					  let index = (STATE["selectionMove"]["initTop"] + y) * CELLS_PER_ROW +
-								  (STATE["selectionMove"]["initLeft"] + x);
-					  HISTORY_STATES.getCurrentState()[index] = "transparent";
+					for (let y = 0; y < selectionHeight; y++) {
+						for (let x = 0; x < selectionWidth; x++) {
+							let index = (STATE["selectionMove"]["initTop"] + y) * CELLS_PER_ROW +
+										(STATE["selectionMove"]["initLeft"] + x);
+							HISTORY_STATES.getCurrentState()[index] = "transparent";
+						}
 					}
-				  }
-				  STATE["selection"]["originalCleared"] = true;
+					STATE["selection"]["originalCleared"] = true;
 				}
-			  
+
 				for (let i = 0; i < CELLS_PER_ROW * CELLS_PER_ROW; i++) {
-				  let cell = document.getElementById(Pad_Start_Int(i, 4));
-				  cell.style.backgroundColor = HISTORY_STATES.getCurrentState()[i];
+					let cell = document.getElementById(Pad_Start_Int(i, 4));
+					cell.style.backgroundColor = HISTORY_STATES.getCurrentState()[i];
 				}
-			  
+
 				let cell0 = Get_CellInt_From_CellXY(newLeft, newTop);
 				for (let y = 0; y < selectionHeight; y++) {
-				  for (let x = 0; x < selectionWidth; x++) {
-					let id = Pad_Start_Int(cell0 + y * CELLS_PER_ROW + x);
-					let cell = document.getElementById(id);
-					let idx = x + y * selectionWidth;
-					let color = STATE["selectionCopy"]["colorArray"][idx];
-					if (color && color !== "transparent") {
-					  cell.style.backgroundColor = color;
+					for (let x = 0; x < selectionWidth; x++) {
+						let id = Pad_Start_Int(cell0 + y * CELLS_PER_ROW + x);
+						let cell = document.getElementById(id);
+						let idx = x + y * selectionWidth;
+						let color = STATE["selectionCopy"]["colorArray"][idx];
+						if (color && color !== "transparent") {
+							cell.style.backgroundColor = color;
+						}
 					}
-				  }
 				}
-			  
+
 				selection.style.left = newLeft * CELL_WIDTH_PX + "px";
 				selection.style.top = newTop * CELL_WIDTH_PX + "px";
-			  } else 
+			} else 
 			if (CursorXY_In_Selection(cursorXY, selection) && STATE["altKeyDown"] === true) {
 				Set_Cursor("move");
 			}
@@ -483,6 +743,10 @@ function Add_EventHandlers_To_Canvas_Cells()
 
 	function Tool_Action_On_Canvas_Cell(e)
 	{
+		// If a shape tool (line, rectangle or ellipse) is active, drawing is handled separately (preview/commit).
+		if (STATE["activeTool"] === "line" || STATE["activeTool"] === "rectangle" || STATE["activeTool"] === "ellipse") {
+			return;
+		}
 		const cell = e.target;
 		const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
 		const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
@@ -505,6 +769,19 @@ function Add_EventHandlers_To_Canvas_Cells()
 		canvasCells[i].addEventListener("mousedown", function (e) {
 			Reset_Previous_Cursor_Position();
 			Selection_Mousedown(e);
+			// Handle shape tools (line, rectangle, ellipse) mousedown specially: mark start and begin preview
+			if (STATE["activeTool"] === "line" || STATE["activeTool"] === "rectangle" || STATE["activeTool"] === "ellipse") {
+				STATE["brushDown"] = true;
+				const cell = e.target;
+				const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
+				const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
+				let shapeType = 'line';
+				if (STATE["activeTool"] === "line") shapeType = 'line';
+				else if (STATE["activeTool"] === "rectangle") shapeType = 'rect';
+				else if (STATE["activeTool"] === "ellipse") shapeType = 'ellipse';
+				ShapePreviewManager.begin(shapeType, x, y);
+				return;
+			}
 			Tool_Action_On_Canvas_Cell(e);
 		});
 		canvasCells[i].addEventListener("mousemove", Selection_Mousemove);
@@ -512,18 +789,39 @@ function Add_EventHandlers_To_Canvas_Cells()
 		canvasCells[i].addEventListener("mousedown", Tool_Action_On_Canvas_Cell);
 
 		canvasCells[i].addEventListener("mousemove", function (e) {
+			// If a shape tool is active (line, rectangle or ellipse) and brush is down, show preview
+			if ((STATE["activeTool"] === "line" || STATE["activeTool"] === "rectangle" || STATE["activeTool"] === "ellipse") && ShapePreviewManager.active && STATE["brushDown"]) {
+				const cell = e.target;
+				const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
+				const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
+				if (ShapePreviewManager.lastPreviewed.x === x && ShapePreviewManager.lastPreviewed.y === y) return;
+				Restore_And_Draw_Shape(ShapePreviewManager.type, ShapePreviewManager.startX, ShapePreviewManager.startY, x, y);
+				ShapePreviewManager.lastPreviewed = {x, y};
+				return;
+			}
 			if (STATE["brushDown"]) {
 				Tool_Action_On_Canvas_Cell(e);
 			}
 		});
 
 		canvasCells[i].addEventListener("mouseup", function (e) {
+			// If a shape preview was active, commit the previewed shape
+			if (ShapePreviewManager.active) {
+				const cell = e.target;
+				const x = Math.floor(cell.offsetLeft / CELL_WIDTH_PX);
+				const y = Math.floor(cell.offsetTop / CELL_WIDTH_PX);
+				Restore_And_Draw_Shape(ShapePreviewManager.type, ShapePreviewManager.startX, ShapePreviewManager.startY, x, y);
+				ShapePreviewManager.clear();
+				Save_Canvas_State();
+				Reset_Previous_Cursor_Position();
+				return;
+			}
 			let cursor = Get_Cursor();
 			if (cursor.includes("fill.png")) {
 				let cell_id = e.target.id;
 				let target_color = e.target.style.backgroundColor;
 				let replacement_color = STATE[ACTIVE_COLOR_SELECT];
-
+				
 				Flood_Fill_Algorithm(cell_id, target_color, replacement_color);
 			}
 			Reset_Previous_Cursor_Position();
@@ -544,6 +842,23 @@ function Add_EventHandlers_To_Canvas_Cells()
 	document.addEventListener("mouseup", function (e) {
 		Exit_Drawing_Mode();
 		Reset_Previous_Cursor_Position();
+
+		// If a shape preview is active, commit it on any mouseup
+		if (ShapePreviewManager.active) {
+			let endX, endY;
+			if (e.target && e.target.classList && e.target.classList.contains('canvasCell')) {
+				endX = Math.floor(e.target.offsetLeft / CELL_WIDTH_PX);
+				endY = Math.floor(e.target.offsetTop / CELL_WIDTH_PX);
+			} else {
+				endX = Math.max(0, Math.min(lastMouseX, CELLS_PER_ROW - 1));
+				endY = Math.max(0, Math.min(lastMouseY, CELLS_PER_ROW - 1));
+			}
+			Restore_And_Draw_Shape(ShapePreviewManager.type, ShapePreviewManager.startX, ShapePreviewManager.startY, endX, endY);
+			ShapePreviewManager.clear();
+			Save_Canvas_State();
+			return;
+		}
+
 		if (e.target.id !== "undo-button" && e.target.id !== "redo-button") {
 			Save_Canvas_State();
 		}
@@ -575,6 +890,24 @@ function Add_EventHandlers_To_Toolbar_Buttons()
 				break;
 			case "colorpicker-button":
 				button.addEventListener("click", () => Activate_Tool("colorpicker"));
+				break;
+			case "line-button":
+				button.addEventListener("click", () => Activate_Tool("line"));
+				break;
+			case "rectangle-button":
+				button.addEventListener("click", () => Activate_Tool("rectangle"));
+				break;
+			case "ellipse-button":
+				button.addEventListener("click", () => Activate_Tool("ellipse"));
+				break;
+			case "rotate-button":
+				button.addEventListener("click", Rotate_Canvas_90deg);
+				break;
+			case "flip-x-button":
+				button.addEventListener("click", Flip_Along_X_Axis);
+				break;
+			case "flip-y-button":
+				button.addEventListener("click", Flip_Along_Y_Axis);
 				break;
 			case "grid-button":
 				button.addEventListener("click", Toggle_Grid);

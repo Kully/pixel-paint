@@ -9,52 +9,64 @@
 	<body>
 		<div id="blanket-around-body">
 			<div id="toolbar">
-				<div class="no-select undoImg toolbarButton" id="undo-button">
-					<span class="tooltipText">undo <span class="hotkeyText">(Z)</span></span>
+				<div class="toolbar-row">
+					<div class="no-select undoImg toolbarButton" id="undo-button">
+						<span class="tooltipText">undo <span class="hotkeyText">(Z)</span></span>
+					</div>
+					<div class="no-select redoImg toolbarButton" id="redo-button">
+						<span class="tooltipText">redo <span class="hotkeyText">(X)</span></span>
+					</div>
+					<div class="no-select pencilImg toolbarButton" id="pencil-button">
+						<span class="tooltipText"></span>
+					</div>
+					<div class="no-select fillImg toolbarButton" id="fill-button">
+						<span class="tooltipText"></span>
+					</div>
+					<div class="no-select eraserImg toolbarButton" id="eraser-button">
+						<span class="tooltipText"></span>
+					</div>
+					<div class="no-select selectionImg toolbarButton" id="selection-button">
+						<span class="tooltipText"></span>
+					</div>
+					<div class="no-select colorpickerImg toolbarButton" id="colorpicker-button">
+						<span class="tooltipText"></span>
+					</div>
+					<div class="no-select gridImg toolbarButton" id="grid-button">
+						<span class="tooltipText">grid <span class="hotkeyText">(G)</span></span>
+					</div>
+					<div class="no-select saveImg toolbarButton" id="save-button">
+						<span class="tooltipText">save</span>
+					</div>
+					<div id="popup-message" class="fadeOutAnimation"></div>
 				</div>
-
-				<div class="no-select redoImg toolbarButton" id="redo-button">
-					<span class="tooltipText">redo <span class="hotkeyText">(X)</span></span>
+				<div class="toolbar-row">
+					<div class="no-select lineImg toolbarButton" id="line-button">
+						<span class="tooltipText">line <span class="hotkeyText">(L)</span></span>
+					</div>
+					<div class="no-select rectangleImg toolbarButton" id="rectangle-button">
+						<span class="tooltipText">rectangle <span class="hotkeyText">(R)</span></span>
+					</div>
+					<div class="no-select ellipseImg toolbarButton" id="ellipse-button">
+						<span class="tooltipText">ellipse <span class="hotkeyText">(O)</span></span>
+					</div>
+					<div class="no-select rotateImg toolbarButton" id="rotate-button">
+						<span class="tooltipText">rotate <span class="hotkeyText">(T)</span></span>
+					</div>
+					<div class="no-select flipXImg toolbarButton" id="flip-x-button">
+						<span class="tooltipText">flip X <span class="hotkeyText">(F)</span></span>
+					</div>
+					<div class="no-select flipYImg toolbarButton" id="flip-y-button">
+						<span class="tooltipText">flip Y <span class="hotkeyText">(Y)</span></span>
+					</div>
 				</div>
-
-				<div class="no-select pencilImg toolbarButton" id="pencil-button">
-					<span class="tooltipText"></span>
-				</div>
-
-				<div class="no-select fillImg toolbarButton" id="fill-button">
-					<span class="tooltipText"></span>
-				</div>
-				
-				<div class="no-select eraserImg toolbarButton" id="eraser-button">
-					<span class="tooltipText"></span>
-				</div>
-
-				<div class="no-select selectionImg toolbarButton" id="selection-button">
-					<span class="tooltipText"></span>
-				</div>
-
-				<div class="no-select colorpickerImg toolbarButton" id="colorpicker-button">
-					<span class="tooltipText"></span>
-				</div>
-
-				<div class="no-select gridImg toolbarButton" id="grid-button">
-					<span class="tooltipText">grid <span class="hotkeyText">(G)</span></span>
-				</div>
-
-				<div class="no-select saveImg toolbarButton" id="save-button">
-					<span class="tooltipText">save</span>
-				</div>
-
-				<div id="popup-message" class="fadeOutAnimation"></div>
-
 				<div class="active_indicator active-color-preview" id="active-color-preview-1"></div>
 				<div class="active-color-preview" id="active-color-preview-2"></div>
-
 				<label id="active-color-label"></label>
 			</div>
 
-			<div id="canvas-div"></div>
-			<div id="drop-shadow-preview"></div>
+			<div id="canvas-div">
+				<div id="drop-shadow-preview"></div>
+			</div>
 			<div id="palette-select">
 				<label class="container">
 					<span class="checkmark"></span>
@@ -78,6 +90,9 @@
 				<tr><td>Pencil Mode</td><td>P</td></tr>
 				<tr><td>Bucket Mode</td><td>B</td></tr>
 				<tr><td>Eraser Mode</td><td>E</td></tr>
+				<tr><td>Line Tool</td><td>L</td></tr>
+				<tr><td>Rectangle Tool</td><td>R</td></tr>
+				<tr><td>Ellipse Tool</td><td>O</td></tr>
 				<tr><td>Colorpicker Mode</td><td>V</td></tr>
 				<tr><td>Color Swap</td><td>C</td></tr>
 
@@ -94,6 +109,9 @@
 				<tr><td>Paste</td><td>Ctrl + V</td></tr>
 				<tr><td>Undo</td><td>Z</td></tr>
 				<tr><td>Redo</td><td>X</td></tr>
+				<tr><td>Rotate Canvas</td><td>T</td></tr>
+				<tr><td>Flip X</td><td>F</td></tr>
+				<tr><td>Flip Y</td><td>Y</td></tr>
 
 				<!-- General -->
 				<tr><td>Toggle Grid</td><td>G</td></tr>
